@@ -1,0 +1,108 @@
+"""
+routers/reporter.py — Reporter session/message/voice endpoints.
+
+POST /reporter/session   → ReporterSession   (no auth)
+POST /reporter/message   → ReporterMessageResponse  (reporter token)
+POST /reporter/voice     → ReporterMessageResponse  (reporter token, multipart)
+
+Per contracts/endpoints.md:
+  Replies are NOT in the HTTP response.  POST /reporter/message returns a
+  messageId. The reply arrives on /ws/reporter/{sessionId}.
+"""
+from __future__ import annotations
+
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
+
+from ..auth import create_token, require_reporter
+from ..bus import bus
+from ..clock import clock
+from ..models import ReporterMessageRequest, ReporterSessionRequest
+from ..state import state
+
+router = APIRouter(prefix="/reporter", tags=["Reporter"])
+
+
+@router.post("/session")
+def create_session(body: ReporterSessionRequest) -> dict:
+    """
+    Creates an anonymous reporter session.
+    Returns: ReporterSession { sessionId, token, language }
+    """
+    session_id = state.next_id("SES")
+    language = body.language or "en"
+    token = create_token(sub=session_id, role="reporter", unit_id=None)
+    session = {
+        "sessionId": session_id,
+        "token": token,
+        "language": language,
+    }
+    state.upsert_reporter_session(session)
+    return session
+
+
+@router.post("/message")
+def send_message(body: ReporterMessageRequest,
+                 claims=Depends(require_reporter)) -> dict:
+    """
+    Reporter sends a text message.
+    Returns: { messageId }  (reply arrives on WS channel).
+    Emits: reporter.message_sent (from reporter direction).
+    """
+    session = state.get_reporter_session(body.session_id)
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Session {body.session_id} not found")
+
+    message_id = state.next_id("MSG")
+    ts = clock.now()
+
+    bus.publish("reporter.message_sent", {
+        "sessionId": body.session_id,
+        "messageId": message_id,
+        "from": "reporter",
+        "text": body.text,
+        "translatedText": None,   # P4-Comms will fill translation
+        "language": body.language or session.get("language", "en"),
+        "channel": "chat",
+    })
+
+    # Log it
+    log_id = state.next_id("LOG")
+    state.append_comms_log({
+        "entryId": log_id,
+        "ts": ts,
+        "direction": "in",
+        "channel": "chat",
+        "recipient": {"kind": "operator", "id": "operator"},
+        "text": body.text,
+        "delivery": "sent",
+        "zoneId": None,
+    })
+
+    return {"messageId": message_id}
+
+
+@router.post("/voice")
+async def send_voice(
+    sessionId: str = Form(...),
+    audio: UploadFile | None = None,
+    claims=Depends(require_reporter),
+) -> dict:
+    """
+    Reporter sends a voice note (multipart: sessionId + audio file).
+    Returns: { messageId }  (transcribed reply arrives on WS channel).
+    P4-Comms will wire up the transcription pipeline here.
+    """
+    session = state.get_reporter_session(sessionId)
+    if session is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Session {sessionId} not found")
+
+    message_id = state.next_id("MSG")
+    bus.publish("agent.activity", {
+        "agent": "intake",
+        "message": f"Voice note received for session {sessionId}. Pending transcription.",
+        "incidentId": None,
+        "planId": None,
+    })
+    return {"messageId": message_id}
