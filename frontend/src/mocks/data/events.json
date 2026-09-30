@@ -1,0 +1,1238 @@
+[
+  {
+    "id": "evt_001",
+    "type": "status.updated",
+    "ts": "2026-10-10T09:00:00",
+    "payload": {
+      "status": {
+        "scenarioTime": "2026-10-10T09:00:00",
+        "speed": 1,
+        "overallSeverity": "low",
+        "rain": {
+          "intensity": "light",
+          "mmPerHour": 4,
+          "freshness": "live",
+          "observedAt": "2026-10-10T09:00:00"
+        },
+        "commsOverall": "ok"
+      }
+    }
+  },
+  {
+    "id": "evt_002",
+    "type": "reporter.message_sent",
+    "ts": "2026-10-10T09:01:10",
+    "payload": {
+      "sessionId": "SES-01",
+      "messageId": "MSG-001",
+      "from": "reporter",
+      "text": "ನಮ್ಮ ಮನೆಗೆ ನೀರು ನುಗ್ಗುತ್ತಿದೆ, ಸಹಾಯ ಮಾಡಿ",
+      "translatedText": "Water is entering our house, please help",
+      "language": "kn",
+      "channel": "chat"
+    }
+  },
+  {
+    "id": "evt_003",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:01:12",
+    "payload": {
+      "agent": "intake",
+      "message": "Voice note transcribed and translated from Kannada. Location: Lakeside colony, 2nd cross.",
+      "incidentId": "INC-01",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_004",
+    "type": "incident.reported",
+    "ts": "2026-10-10T09:01:14",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-01",
+        "type": "flooded_home",
+        "status": "reported",
+        "severity": null,
+        "severityScore": null,
+        "timeWindowMinutes": null,
+        "location": {
+          "lat": 12.929,
+          "lng": 77.612,
+          "label": "Lakeside colony, 2nd cross",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 6,
+        "language": "kn",
+        "source": "reporter_voice",
+        "summary": "Water entering ground-floor homes; 6 people including children.",
+        "confidence": 0.85,
+        "reportedAt": "2026-10-10T09:01:14",
+        "assignedUnitIds": [],
+        "reporterSessionId": "SES-01"
+      }
+    }
+  },
+  {
+    "id": "evt_005",
+    "type": "reporter.message_sent",
+    "ts": "2026-10-10T09:01:15",
+    "payload": {
+      "sessionId": "SES-01",
+      "messageId": "MSG-002",
+      "from": "system",
+      "text": "ನಿಮ್ಮ ಸಂದೇಶ ತಲುಪಿದೆ. ಸಹಾಯ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ.",
+      "translatedText": "Your message has reached us. Help is being arranged.",
+      "language": "kn",
+      "channel": "chat"
+    }
+  },
+  {
+    "id": "evt_006",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:01:16",
+    "payload": {
+      "sessionId": "SES-01",
+      "incidentId": "INC-01",
+      "stage": "received",
+      "etaRange": null,
+      "safetyTips": [
+        "Move to a higher floor if water keeps rising.",
+        "Switch off the main power supply if it is safe to reach."
+      ]
+    }
+  },
+  {
+    "id": "evt_007",
+    "type": "incident.assessed",
+    "ts": "2026-10-10T09:01:20",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-01",
+        "type": "flooded_home",
+        "status": "assessed",
+        "severity": "high",
+        "severityScore": 72,
+        "timeWindowMinutes": 20,
+        "location": {
+          "lat": 12.929,
+          "lng": 77.612,
+          "label": "Lakeside colony, 2nd cross",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 6,
+        "language": "kn",
+        "source": "reporter_voice",
+        "summary": "Water entering ground-floor homes; 6 people including children.",
+        "confidence": 0.85,
+        "reportedAt": "2026-10-10T09:01:14",
+        "assignedUnitIds": [],
+        "reporterSessionId": "SES-01"
+      }
+    }
+  },
+  {
+    "id": "evt_008",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:01:21",
+    "payload": {
+      "agent": "assessment",
+      "message": "INC-01 scored 72 (high): 6 people, children present, water rising. Help needed within 20 min.",
+      "incidentId": "INC-01",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_009",
+    "type": "incident.reported",
+    "ts": "2026-10-10T09:02:00",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-02",
+        "type": "stranded_vehicle",
+        "status": "reported",
+        "severity": null,
+        "severityScore": null,
+        "timeWindowMinutes": null,
+        "location": {
+          "lat": 12.918,
+          "lng": 77.6255,
+          "label": "Hosur Rd underpass, south side",
+          "zoneId": "ZONE-B"
+        },
+        "peopleAffected": 3,
+        "language": "en",
+        "source": "phone_in",
+        "summary": "Car stranded in rising water; 3 people inside.",
+        "confidence": 0.95,
+        "reportedAt": "2026-10-10T09:02:00",
+        "assignedUnitIds": [],
+        "reporterSessionId": null
+      }
+    }
+  },
+  {
+    "id": "evt_010",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:02:02",
+    "payload": {
+      "agent": "intake",
+      "message": "Phone-in entered by operator: stranded vehicle at Hosur Rd underpass, 3 people.",
+      "incidentId": "INC-02",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_011",
+    "type": "incident.assessed",
+    "ts": "2026-10-10T09:02:10",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-02",
+        "type": "stranded_vehicle",
+        "status": "assessed",
+        "severity": "high",
+        "severityScore": 65,
+        "timeWindowMinutes": 25,
+        "location": {
+          "lat": 12.918,
+          "lng": 77.6255,
+          "label": "Hosur Rd underpass, south side",
+          "zoneId": "ZONE-B"
+        },
+        "peopleAffected": 3,
+        "language": "en",
+        "source": "phone_in",
+        "summary": "Car stranded in rising water; 3 people inside.",
+        "confidence": 0.95,
+        "reportedAt": "2026-10-10T09:02:00",
+        "assignedUnitIds": [],
+        "reporterSessionId": null
+      }
+    }
+  },
+  {
+    "id": "evt_012",
+    "type": "incident.reported",
+    "ts": "2026-10-10T09:02:40",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-03",
+        "type": "medical",
+        "status": "reported",
+        "severity": null,
+        "severityScore": null,
+        "timeWindowMinutes": null,
+        "location": {
+          "lat": 12.9285,
+          "lng": 77.6385,
+          "label": "Canal Rd near Market St",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 2,
+        "language": "en",
+        "source": "reporter_chat",
+        "summary": "Elderly person with breathing difficulty; water at the doorstep.",
+        "confidence": 0.9,
+        "reportedAt": "2026-10-10T09:02:40",
+        "assignedUnitIds": [],
+        "reporterSessionId": "SES-02"
+      }
+    }
+  },
+  {
+    "id": "evt_013",
+    "type": "incident.assessed",
+    "ts": "2026-10-10T09:02:50",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-03",
+        "type": "medical",
+        "status": "assessed",
+        "severity": "critical",
+        "severityScore": 91,
+        "timeWindowMinutes": 10,
+        "location": {
+          "lat": 12.9285,
+          "lng": 77.6385,
+          "label": "Canal Rd near Market St",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 2,
+        "language": "en",
+        "source": "reporter_chat",
+        "summary": "Elderly person with breathing difficulty; water at the doorstep.",
+        "confidence": 0.9,
+        "reportedAt": "2026-10-10T09:02:40",
+        "assignedUnitIds": [],
+        "reporterSessionId": "SES-02"
+      }
+    }
+  },
+  {
+    "id": "evt_014",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:02:52",
+    "payload": {
+      "agent": "assessment",
+      "message": "INC-03 scored 91 (critical): elderly patient with breathing difficulty. Help needed within 10 min.",
+      "incidentId": "INC-03",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_015",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:03:00",
+    "payload": {
+      "agent": "route",
+      "message": "ETAs computed for 8 units across 3 incidents under light rain.",
+      "incidentId": null,
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_016",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:03:05",
+    "payload": {
+      "agent": "allocation",
+      "message": "Solver assigned 3 of 3 incidents. No unserved incidents.",
+      "incidentId": null,
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_017",
+    "type": "plan.published",
+    "ts": "2026-10-10T09:03:10",
+    "payload": {
+      "plan": {
+        "planId": "PLAN-001",
+        "version": 1,
+        "previousPlanId": null,
+        "trigger": "Initial plan for 3 reported incidents",
+        "publishedAt": "2026-10-10T09:03:10",
+        "entries": [
+          {
+            "incidentId": "INC-01",
+            "unitId": "BOAT-01",
+            "etaMinutes": 6,
+            "etaRange": [
+              5,
+              8
+            ]
+          },
+          {
+            "incidentId": "INC-02",
+            "unitId": "RES-02",
+            "etaMinutes": 5,
+            "etaRange": [
+              4,
+              7
+            ]
+          },
+          {
+            "incidentId": "INC-03",
+            "unitId": "AMB-01",
+            "etaMinutes": 4,
+            "etaRange": [
+              3,
+              6
+            ]
+          }
+        ],
+        "unserved": [],
+        "changes": [
+          {
+            "incidentId": "INC-01",
+            "change": "added",
+            "before": null,
+            "after": {
+              "unitId": "BOAT-01",
+              "etaMinutes": 6
+            },
+            "reason": "Nearest boat with open route via Lakeside Rd."
+          },
+          {
+            "incidentId": "INC-02",
+            "change": "added",
+            "before": null,
+            "after": {
+              "unitId": "RES-02",
+              "etaMinutes": 5
+            },
+            "reason": "Nearest rescue team, direct route via Hosur Rd underpass."
+          },
+          {
+            "incidentId": "INC-03",
+            "change": "added",
+            "before": null,
+            "after": {
+              "unitId": "AMB-01",
+              "etaMinutes": 4
+            },
+            "reason": "Nearest ambulance; critical case gets first pick."
+          }
+        ],
+        "pendingApprovalIds": []
+      }
+    }
+  },
+  {
+    "id": "evt_018",
+    "type": "assignment.sent",
+    "ts": "2026-10-10T09:03:12",
+    "payload": {
+      "assignment": {
+        "assignmentId": "ASN-001",
+        "planId": "PLAN-001",
+        "incidentId": "INC-01",
+        "unitId": "BOAT-01",
+        "status": "sent",
+        "incidentSummary": "Water entering ground-floor homes; 6 people including children.",
+        "location": {
+          "lat": 12.929,
+          "lng": 77.612,
+          "label": "Lakeside colony, 2nd cross",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 6,
+        "etaMinutes": 6,
+        "instructions": "Children present. Approach from the Lakeside Rd side.",
+        "sentAt": "2026-10-10T09:03:12",
+        "respondedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_019",
+    "type": "assignment.sent",
+    "ts": "2026-10-10T09:03:12",
+    "payload": {
+      "assignment": {
+        "assignmentId": "ASN-002",
+        "planId": "PLAN-001",
+        "incidentId": "INC-02",
+        "unitId": "RES-02",
+        "status": "sent",
+        "incidentSummary": "Car stranded in rising water; 3 people inside.",
+        "location": {
+          "lat": 12.918,
+          "lng": 77.6255,
+          "label": "Hosur Rd underpass, south side",
+          "zoneId": "ZONE-B"
+        },
+        "peopleAffected": 3,
+        "etaMinutes": 5,
+        "instructions": "Vehicle in rising water. Keep clear of the underpass centre.",
+        "sentAt": "2026-10-10T09:03:12",
+        "respondedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_020",
+    "type": "assignment.sent",
+    "ts": "2026-10-10T09:03:12",
+    "payload": {
+      "assignment": {
+        "assignmentId": "ASN-003",
+        "planId": "PLAN-001",
+        "incidentId": "INC-03",
+        "unitId": "AMB-01",
+        "status": "sent",
+        "incidentSummary": "Elderly person with breathing difficulty; water at the doorstep.",
+        "location": {
+          "lat": 12.9285,
+          "lng": 77.6385,
+          "label": "Canal Rd near Market St",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 2,
+        "etaMinutes": 4,
+        "instructions": "Elderly patient, breathing difficulty. Oxygen likely needed.",
+        "sentAt": "2026-10-10T09:03:12",
+        "respondedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_021",
+    "type": "assignment.accepted",
+    "ts": "2026-10-10T09:03:40",
+    "payload": {
+      "assignmentId": "ASN-001",
+      "unitId": "BOAT-01",
+      "incidentId": "INC-01"
+    }
+  },
+  {
+    "id": "evt_022",
+    "type": "assignment.accepted",
+    "ts": "2026-10-10T09:03:55",
+    "payload": {
+      "assignmentId": "ASN-002",
+      "unitId": "RES-02",
+      "incidentId": "INC-02"
+    }
+  },
+  {
+    "id": "evt_023",
+    "type": "assignment.accepted",
+    "ts": "2026-10-10T09:04:10",
+    "payload": {
+      "assignmentId": "ASN-003",
+      "unitId": "AMB-01",
+      "incidentId": "INC-03"
+    }
+  },
+  {
+    "id": "evt_024",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:04:12",
+    "payload": {
+      "unitId": "BOAT-01",
+      "status": "en_route",
+      "previousStatus": "available",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_025",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:04:12",
+    "payload": {
+      "unitId": "RES-02",
+      "status": "en_route",
+      "previousStatus": "available",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_026",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:04:12",
+    "payload": {
+      "unitId": "AMB-01",
+      "status": "en_route",
+      "previousStatus": "available",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_027",
+    "type": "incident.updated",
+    "ts": "2026-10-10T09:04:15",
+    "payload": {
+      "incident": {
+        "incidentId": "INC-01",
+        "type": "flooded_home",
+        "status": "en_route",
+        "severity": "high",
+        "severityScore": 72,
+        "timeWindowMinutes": 20,
+        "location": {
+          "lat": 12.929,
+          "lng": 77.612,
+          "label": "Lakeside colony, 2nd cross",
+          "zoneId": "ZONE-A"
+        },
+        "peopleAffected": 6,
+        "language": "kn",
+        "source": "reporter_voice",
+        "summary": "Water entering ground-floor homes; 6 people including children.",
+        "confidence": 0.85,
+        "reportedAt": "2026-10-10T09:01:14",
+        "assignedUnitIds": [
+          "BOAT-01"
+        ],
+        "reporterSessionId": "SES-01"
+      },
+      "changedFields": [
+        "status",
+        "assignedUnitIds"
+      ]
+    }
+  },
+  {
+    "id": "evt_028",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:04:16",
+    "payload": {
+      "sessionId": "SES-01",
+      "incidentId": "INC-01",
+      "stage": "on_the_way",
+      "etaRange": [
+        5,
+        8
+      ],
+      "safetyTips": [
+        "Stay where you are and keep children together.",
+        "Keep a torch and phone charged if you can."
+      ]
+    }
+  },
+  {
+    "id": "evt_029",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:04:17",
+    "payload": {
+      "sessionId": "SES-02",
+      "incidentId": "INC-03",
+      "stage": "on_the_way",
+      "etaRange": [
+        3,
+        6
+      ],
+      "safetyTips": [
+        "Keep the patient seated upright.",
+        "Unlock the front door for the crew."
+      ]
+    }
+  },
+  {
+    "id": "evt_030",
+    "type": "status.updated",
+    "ts": "2026-10-10T09:06:00",
+    "payload": {
+      "status": {
+        "scenarioTime": "2026-10-10T09:06:00",
+        "speed": 1,
+        "overallSeverity": "high",
+        "rain": {
+          "intensity": "heavy",
+          "mmPerHour": 22,
+          "freshness": "live",
+          "observedAt": "2026-10-10T09:06:00"
+        },
+        "commsOverall": "ok"
+      }
+    }
+  },
+  {
+    "id": "evt_031",
+    "type": "road.status_changed",
+    "ts": "2026-10-10T09:06:05",
+    "payload": {
+      "roadId": "ROAD-04",
+      "status": "closed",
+      "previousStatus": "open",
+      "reason": "Underpass flooded, impassable"
+    }
+  },
+  {
+    "id": "evt_032",
+    "type": "road.status_changed",
+    "ts": "2026-10-10T09:06:06",
+    "payload": {
+      "roadId": "ROAD-05",
+      "status": "slow",
+      "previousStatus": "open",
+      "reason": "Heavy rain, water on carriageway"
+    }
+  },
+  {
+    "id": "evt_033",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:06:08",
+    "payload": {
+      "agent": "route",
+      "message": "Hosur Rd underpass now impassable; 2 ETAs updated.",
+      "incidentId": null,
+      "planId": "PLAN-001"
+    }
+  },
+  {
+    "id": "evt_034",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:06:12",
+    "payload": {
+      "agent": "allocation",
+      "message": "Re-solved with new ETAs. RES-02 is cut off from INC-02. Best replacement is RES-01 from the depot.",
+      "incidentId": "INC-02",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_035",
+    "type": "approval.requested",
+    "ts": "2026-10-10T09:06:20",
+    "payload": {
+      "approval": {
+        "approvalId": "APR-001",
+        "kind": "reassign_unit",
+        "status": "pending",
+        "summary": "Redirect RES-01 from depot standby to INC-02 (stranded vehicle, 3 people).",
+        "reason": "RES-02's route through the Hosur Rd underpass is closed. RES-01 is the fastest alternative (9 min) but leaves Zone C without a standby rescue team.",
+        "options": [
+          {
+            "optionId": "OPT-A",
+            "label": "Send RES-01 (ETA 9 min)",
+            "description": "Fastest option. Zone C has no standby rescue team afterwards."
+          },
+          {
+            "optionId": "OPT-B",
+            "label": "Keep RES-02 on detour (ETA 16 min)",
+            "description": "Keeps depot standby but misses the 25 min window by a wide margin."
+          },
+          {
+            "optionId": "OPT-C",
+            "label": "Send BOAT-02 (ETA 12 min)",
+            "description": "Boat can cross the flooded stretch, but is not equipped for vehicle recovery."
+          }
+        ],
+        "recommendedOptionId": "OPT-A",
+        "relatedIncidentIds": [
+          "INC-02"
+        ],
+        "requestedAt": "2026-10-10T09:06:20",
+        "chosenOptionId": null,
+        "decidedBy": null,
+        "decidedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_036",
+    "type": "approval.resolved",
+    "ts": "2026-10-10T09:06:50",
+    "payload": {
+      "approvalId": "APR-001",
+      "decision": "approve",
+      "chosenOptionId": "OPT-A",
+      "decidedBy": "operator",
+      "decidedAt": "2026-10-10T09:06:50",
+      "note": null
+    }
+  },
+  {
+    "id": "evt_037",
+    "type": "plan.published",
+    "ts": "2026-10-10T09:06:52",
+    "payload": {
+      "plan": {
+        "planId": "PLAN-002",
+        "version": 2,
+        "previousPlanId": "PLAN-001",
+        "trigger": "ROAD-04 closed and ROAD-05 slowed by rain surge; APR-001 approved",
+        "publishedAt": "2026-10-10T09:06:52",
+        "entries": [
+          {
+            "incidentId": "INC-01",
+            "unitId": "BOAT-01",
+            "etaMinutes": 6,
+            "etaRange": [
+              5,
+              8
+            ]
+          },
+          {
+            "incidentId": "INC-02",
+            "unitId": "RES-01",
+            "etaMinutes": 9,
+            "etaRange": [
+              8,
+              12
+            ]
+          },
+          {
+            "incidentId": "INC-03",
+            "unitId": "AMB-01",
+            "etaMinutes": 7,
+            "etaRange": [
+              6,
+              9
+            ]
+          }
+        ],
+        "unserved": [],
+        "changes": [
+          {
+            "incidentId": "INC-01",
+            "change": "unchanged",
+            "before": {
+              "unitId": "BOAT-01",
+              "etaMinutes": 6
+            },
+            "after": {
+              "unitId": "BOAT-01",
+              "etaMinutes": 6
+            },
+            "reason": "No change; route via Lakeside Rd is unaffected."
+          },
+          {
+            "incidentId": "INC-02",
+            "change": "changed",
+            "before": {
+              "unitId": "RES-02",
+              "etaMinutes": 5
+            },
+            "after": {
+              "unitId": "RES-01",
+              "etaMinutes": 9
+            },
+            "reason": "Hosur Rd underpass closed, RES-02 cut off. RES-01 is now the fastest (approved by operator)."
+          },
+          {
+            "incidentId": "INC-03",
+            "change": "changed",
+            "before": {
+              "unitId": "AMB-01",
+              "etaMinutes": 4
+            },
+            "after": {
+              "unitId": "AMB-01",
+              "etaMinutes": 7
+            },
+            "reason": "Same unit. Canal Rd slowed by rain, ETA up 3 min."
+          }
+        ],
+        "pendingApprovalIds": []
+      }
+    }
+  },
+  {
+    "id": "evt_038",
+    "type": "assignment.cancelled",
+    "ts": "2026-10-10T09:06:53",
+    "payload": {
+      "assignmentId": "ASN-002",
+      "unitId": "RES-02",
+      "incidentId": "INC-02",
+      "reason": "Route closed; reassigned to RES-01"
+    }
+  },
+  {
+    "id": "evt_039",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:06:53",
+    "payload": {
+      "unitId": "RES-02",
+      "status": "available",
+      "previousStatus": "en_route",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_040",
+    "type": "assignment.sent",
+    "ts": "2026-10-10T09:06:55",
+    "payload": {
+      "assignment": {
+        "assignmentId": "ASN-004",
+        "planId": "PLAN-002",
+        "incidentId": "INC-02",
+        "unitId": "RES-01",
+        "status": "sent",
+        "incidentSummary": "Car stranded in rising water; 3 people inside.",
+        "location": {
+          "lat": 12.918,
+          "lng": 77.6255,
+          "label": "Hosur Rd underpass, south side",
+          "zoneId": "ZONE-B"
+        },
+        "peopleAffected": 3,
+        "etaMinutes": 9,
+        "instructions": "Approach from the south via Station Rd. The underpass is closed.",
+        "sentAt": "2026-10-10T09:06:55",
+        "respondedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_041",
+    "type": "assignment.accepted",
+    "ts": "2026-10-10T09:07:10",
+    "payload": {
+      "assignmentId": "ASN-004",
+      "unitId": "RES-01",
+      "incidentId": "INC-02"
+    }
+  },
+  {
+    "id": "evt_042",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:07:12",
+    "payload": {
+      "unitId": "RES-01",
+      "status": "en_route",
+      "previousStatus": "available",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_043",
+    "type": "reporter.message_sent",
+    "ts": "2026-10-10T09:07:15",
+    "payload": {
+      "sessionId": "SES-02",
+      "messageId": "MSG-003",
+      "from": "system",
+      "text": "Heavy rain has slowed the route. Your ambulance is now about 6 to 9 minutes away. We are sorry for the delay.",
+      "translatedText": null,
+      "language": "en",
+      "channel": "chat"
+    }
+  },
+  {
+    "id": "evt_044",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:07:16",
+    "payload": {
+      "sessionId": "SES-02",
+      "incidentId": "INC-03",
+      "stage": "on_the_way",
+      "etaRange": [
+        6,
+        9
+      ],
+      "safetyTips": [
+        "Keep the patient seated upright.",
+        "Unlock the front door for the crew."
+      ]
+    }
+  },
+  {
+    "id": "evt_045",
+    "type": "status.updated",
+    "ts": "2026-10-10T09:08:00",
+    "payload": {
+      "status": {
+        "scenarioTime": "2026-10-10T09:08:00",
+        "speed": 1,
+        "overallSeverity": "high",
+        "rain": {
+          "intensity": "heavy",
+          "mmPerHour": 22,
+          "freshness": "live",
+          "observedAt": "2026-10-10T09:08:00"
+        },
+        "commsOverall": "degraded"
+      }
+    }
+  },
+  {
+    "id": "evt_046",
+    "type": "zone.comms_degraded",
+    "ts": "2026-10-10T09:08:00",
+    "payload": {
+      "zoneId": "ZONE-B",
+      "fallbackChannel": "sms"
+    }
+  },
+  {
+    "id": "evt_047",
+    "type": "comms.delivery_failed",
+    "ts": "2026-10-10T09:08:02",
+    "payload": {
+      "messageId": "MSG-004",
+      "recipient": {
+        "kind": "crew",
+        "id": "RES-01"
+      },
+      "channel": "chat",
+      "zoneId": "ZONE-B"
+    }
+  },
+  {
+    "id": "evt_048",
+    "type": "comms.channel_switched",
+    "ts": "2026-10-10T09:08:03",
+    "payload": {
+      "recipient": {
+        "kind": "crew",
+        "id": "RES-01"
+      },
+      "from": "chat",
+      "to": "sms",
+      "reason": "ZONE-B comms degraded"
+    }
+  },
+  {
+    "id": "evt_049",
+    "type": "unit.heartbeat_lost",
+    "ts": "2026-10-10T09:08:05",
+    "payload": {
+      "unitId": "RES-01",
+      "lastHeartbeatAt": "2026-10-10T09:07:58"
+    }
+  },
+  {
+    "id": "evt_050",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:08:05",
+    "payload": {
+      "unitId": "RES-01",
+      "status": "unreachable",
+      "previousStatus": "en_route",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_051",
+    "type": "agent.activity",
+    "ts": "2026-10-10T09:08:08",
+    "payload": {
+      "agent": "command",
+      "message": "ZONE-B network outage. RES-01 heartbeat lost. Proposing an SMS check-in for approval.",
+      "incidentId": "INC-02",
+      "planId": null
+    }
+  },
+  {
+    "id": "evt_052",
+    "type": "approval.requested",
+    "ts": "2026-10-10T09:08:10",
+    "payload": {
+      "approval": {
+        "approvalId": "APR-002",
+        "kind": "crew_check",
+        "status": "pending",
+        "summary": "Send an SMS check-in to units in Zone B (RES-01).",
+        "reason": "Zone B lost network and RES-01 stopped sending heartbeats while en route to INC-02.",
+        "options": [
+          {
+            "optionId": "OPT-A",
+            "label": "Send SMS check-in now",
+            "description": "Uses the SMS fallback. Crew replies with a status code."
+          },
+          {
+            "optionId": "OPT-B",
+            "label": "Wait 5 minutes",
+            "description": "Avoids extra messages if the outage is brief."
+          }
+        ],
+        "recommendedOptionId": "OPT-A",
+        "relatedIncidentIds": [
+          "INC-02"
+        ],
+        "requestedAt": "2026-10-10T09:08:10",
+        "chosenOptionId": null,
+        "decidedBy": null,
+        "decidedAt": null
+      }
+    }
+  },
+  {
+    "id": "evt_053",
+    "type": "approval.resolved",
+    "ts": "2026-10-10T09:08:30",
+    "payload": {
+      "approvalId": "APR-002",
+      "decision": "approve",
+      "chosenOptionId": "OPT-A",
+      "decidedBy": "operator",
+      "decidedAt": "2026-10-10T09:08:30",
+      "note": null
+    }
+  },
+  {
+    "id": "evt_054",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:10:20",
+    "payload": {
+      "unitId": "BOAT-01",
+      "status": "on_scene",
+      "previousStatus": "en_route",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_055",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:10:21",
+    "payload": {
+      "sessionId": "SES-01",
+      "incidentId": "INC-01",
+      "stage": "arrived",
+      "etaRange": null,
+      "safetyTips": [
+        "Stay where you are and keep children together.",
+        "Keep a torch and phone charged if you can."
+      ]
+    }
+  },
+  {
+    "id": "evt_056",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:11:10",
+    "payload": {
+      "unitId": "AMB-01",
+      "status": "on_scene",
+      "previousStatus": "en_route",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_057",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:11:11",
+    "payload": {
+      "sessionId": "SES-02",
+      "incidentId": "INC-03",
+      "stage": "arrived",
+      "etaRange": null,
+      "safetyTips": [
+        "Keep the patient seated upright.",
+        "Unlock the front door for the crew."
+      ]
+    }
+  },
+  {
+    "id": "evt_058",
+    "type": "zone.comms_restored",
+    "ts": "2026-10-10T09:12:00",
+    "payload": {
+      "zoneId": "ZONE-B"
+    }
+  },
+  {
+    "id": "evt_059",
+    "type": "status.updated",
+    "ts": "2026-10-10T09:12:00",
+    "payload": {
+      "status": {
+        "scenarioTime": "2026-10-10T09:12:00",
+        "speed": 1,
+        "overallSeverity": "medium",
+        "rain": {
+          "intensity": "moderate",
+          "mmPerHour": 9,
+          "freshness": "cached",
+          "observedAt": "2026-10-10T09:12:00"
+        },
+        "commsOverall": "ok"
+      }
+    }
+  },
+  {
+    "id": "evt_060",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:12:05",
+    "payload": {
+      "unitId": "RES-01",
+      "status": "en_route",
+      "previousStatus": "unreachable",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_061",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:17:00",
+    "payload": {
+      "unitId": "RES-01",
+      "status": "on_scene",
+      "previousStatus": "en_route",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_062",
+    "type": "incident.closed",
+    "ts": "2026-10-10T09:20:00",
+    "payload": {
+      "incidentId": "INC-03",
+      "closedAt": "2026-10-10T09:20:00",
+      "outcome": "resolved"
+    }
+  },
+  {
+    "id": "evt_063",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:20:00",
+    "payload": {
+      "unitId": "AMB-01",
+      "status": "available",
+      "previousStatus": "on_scene",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_064",
+    "type": "incident.closed",
+    "ts": "2026-10-10T09:22:00",
+    "payload": {
+      "incidentId": "INC-01",
+      "closedAt": "2026-10-10T09:22:00",
+      "outcome": "resolved"
+    }
+  },
+  {
+    "id": "evt_065",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:22:00",
+    "payload": {
+      "unitId": "BOAT-01",
+      "status": "available",
+      "previousStatus": "on_scene",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_066",
+    "type": "reporter.message_sent",
+    "ts": "2026-10-10T09:22:05",
+    "payload": {
+      "sessionId": "SES-01",
+      "messageId": "MSG-005",
+      "from": "system",
+      "text": "ನಿಮ್ಮ ಸಮಸ್ಯೆ ಬಗೆಹರಿದಿದೆ ಎಂದು ದಾಖಲಾಗಿದೆ. ಎಲ್ಲವೂ ಸರಿಯಾಗಿದೆಯೇ?",
+      "translatedText": "Your problem is marked as resolved. Is everything OK now?",
+      "language": "kn",
+      "channel": "chat"
+    }
+  },
+  {
+    "id": "evt_067",
+    "type": "reporter.status_updated",
+    "ts": "2026-10-10T09:22:06",
+    "payload": {
+      "sessionId": "SES-01",
+      "incidentId": "INC-01",
+      "stage": "resolved",
+      "etaRange": null,
+      "safetyTips": []
+    }
+  },
+  {
+    "id": "evt_068",
+    "type": "incident.closed",
+    "ts": "2026-10-10T09:25:00",
+    "payload": {
+      "incidentId": "INC-02",
+      "closedAt": "2026-10-10T09:25:00",
+      "outcome": "resolved"
+    }
+  },
+  {
+    "id": "evt_069",
+    "type": "unit.status_changed",
+    "ts": "2026-10-10T09:25:00",
+    "payload": {
+      "unitId": "RES-01",
+      "status": "available",
+      "previousStatus": "on_scene",
+      "location": null
+    }
+  },
+  {
+    "id": "evt_070",
+    "type": "status.updated",
+    "ts": "2026-10-10T09:26:00",
+    "payload": {
+      "status": {
+        "scenarioTime": "2026-10-10T09:26:00",
+        "speed": 1,
+        "overallSeverity": "low",
+        "rain": {
+          "intensity": "light",
+          "mmPerHour": 3,
+          "freshness": "cached",
+          "observedAt": "2026-10-10T09:26:00"
+        },
+        "commsOverall": "ok"
+      }
+    }
+  }
+]

@@ -1,0 +1,226 @@
+{
+  "nodes": [
+    {
+      "nodeId": "N1",
+      "lat": 12.93,
+      "lng": 77.61
+    },
+    {
+      "nodeId": "N2",
+      "lat": 12.93,
+      "lng": 77.625
+    },
+    {
+      "nodeId": "N3",
+      "lat": 12.93,
+      "lng": 77.64
+    },
+    {
+      "nodeId": "N4",
+      "lat": 12.915,
+      "lng": 77.61
+    },
+    {
+      "nodeId": "N5",
+      "lat": 12.915,
+      "lng": 77.625
+    },
+    {
+      "nodeId": "N6",
+      "lat": 12.915,
+      "lng": 77.64
+    },
+    {
+      "nodeId": "N7",
+      "lat": 12.9,
+      "lng": 77.625
+    },
+    {
+      "nodeId": "N8",
+      "lat": 12.9,
+      "lng": 77.64
+    }
+  ],
+  "roads": [
+    {
+      "roadId": "ROAD-01",
+      "name": "Lakeside Rd",
+      "fromNode": "N1",
+      "toNode": "N2",
+      "status": "open",
+      "lengthKm": 1.63,
+      "geometry": [
+        [
+          12.93,
+          77.61
+        ],
+        [
+          12.93,
+          77.625
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-02",
+      "name": "Market St",
+      "fromNode": "N2",
+      "toNode": "N3",
+      "status": "open",
+      "lengthKm": 1.63,
+      "geometry": [
+        [
+          12.93,
+          77.625
+        ],
+        [
+          12.93,
+          77.64
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-03",
+      "name": "School Rd",
+      "fromNode": "N1",
+      "toNode": "N4",
+      "status": "open",
+      "lengthKm": 1.67,
+      "geometry": [
+        [
+          12.93,
+          77.61
+        ],
+        [
+          12.915,
+          77.61
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-04",
+      "name": "Hosur Rd underpass",
+      "fromNode": "N2",
+      "toNode": "N5",
+      "status": "open",
+      "lengthKm": 1.67,
+      "geometry": [
+        [
+          12.93,
+          77.625
+        ],
+        [
+          12.915,
+          77.625
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-05",
+      "name": "Canal Rd",
+      "fromNode": "N3",
+      "toNode": "N6",
+      "status": "open",
+      "lengthKm": 1.67,
+      "geometry": [
+        [
+          12.93,
+          77.64
+        ],
+        [
+          12.915,
+          77.64
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-06",
+      "name": "Ring Rd West",
+      "fromNode": "N4",
+      "toNode": "N5",
+      "status": "open",
+      "lengthKm": 1.63,
+      "geometry": [
+        [
+          12.915,
+          77.61
+        ],
+        [
+          12.915,
+          77.625
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-07",
+      "name": "Ring Rd East",
+      "fromNode": "N5",
+      "toNode": "N6",
+      "status": "open",
+      "lengthKm": 1.63,
+      "geometry": [
+        [
+          12.915,
+          77.625
+        ],
+        [
+          12.915,
+          77.64
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-08",
+      "name": "Station Rd",
+      "fromNode": "N5",
+      "toNode": "N7",
+      "status": "open",
+      "lengthKm": 1.67,
+      "geometry": [
+        [
+          12.915,
+          77.625
+        ],
+        [
+          12.9,
+          77.625
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-09",
+      "name": "Bridge Rd",
+      "fromNode": "N6",
+      "toNode": "N8",
+      "status": "open",
+      "lengthKm": 1.67,
+      "geometry": [
+        [
+          12.915,
+          77.64
+        ],
+        [
+          12.9,
+          77.64
+        ]
+      ]
+    },
+    {
+      "roadId": "ROAD-10",
+      "name": "South Link",
+      "fromNode": "N7",
+      "toNode": "N8",
+      "status": "open",
+      "lengthKm": 1.63,
+      "geometry": [
+        [
+          12.9,
+          77.625
+        ],
+        [
+          12.9,
+          77.64
+        ]
+      ]
+    }
+  ]
+}
