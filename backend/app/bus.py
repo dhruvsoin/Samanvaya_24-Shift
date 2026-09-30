@@ -72,11 +72,20 @@ class _AgentSub:
 class _QueueSub:
     queue: asyncio.Queue[dict]
     types: set[str] | None  # None means wildcard
+    filter_fn: Callable[[dict], bool] | None = None
+    loop: asyncio.AbstractEventLoop | None = None
 
-    def matches(self, event_type: str) -> bool:
-        if self.types is None or "*" in self.types:
-            return True
-        return event_type in self.types
+    def matches(self, envelope: dict) -> bool:
+        event_type = envelope.get("type", "")
+        if self.types is not None and "*" not in self.types and event_type not in self.types:
+            return False
+        if self.filter_fn is not None:
+            try:
+                return bool(self.filter_fn(envelope))
+            except Exception as e:
+                logger.exception("Error in queue filter_fn: %s", e)
+                return False
+        return True
 
 
 class EventBus:
@@ -123,13 +132,22 @@ class EventBus:
             queue_subs = list(self._queue_subs)
             agent_subs = [s for s in self._agent_subs if s.matches(event_type)]
 
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            current_loop = None
+
         # 1. Non-blocking delivery to subscriber queues (WebSockets)
         for q_sub in queue_subs:
-            if q_sub.matches(event_type):
-                try:
-                    q_sub.queue.put_nowait(envelope)
-                except asyncio.QueueFull:
-                    logger.warning("Subscriber queue full; dropping event %s", envelope["id"])
+            if q_sub.matches(envelope):
+                if q_sub.loop and q_sub.loop is not current_loop:
+                    if not q_sub.loop.is_closed():
+                        q_sub.loop.call_soon_threadsafe(q_sub.queue.put_nowait, envelope)
+                else:
+                    try:
+                        q_sub.queue.put_nowait(envelope)
+                    except asyncio.QueueFull:
+                        logger.warning("Subscriber queue full; dropping event %s", envelope["id"])
 
         # 2. Backward-compatible direct WebSocket broadcast
         self._schedule_ws_broadcast(envelope)
@@ -175,11 +193,13 @@ class EventBus:
     def subscribe_queue(
         self,
         types: str | Iterable[str] | None = None,
+        filter_fn: Callable[[dict], bool] | None = None,
         maxsize: int = 0,
     ) -> asyncio.Queue[dict]:
         """
         Subscribe an asyncio.Queue to events (ideal for WebSocket clients).
         `types` optionally filters event types (None or '*' receives all events).
+        `filter_fn` optionally provides custom predicate filtering.
         Returns an asyncio.Queue that receives event envelopes in publication order.
         """
         if types is None or types == "*":
@@ -189,8 +209,13 @@ class EventBus:
         else:
             type_set = set(types)
 
+        try:
+            current_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            current_loop = None
+
         q: asyncio.Queue[dict] = asyncio.Queue(maxsize=maxsize)
-        q_sub = _QueueSub(queue=q, types=type_set)
+        q_sub = _QueueSub(queue=q, types=type_set, filter_fn=filter_fn, loop=current_loop)
         with self._lock:
             self._queue_subs.append(q_sub)
         return q
