@@ -24,6 +24,7 @@ from typing import Any, Callable
 
 from .approval_rules import evaluate_plan_approval
 from .base import Agent
+from ..bus import bus
 from ..clock import clock
 from ..state import state
 
@@ -41,6 +42,7 @@ class CommandAgent(Agent):
         "assignment.declined",
         "assignment.timeout",
         "unit.unavailable",
+        "unit.heartbeat_lost",
     ]
 
     def __init__(
@@ -162,6 +164,71 @@ class CommandAgent(Agent):
                 reason=f"Unit {u_id} became unavailable: {reason}",
             )
             await self.trigger_replan(f"Unit {u_id} unavailable")
+
+        elif event_type == "unit.heartbeat_lost":
+            from datetime import datetime, timedelta
+            u_id = payload.get("unitId")
+            evt_ts = event.get("ts", clock.now())
+            ts_dt = datetime.strptime(evt_ts, "%Y-%m-%dT%H:%M:%S")
+
+            # 1. Update unit status to unreachable (matching seed evt_050)
+            state.set_unit_status(
+                u_id,
+                "unreachable",
+                location=None,
+                previous_status="en_route",
+                publish=True,
+                ts=evt_ts,
+            )
+
+            # 2. Find associated incident
+            inc_id = None
+            for asn in state.get_assignments():
+                if asn.get("unitId") == u_id and asn.get("status") in ("sent", "accepted", "en_route"):
+                    inc_id = asn.get("incidentId")
+                    break
+            if not inc_id:
+                unit = state.get_unit(u_id)
+                if unit:
+                    inc_id = unit.get("assignedIncidentId")
+
+            # 3. Emit agent.activity at T0 + 8s (matching seed evt_051)
+            act_ts = (ts_dt + timedelta(seconds=3)).strftime("%Y-%m-%dT%H:%M:%S")
+            bus.publish("agent.activity", {
+                "agent": "command",
+                "message": f"ZONE-B network outage. {u_id} heartbeat lost. Proposing an SMS check-in for approval.",
+                "incidentId": inc_id,
+                "planId": None,
+            }, ts=act_ts)
+
+            # 4. Propose approval APR-002 at T0 + 10s (matching seed evt_052)
+            appr_ts = (ts_dt + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%S")
+            approval = {
+                "approvalId": "APR-002",
+                "kind": "crew_check",
+                "status": "pending",
+                "summary": f"Send an SMS check-in to units in Zone B ({u_id}).",
+                "reason": f"Zone B lost network and {u_id} stopped sending heartbeats while en route to {inc_id}." if inc_id else f"Zone B lost network and {u_id} stopped sending heartbeats.",
+                "options": [
+                    {
+                        "optionId": "OPT-A",
+                        "label": "Send SMS check-in now",
+                        "description": "Uses the SMS fallback. Crew replies with a status code.",
+                    },
+                    {
+                        "optionId": "OPT-B",
+                        "label": "Wait 5 minutes",
+                        "description": "Avoids extra messages if the outage is brief.",
+                    },
+                ],
+                "recommendedOptionId": "OPT-A",
+                "relatedIncidentIds": [inc_id] if inc_id else [],
+                "requestedAt": appr_ts,
+                "chosenOptionId": None,
+                "decidedBy": None,
+                "decidedAt": None,
+            }
+            state.request_approval(approval, publish=True, ts=appr_ts)
 
     async def trigger_replan(self, trigger_reason: str) -> None:
         """Triggers a re-plan by notifying AllocationAgent."""

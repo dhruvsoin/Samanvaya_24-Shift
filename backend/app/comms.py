@@ -58,6 +58,7 @@ def dispatch(
     text: str,
     kind: RecipientKind | str | None = None,
     zone_id: str | None = None,
+    ts: str | None = None,
 ) -> dict[str, Any]:
     """
     Dispatches a message to a reporter session, crew unit, or operator.
@@ -74,6 +75,8 @@ def dispatch(
          - Appends an entry (channel 'sms') to the comms log through state
          - If reporter, publishes reporter.message_sent (channel: 'sms', from: 'system')
     """
+    from datetime import datetime, timedelta
+
     # 1. Normalize recipient and kind
     if isinstance(recipient, dict):
         r_kind = recipient.get("kind") or kind
@@ -105,7 +108,7 @@ def dispatch(
         if zone and zone.get("commsStatus") == "degraded":
             is_degraded = True
 
-    ts = clock.now()
+    current_ts = ts or clock.now()
 
     if not is_degraded:
         # Deliver on normal channel ('chat')
@@ -119,12 +122,12 @@ def dispatch(
                 "translatedText": None,
                 "language": "en",
                 "channel": "chat",
-            })
+            }, ts=current_ts)
 
         log_id = state.next_id("LOG")
         log_entry = {
             "entryId": log_id,
-            "ts": ts,
+            "ts": current_ts,
             "direction": "out",
             "channel": "chat",
             "recipient": recipient_ref,
@@ -142,7 +145,15 @@ def dispatch(
         }
 
     else:
-        # Zone degraded:
+        # Zone degraded: calculate timestamps matching seed gaps if base ts provided
+        if ts:
+            base_dt = datetime.strptime(ts, "%Y-%m-%dT%H:%M:%S")
+            failed_ts = (base_dt + timedelta(seconds=2)).strftime("%Y-%m-%dT%H:%M:%S")
+            switched_ts = (base_dt + timedelta(seconds=3)).strftime("%Y-%m-%dT%H:%M:%S")
+        else:
+            failed_ts = clock.now()
+            switched_ts = clock.now()
+
         # Step A: publish comms.delivery_failed for normal channel
         failed_msg_id = state.next_id("MSG")
         bus.publish("comms.delivery_failed", {
@@ -150,7 +161,20 @@ def dispatch(
             "recipient": recipient_ref,
             "channel": "chat",
             "zoneId": zone_id,
-        })
+        }, ts=failed_ts)
+
+        failed_log_id = state.next_id("LOG")
+        failed_entry = {
+            "entryId": failed_log_id,
+            "ts": failed_ts,
+            "direction": "out",
+            "channel": "chat",
+            "recipient": recipient_ref,
+            "text": text,
+            "delivery": "failed",
+            "zoneId": zone_id,
+        }
+        state.append_comms_log(failed_entry)
 
         # Step B: publish comms.channel_switched to sms
         bus.publish("comms.channel_switched", {
@@ -158,7 +182,7 @@ def dispatch(
             "from": "chat",
             "to": "sms",
             "reason": f"{zone_id} comms degraded",
-        })
+        }, ts=switched_ts)
 
         # Step C: deliver as simulated SMS
         sms_msg_id = state.next_id("MSG")
@@ -171,12 +195,12 @@ def dispatch(
                 "translatedText": None,
                 "language": "en",
                 "channel": "sms",
-            })
+            }, ts=switched_ts)
 
         log_id = state.next_id("LOG")
         sms_entry = {
             "entryId": log_id,
-            "ts": ts,
+            "ts": switched_ts,
             "direction": "out",
             "channel": "sms",
             "recipient": recipient_ref,

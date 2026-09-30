@@ -250,17 +250,43 @@ def set_outage(zone_id: str, active: bool) -> dict[str, Any]:
         raise ValueError(f"Zone {zone_id} not found")
 
     if active:
+        from datetime import datetime, timedelta
         from ..comms import dispatch
-        for unit in state.get_units():
-            u_zone = unit.get("zoneId") or (unit.get("location") or {}).get("zoneId")
-            if u_zone == zone_id:
-                dispatch(
-                    recipient=unit["unitId"],
-                    text=f"Advisory: network outage in {zone_id}. Switching channel to SMS fallback.",
-                    kind="crew",
-                    zone_id=zone_id,
-                )
 
+        t0_str = clock.now()
+        t0_dt = datetime.strptime(t0_str, "%Y-%m-%dT%H:%M:%S")
+
+        # 1. Filter: only message units with an active assignment in this zone (idle units are not messaged)
+        active_assignments = state.get_assignments()
+        assigned_units = {
+            asn["unitId"]: asn
+            for asn in active_assignments
+            if asn.get("status") in ("sent", "accepted", "en_route", "on_scene")
+        }
+
+        active_units_in_zone: list[str] = []
+        for unit in state.get_units():
+            u_id = unit["unitId"]
+            u_zone = unit.get("zoneId") or (unit.get("location") or {}).get("zoneId")
+            asn = assigned_units.get(u_id)
+            if asn:
+                asn_inc = state.get_incident(asn.get("incidentId"))
+                inc_zone = (asn_inc.get("location") or {}).get("zoneId") if asn_inc else None
+                # Unit has an active assignment in this zone
+                if inc_zone == zone_id:
+                    active_units_in_zone.append(u_id)
+
+        # Dispatch only to active units
+        for u_id in active_units_in_zone:
+            dispatch(
+                recipient=u_id,
+                text=f"Advisory: network outage in {zone_id}. Switching channel to SMS fallback.",
+                kind="crew",
+                zone_id=zone_id,
+                ts=t0_str,
+            )
+
+        # 2. Dispatch to open-incident reporters in this zone
         notified_sessions: set[str] = set()
         for inc in state.get_incidents():
             if inc.get("status") not in ("closed", "resolved"):
@@ -274,7 +300,17 @@ def set_outage(zone_id: str, active: bool) -> dict[str, Any]:
                             text=f"Network outage detected in your area ({zone_id}). Updates will arrive via SMS.",
                             kind="reporter",
                             zone_id=zone_id,
+                            ts=t0_str,
                         )
+
+        # 3. For active units that lost comms in this zone, trigger heartbeat_lost at T0 + 5s
+        for u_id in active_units_in_zone:
+            hb_ts = (t0_dt - timedelta(seconds=2)).strftime("%Y-%m-%dT%H:%M:%S")
+            lost_ts = (t0_dt + timedelta(seconds=5)).strftime("%Y-%m-%dT%H:%M:%S")
+            bus.publish("unit.heartbeat_lost", {
+                "unitId": u_id,
+                "lastHeartbeatAt": hb_ts,
+            }, ts=lost_ts)
 
     return zone
 

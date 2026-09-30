@@ -49,6 +49,9 @@ class RouteAgent(Agent):
         event_type = event.get("type")
         payload = event.get("payload", {})
 
+        if event_type == "unit.status_changed" and payload.get("status") == "unreachable":
+            return self._cached_etas
+
         # Refresh engine instance in case ENGINE_MODE changed dynamically
         self._engine = get_engine()
 
@@ -102,6 +105,8 @@ class RouteAgent(Agent):
         return new_etas
 
     async def handle(self, event: dict) -> None:
+        if event.get("type") == "unit.status_changed" and event.get("payload", {}).get("status") == "unreachable":
+            return
         new_etas = self.handle_sync(event)
 
         # Notify listeners if ETAs changed or callback provided

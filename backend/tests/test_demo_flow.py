@@ -37,6 +37,8 @@ import pytest
 os.environ.setdefault("LLM_MODE", "scripted")
 os.environ.setdefault("ENGINE_MODE", "stub")
 
+from fastapi.testclient import TestClient
+
 from app.agents.allocation import AllocationAgent
 from app.agents.assessment import AssessmentAgent
 from app.agents.base import AgentRunner
@@ -44,6 +46,7 @@ from app.agents.command import CommandAgent
 from app.agents.route import RouteAgent
 from app.bus import bus
 from app.clock import clock
+from app.main import app
 from app.services import scenario as scenario_service
 from app.state import state
 
@@ -492,3 +495,178 @@ async def test_event_ordering_maintained():
 
     finally:
         runner.stop()
+
+
+# ── Test: Outage exact sequence and comms log validation ──────────────
+
+@pytest.mark.asyncio
+async def test_outage_exact_seed_sequence_and_comms_log():
+    """
+    Validates:
+      1. Outage sequence strictly matches seed evt_045 to evt_053 in order.
+      2. APR-002 exists with kind 'crew_check'.
+      3. GET /comms/log contains exactly one failed plus one switched entry for RES-01.
+      4. GET /approvals lists APR-002.
+    """
+    runner, _, route_agent, _, _ = _build_agent_pipeline()
+
+    try:
+        # Phase 1: Inject seed incidents
+        _inject_seed_incidents()
+        await asyncio.sleep(0.3)
+
+        # Phase 2: Rain surge heavy
+        scenario_service.rain_surge("heavy", route_agent=route_agent)
+        await asyncio.sleep(0.3)
+
+        # Phase 3: Approve latest requested approval (reassign to RES-01)
+        approvals_requested = _find_events_of_type("approval.requested")
+        assert len(approvals_requested) >= 1
+        latest_apr_id = approvals_requested[-1]["payload"]["approval"]["approvalId"]
+        state.resolve_approval(latest_apr_id, "approve", "OPT-A", "operator", publish=True)
+        await asyncio.sleep(0.3)
+
+        # Verify RES-01 assignment is active
+        plans = _find_events_of_type("plan.published")
+        assert len(plans) >= 2
+
+        # Anchor clock to seed outage time
+        clock.set_time("2026-10-10T09:08:00")
+        evts_before = len(bus.get_events_since())
+
+        # Phase 4: Set outage in ZONE-B
+        scenario_service.set_outage("ZONE-B", active=True)
+        await asyncio.sleep(0.4)
+
+        # Phase 5: Resolve APR-002
+        clock.set_time("2026-10-10T09:08:30")
+        state.resolve_approval("APR-002", "approve", "OPT-A", "operator", publish=True)
+        await asyncio.sleep(0.2)
+
+        outage_events = bus.get_events_since()[evts_before:]
+        outage_types = [e["type"] for e in outage_events]
+
+        expected_types = [
+            "status.updated",           # evt_045
+            "zone.comms_degraded",      # evt_046
+            "comms.delivery_failed",    # evt_047
+            "comms.channel_switched",   # evt_048
+            "unit.heartbeat_lost",      # evt_049
+            "unit.status_changed",      # evt_050
+            "agent.activity",           # evt_051
+            "approval.requested",       # evt_052
+            "approval.resolved",        # evt_053
+        ]
+        assert outage_types == expected_types, (
+            f"Outage sequence mismatch:\nActual: {outage_types}\nExpected: {expected_types}"
+        )
+
+        # Assert APR-002 exists with kind crew_check
+        apr_002 = state.get_approval("APR-002")
+        assert apr_002 is not None, "APR-002 must exist"
+        assert apr_002["kind"] == "crew_check", f"Expected kind crew_check, got {apr_002['kind']}"
+
+        # Assert via HTTP API
+        client = TestClient(app)
+        auth_resp = client.post("/auth/login", json={"username": "operator", "password": "demo1234"})
+        assert auth_resp.status_code == 200
+        token = auth_resp.json()["token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Check GET /comms/log: exactly one failed plus one switched entry for RES-01
+        comms_resp = client.get("/comms/log", headers=headers)
+        assert comms_resp.status_code == 200
+        comms_log = comms_resp.json()
+
+        res01_entries = [
+            e for e in comms_log
+            if e.get("recipient", {}).get("id") == "RES-01"
+        ]
+        failed_res01 = [
+            e for e in res01_entries
+            if e.get("delivery") == "failed" and e.get("channel") == "chat"
+        ]
+        switched_res01 = [
+            e for e in res01_entries
+            if e.get("channel") == "sms"
+        ]
+        assert len(failed_res01) == 1, (
+            f"Expected exactly 1 failed entry for RES-01, got {len(failed_res01)}"
+        )
+        assert len(switched_res01) == 1, (
+            f"Expected exactly 1 switched entry for RES-01, got {len(switched_res01)}"
+        )
+
+        # Check GET /approvals: lists APR-002
+        approvals_resp = client.get("/approvals", headers=headers)
+        assert approvals_resp.status_code == 200
+        approvals_list = approvals_resp.json()
+        assert any(
+            a["approvalId"] == "APR-002" and a["kind"] == "crew_check"
+            for a in approvals_list
+        ), "GET /approvals must list APR-002 with kind crew_check"
+
+    finally:
+        runner.stop()
+
+
+# ── Test: Determinism across demo -> reset cycles in one process ─────
+
+@pytest.mark.asyncio
+async def test_outage_determinism_demo_reset_cycles():
+    """
+    Runs demo -> reset -> demo -> reset -> demo in one process and asserts
+    the outage sequence is strictly identical across all iterations.
+    """
+    expected_types = [
+        "status.updated",
+        "zone.comms_degraded",
+        "comms.delivery_failed",
+        "comms.channel_switched",
+        "unit.heartbeat_lost",
+        "unit.status_changed",
+        "agent.activity",
+        "approval.requested",
+        "approval.resolved",
+    ]
+
+    sequences = []
+
+    for cycle in range(3):
+        state.reset()
+        bus.reset()
+        clock.reset()
+
+        runner, _, route_agent, _, _ = _build_agent_pipeline()
+        try:
+            _inject_seed_incidents()
+            await asyncio.sleep(0.3)
+
+            scenario_service.rain_surge("heavy", route_agent=route_agent)
+            await asyncio.sleep(0.3)
+
+            approvals = _find_events_of_type("approval.requested")
+            latest_id = approvals[-1]["payload"]["approval"]["approvalId"]
+            state.resolve_approval(latest_id, "approve", "OPT-A", "operator", publish=True)
+            await asyncio.sleep(0.3)
+
+            clock.set_time("2026-10-10T09:08:00")
+            before_idx = len(bus.get_events_since())
+
+            scenario_service.set_outage("ZONE-B", active=True)
+            await asyncio.sleep(0.4)
+
+            clock.set_time("2026-10-10T09:08:30")
+            state.resolve_approval("APR-002", "approve", "OPT-A", "operator", publish=True)
+            await asyncio.sleep(0.2)
+
+            cycle_events = bus.get_events_since()[before_idx:]
+            sequences.append([e["type"] for e in cycle_events])
+        finally:
+            runner.stop()
+
+    assert len(sequences) == 3
+    assert sequences[0] == expected_types
+    assert sequences[1] == expected_types
+    assert sequences[2] == expected_types
+    assert sequences[0] == sequences[1] == sequences[2]

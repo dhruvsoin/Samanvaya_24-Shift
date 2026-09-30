@@ -109,9 +109,15 @@ def test_degraded_zone_gives_failed_then_switched_then_sms_log():
     assert switched_evt["payload"]["to"] == "sms"
     assert "ZONE-B comms degraded" in switched_evt["payload"]["reason"]
 
-    # Verify comms log entry has channel 'sms'
+    # Verify comms log has failed entry and switched sms entry
     logs = state.get_comms_log()
-    assert len(logs) == initial_log_count + 1
+    assert len(logs) == initial_log_count + 2
+    failed_entry = logs[-2]
+    assert failed_entry["channel"] == "chat"
+    assert failed_entry["delivery"] == "failed"
+    assert failed_entry["recipient"] == {"kind": "crew", "id": "RES-01"}
+    assert failed_entry["zoneId"] == "ZONE-B"
+
     sms_entry = logs[-1]
     assert sms_entry["channel"] == "sms"
     assert sms_entry["direction"] == "out"

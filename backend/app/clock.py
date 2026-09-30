@@ -71,6 +71,11 @@ class ScenarioClock:
         self._anchor_real = time.monotonic()
         self._speed = float(speed)
 
+    def set_time(self, time_str: str) -> None:
+        """Explicitly set current scenario time (used in deterministic tests and warp)."""
+        self._anchor_scenario_dt = datetime.strptime(time_str, _FMT)
+        self._anchor_real = time.monotonic()
+
     def reset(self) -> None:
         """Restore scenario clock to start_time at speed 1."""
         self._anchor_scenario_dt = self._start_dt

@@ -245,6 +245,8 @@ class AppState:
         new_status: str,
         location: dict | None = None,
         publish: bool = True,
+        previous_status: str | None = None,
+        ts: str | None = None,
     ) -> dict | None:
         """
         Updates a unit's status and publishes unit.status_changed on the bus.
@@ -253,22 +255,21 @@ class AppState:
             unit = self.units.get(unit_id)
             if unit is None:
                 return None
-            previous_status = unit.get("status")
+            prev = previous_status if previous_status is not None else unit.get("status")
             unit["status"] = new_status
-            unit["lastHeartbeatAt"] = clock.now()
+            unit["lastHeartbeatAt"] = ts or clock.now()
             if location:
                 unit["location"] = copy.deepcopy(location)
             unit_copy = copy.deepcopy(unit)
 
         if publish:
-            loc = location or unit_copy.get("location")
-            lat_lng = {"lat": loc["lat"], "lng": loc["lng"]} if loc and "lat" in loc else None
+            lat_lng = {"lat": location["lat"], "lng": location["lng"]} if location and "lat" in location else None
             bus.publish("unit.status_changed", {
                 "unitId": unit_id,
                 "status": new_status,
-                "previousStatus": previous_status,
+                "previousStatus": prev,
                 "location": lat_lng,
-            })
+            }, ts=ts)
         return unit_copy
 
     def add_incident(self, incident: dict, publish: bool = True) -> dict:
@@ -495,7 +496,7 @@ class AppState:
             bus.publish("plan.published", {"plan": plan_copy})
         return plan_copy
 
-    def request_approval(self, approval: dict, publish: bool = True) -> dict:
+    def request_approval(self, approval: dict, publish: bool = True, ts: str | None = None) -> dict:
         """
         Stores an approval and emits approval.requested.
         """
@@ -504,7 +505,7 @@ class AppState:
             appr_copy = copy.deepcopy(approval)
 
         if publish:
-            bus.publish("approval.requested", {"approval": appr_copy})
+            bus.publish("approval.requested", {"approval": appr_copy}, ts=ts or appr_copy.get("requestedAt"))
         return appr_copy
 
     def resolve_approval(
