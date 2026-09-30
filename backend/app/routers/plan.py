@@ -5,7 +5,7 @@ GET /plan/current         → Plan | null
 GET /plan/history         → Plan[]  (oldest first)
 GET /plan/diff?from=&to=  → PlanChange[]
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..auth import require_operator_or_reviewer
 
@@ -28,8 +28,10 @@ def get_plan_history(_=Depends(require_operator_or_reviewer)) -> list[dict]:
 
 @router.get("/diff")
 def get_plan_diff(
-    from_plan: str,
-    to_plan: str,
+    from_plan: str | None = Query(None),
+    to_plan: str | None = Query(None),
+    from_alias: str | None = Query(None, alias="from"),
+    to_alias: str | None = Query(None, alias="to"),
     _=Depends(require_operator_or_reviewer),
 ) -> list[dict]:
     """
@@ -37,14 +39,20 @@ def get_plan_diff(
     since the 'from' plan.  (The diff is stored inside the plan itself.)
     Query params: from=PLAN-001&to=PLAN-002
     """
-    # FastAPI maps ?from= → from_plan because 'from' is a reserved keyword.
-    # The endpoint path uses ?from=...&to=... per contracts/endpoints.md.
-    plan = state.get_plan_by_id(to_plan)
+    f_id = from_alias or from_plan
+    t_id = to_alias or to_plan
+    if not f_id or not t_id:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Query parameters 'from' and 'to' are required",
+        )
+
+    plan = state.get_plan_by_id(t_id)
     if plan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Plan {to_plan} not found")
-    source = state.get_plan_by_id(from_plan)
+                            detail=f"Plan {t_id} not found")
+    source = state.get_plan_by_id(f_id)
     if source is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Plan {from_plan} not found")
+                            detail=f"Plan {f_id} not found")
     return plan.get("changes", [])

@@ -189,9 +189,13 @@ def test_plan_history_empty_at_start():
 
 
 def test_plan_diff_404_unknown():
-    r = client.get("/plan/diff?from_plan=PLAN-001&to_plan=PLAN-002",
+    r = client.get("/plan/diff?from=PLAN-001&to=PLAN-002",
                    headers=auth(operator_token()))
     assert r.status_code == 404
+    # Also support backwards compatibility from_plan / to_plan
+    r2 = client.get("/plan/diff?from_plan=PLAN-001&to_plan=PLAN-002",
+                    headers=auth(operator_token()))
+    assert r2.status_code == 404
 
 
 # ── Approvals ─────────────────────────────────────────────────────────
@@ -200,6 +204,11 @@ def test_approvals_empty_at_start():
     r = client.get("/approvals", headers=auth(operator_token()))
     assert r.status_code == 200
     assert r.json() == []
+
+    # test ?status=pending query param alias
+    r2 = client.get("/approvals?status=pending", headers=auth(operator_token()))
+    assert r2.status_code == 200
+    assert r2.json() == []
 
 
 def test_approval_decision_404():

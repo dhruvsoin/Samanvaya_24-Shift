@@ -9,7 +9,7 @@ Per contracts/endpoints.md:
   - In the stub, "executing" just updates the approval status.
     P1-Brain will wire up the real plan mutation here.
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..auth import require_operator
 from ..bus import bus
@@ -22,15 +22,16 @@ router = APIRouter(prefix="/approvals", tags=["Approvals"])
 
 @router.get("")
 def get_approvals(
-    approval_status: str | None = None,
+    approval_status: str | None = Query(None, alias="status"),
+    status_param: str | None = Query(None, alias="approval_status"),
     _=Depends(require_operator),
 ) -> list[dict]:
     """
     Returns approvals, optionally filtered by status.
-    Query param: ?status=pending
-    (FastAPI parameter named approval_status to avoid shadowing built-in `status`.)
+    Query param: ?status=pending (or ?approval_status=pending)
     """
-    return state.get_approvals(approval_status)
+    st = approval_status or status_param
+    return state.get_approvals(st)
 
 
 @router.post("/{approval_id}/decision")
