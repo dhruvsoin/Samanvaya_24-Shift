@@ -511,7 +511,7 @@ class AppState:
             approval = self.approvals.get(approval_id)
             if approval is None:
                 return None
-            approval["status"] = "approved" if decision == "approve" else "rejected"
+            approval["status"] = "approved" if decision in ("approve", "choose_other") else "rejected"
             approval["chosenOptionId"] = chosen_option_id
             approval["decidedBy"] = decided_by
             approval["decidedAt"] = ts

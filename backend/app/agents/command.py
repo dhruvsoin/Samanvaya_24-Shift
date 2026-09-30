@@ -105,7 +105,7 @@ class CommandAgent(Agent):
             chosen_opt = payload.get("chosenOptionId")
 
             if approval_id == self._pending_approval_id and self._pending_plan:
-                if decision == "approve":
+                if decision in ("approve", "choose_other"):
                     self.log_decision(
                         decision="approve_plan",
                         reason=f"Operator approved {approval_id} (Option: {chosen_opt}).",

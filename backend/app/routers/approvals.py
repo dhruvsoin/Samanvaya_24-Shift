@@ -9,10 +9,10 @@ Per contracts/endpoints.md:
   - In the stub, "executing" just updates the approval status.
     P1-Brain will wire up the real plan mutation here.
 """
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..auth import require_operator
-from ..bus import bus
 from ..clock import clock
 from ..models import ApprovalDecisionRequest
 from ..state import state
@@ -35,38 +35,63 @@ def get_approvals(
 
 
 @router.post("/{approval_id}/decision")
-def post_decision(
+async def post_decision(
     approval_id: str,
     body: ApprovalDecisionRequest,
     claims=Depends(require_operator),
 ) -> dict:
     """
-    Operator decides on an approval.
-    Emits: approval.resolved
-    If decision == approve: also emits plan.published (stub: no plan mutation yet).
+    Operator decides on an approval (approve, reject, or choose_other with optionId).
+    Records decidedBy from token and decidedAt from scenario clock.
+    Publishes approval.resolved, allowing CommandAgent to continue (publishing plan.published).
+    Returns 409 if the approval is already resolved.
     """
     approval = state.get_approval(approval_id)
     if approval is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Approval {approval_id} not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Approval {approval_id} not found",
+        )
     if approval["status"] != "pending":
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
-                            detail=f"Approval {approval_id} is already {approval['status']}")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Approval {approval_id} is already {approval['status']}",
+        )
 
-    ts = clock.now()
-    approval["status"] = "approved" if body.decision == "approve" else "rejected"
-    approval["chosenOptionId"] = body.option_id
-    approval["decidedBy"] = claims["sub"]
-    approval["decidedAt"] = ts
-    state.upsert_approval(approval)
+    if body.decision == "approve":
+        chosen_option_id = body.option_id or approval.get("recommendedOptionId")
+    elif body.decision == "choose_other":
+        if not body.option_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="optionId is required when decision is choose_other",
+            )
+        options = [opt.get("optionId") or opt.get("option_id") for opt in approval.get("options", [])]
+        if options and body.option_id not in options:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid optionId '{body.option_id}'. Available options: {options}",
+            )
+        chosen_option_id = body.option_id
+    elif body.decision == "reject":
+        chosen_option_id = None
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid decision '{body.decision}'",
+        )
 
-    bus.publish("approval.resolved", {
-        "approvalId": approval_id,
-        "decision": body.decision,
-        "chosenOptionId": body.option_id,
-        "decidedBy": claims["sub"],
-        "decidedAt": ts,
-        "note": body.note,
-    })
+    decided_by = claims.get("sub") or claims.get("displayName") or "operator"
+    resolved_approval = state.resolve_approval(
+        approval_id=approval_id,
+        decision=body.decision,
+        chosen_option_id=chosen_option_id,
+        decided_by=decided_by,
+        note=body.note,
+        publish=True,
+    )
 
-    return approval
+    # Allow asyncio tasks (e.g. CommandAgent reacting to approval.resolved) to execute
+    await asyncio.sleep(0.02)
+
+    return resolved_approval or approval
