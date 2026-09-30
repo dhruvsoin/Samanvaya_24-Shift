@@ -1,0 +1,47 @@
+{
+  "speeds_kmh": {
+    "ambulance": 30.0,
+    "rescue_team": 25.0,
+    "boat": 12.0,
+    "pump": 25.0
+  },
+  "rain_multipliers": {
+    "none": 1.0,
+    "light": 0.9,
+    "moderate": 0.75,
+    "heavy": 0.55,
+    "extreme": 0.4
+  },
+  "severity_weights": {
+    "critical": 8,
+    "high": 4,
+    "medium": 2,
+    "low": 1
+  },
+  "rain_rules": [
+    {
+      "condition": ["heavy", "extreme"],
+      "roadId": "ROAD-04",
+      "newStatus": "closed",
+      "reason": "Water depth exceeded 1.2m on causeway. Impassable for wheeled vehicles."
+    },
+    {
+      "condition": ["heavy", "extreme"],
+      "roadId": "ROAD-05",
+      "newStatus": "slow",
+      "reason": "Waterlogging along Canal Rd, speed reduced by 50%."
+    }
+  ],
+  "eligibility": {
+    "medical": ["ambulance"],
+    "flooded_home": ["boat", "rescue_team"],
+    "trapped": ["boat", "rescue_team"],
+    "stranded_vehicle": ["rescue_team", "boat"],
+    "road_blocked": ["pump"]
+  },
+  "valid_unit_statuses": ["available", "en_route"],
+  "last_mile_minutes": 1.0,
+  "unserved_penalty_base": 5000,
+  "lateness_penalty_per_min": 50,
+  "stickiness_bonus": 2
+}

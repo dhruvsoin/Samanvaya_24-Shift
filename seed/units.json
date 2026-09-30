@@ -1,0 +1,38 @@
+[
+  {
+    "id": "BOAT-01",
+    "name": "Rescue Boat Alpha",
+    "type": "boat",
+    "status": "available",
+    "location": { "lat": 10.010, "lon": 76.335 },
+    "nearestNode": "N4",
+    "speedKmH": 12
+  },
+  {
+    "id": "RES-02",
+    "name": "Rapid Response Team 2",
+    "type": "rescue_team",
+    "status": "available",
+    "location": { "lat": 10.020, "lon": 76.300 },
+    "nearestNode": "N2",
+    "speedKmH": 25
+  },
+  {
+    "id": "RES-01",
+    "name": "Rapid Response Team 1",
+    "type": "rescue_team",
+    "status": "available",
+    "location": { "lat": 9.990, "lon": 76.320 },
+    "nearestNode": "N7",
+    "speedKmH": 25
+  },
+  {
+    "id": "AMB-01",
+    "name": "Emergency Medical Ambulance 1",
+    "type": "ambulance",
+    "status": "available",
+    "location": { "lat": 10.025, "lon": 76.310 },
+    "nearestNode": "N1",
+    "speedKmH": 30
+  }
+]

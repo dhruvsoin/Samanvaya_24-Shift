@@ -1,0 +1,222 @@
+[
+  {
+    "id": "EVT-001",
+    "ts": "2026-09-30T09:01:14Z",
+    "type": "incident.reported",
+    "payload": {
+      "incidentId": "INC-01",
+      "type": "flooded_home",
+      "severity": "critical",
+      "location": { "lat": 10.012, "lon": 76.322 },
+      "nearestNode": "N3",
+      "peopleCount": 4,
+      "reporterName": "Anand Menon",
+      "description": "Rising flood water entering ground floor, 4 family members including elderly."
+    }
+  },
+  {
+    "id": "EVT-002",
+    "ts": "2026-09-30T09:01:45Z",
+    "type": "incident.reported",
+    "payload": {
+      "incidentId": "INC-02",
+      "type": "trapped",
+      "severity": "high",
+      "location": { "lat": 10.005, "lon": 76.305 },
+      "nearestNode": "N5",
+      "peopleCount": 2,
+      "reporterName": "Fathima Beevi",
+      "description": "Two individuals trapped on high platform near Central Lowland sector."
+    }
+  },
+  {
+    "id": "EVT-003",
+    "ts": "2026-09-30T09:02:50Z",
+    "type": "incident.reported",
+    "payload": {
+      "incidentId": "INC-03",
+      "type": "medical",
+      "severity": "high",
+      "location": { "lat": 10.000, "lon": 76.325 },
+      "nearestNode": "N6",
+      "peopleCount": 1,
+      "reporterName": "Suresh Kumar",
+      "description": "Elderly patient experiencing acute respiratory distress, needs immediate ambulance."
+    }
+  },
+  {
+    "id": "EVT-004",
+    "ts": "2026-09-30T09:03:10Z",
+    "type": "plan.published",
+    "payload": {
+      "planId": "PLAN-001",
+      "planNumber": 1,
+      "rainIntensity": "none",
+      "entries": [
+        {
+          "incidentId": "INC-01",
+          "unitId": "BOAT-01",
+          "etaMinutes": 6,
+          "etaRange": [5, 9],
+          "routeRoadIds": ["ROAD-10"],
+          "assignedAt": "2026-09-30T09:03:10Z",
+          "status": "assigned"
+        },
+        {
+          "incidentId": "INC-02",
+          "unitId": "RES-02",
+          "etaMinutes": 5,
+          "etaRange": [4, 8],
+          "routeRoadIds": ["ROAD-04"],
+          "assignedAt": "2026-09-30T09:03:10Z",
+          "status": "assigned"
+        },
+        {
+          "incidentId": "INC-03",
+          "unitId": "AMB-01",
+          "etaMinutes": 4,
+          "etaRange": [3, 7],
+          "routeRoadIds": ["ROAD-05"],
+          "assignedAt": "2026-09-30T09:03:10Z",
+          "status": "assigned"
+        }
+      ],
+      "changes": [
+        {
+          "incidentId": "INC-01",
+          "previousUnitId": null,
+          "newUnitId": "BOAT-01",
+          "previousEta": null,
+          "newEta": 6,
+          "changeType": "added",
+          "reason": "Nearest boat, route open"
+        },
+        {
+          "incidentId": "INC-02",
+          "previousUnitId": null,
+          "newUnitId": "RES-02",
+          "previousEta": null,
+          "newEta": 5,
+          "changeType": "added",
+          "reason": "Nearest rescue team, route open"
+        },
+        {
+          "incidentId": "INC-03",
+          "previousUnitId": null,
+          "newUnitId": "AMB-01",
+          "previousEta": null,
+          "newEta": 4,
+          "changeType": "added",
+          "reason": "Nearest ambulance, route open"
+        }
+      ],
+      "unserved": []
+    }
+  },
+  {
+    "id": "EVT-005",
+    "ts": "2026-09-30T09:06:05Z",
+    "type": "road.status_changed",
+    "payload": {
+      "roadId": "ROAD-04",
+      "oldStatus": "open",
+      "newStatus": "closed",
+      "reason": "Heavy water accumulation. Water depth > 1.2m. Submerged causeway impassable for land vehicles."
+    }
+  },
+  {
+    "id": "EVT-006",
+    "ts": "2026-09-30T09:06:05Z",
+    "type": "road.status_changed",
+    "payload": {
+      "roadId": "ROAD-05",
+      "oldStatus": "open",
+      "newStatus": "slow",
+      "reason": "Waterlogging along Canal Rd, traffic slowed to half speed."
+    }
+  },
+  {
+    "id": "EVT-007",
+    "ts": "2026-09-30T09:06:20Z",
+    "type": "approval.requested",
+    "payload": {
+      "id": "APR-001",
+      "title": "Reassignment for INC-02 (Cut-off by Causeway Closure)",
+      "reason": "ROAD-04 closed, cutting off RES-02. Reassign to RES-01 or BOAT-01 across flooded road.",
+      "options": [
+        { "id": "A", "label": "Reassign INC-02 to RES-01 via East Link", "recommended": true },
+        { "id": "B", "label": "Wait for RES-02 long detour", "recommended": false },
+        { "id": "C", "label": "Deploy Boat across flooded road segment", "recommended": false }
+      ]
+    }
+  },
+  {
+    "id": "EVT-008",
+    "ts": "2026-09-30T09:06:52Z",
+    "type": "plan.published",
+    "payload": {
+      "planId": "PLAN-002",
+      "planNumber": 2,
+      "rainIntensity": "heavy",
+      "entries": [
+        {
+          "incidentId": "INC-01",
+          "unitId": "BOAT-01",
+          "etaMinutes": 6,
+          "etaRange": [5, 9],
+          "routeRoadIds": ["ROAD-10"],
+          "assignedAt": "2026-09-30T09:03:10Z",
+          "status": "in_progress"
+        },
+        {
+          "incidentId": "INC-02",
+          "unitId": "RES-01",
+          "etaMinutes": 7,
+          "etaRange": [6, 10],
+          "routeRoadIds": ["ROAD-06"],
+          "assignedAt": "2026-09-30T09:06:52Z",
+          "status": "assigned"
+        },
+        {
+          "incidentId": "INC-03",
+          "unitId": "AMB-01",
+          "etaMinutes": 7,
+          "etaRange": [6, 10],
+          "routeRoadIds": ["ROAD-05"],
+          "assignedAt": "2026-09-30T09:03:10Z",
+          "status": "in_progress"
+        }
+      ],
+      "changes": [
+        {
+          "incidentId": "INC-01",
+          "previousUnitId": "BOAT-01",
+          "newUnitId": "BOAT-01",
+          "previousEta": 6,
+          "newEta": 6,
+          "changeType": "unchanged",
+          "reason": "Waterway open, priority unchanged"
+        },
+        {
+          "incidentId": "INC-02",
+          "previousUnitId": "RES-02",
+          "newUnitId": "RES-01",
+          "previousEta": 5,
+          "newEta": 7,
+          "changeType": "changed_unit",
+          "reason": "ROAD-04 closed, RES-02 cut off. RES-01 is now the fastest"
+        },
+        {
+          "incidentId": "INC-03",
+          "previousUnitId": "AMB-01",
+          "newUnitId": "AMB-01",
+          "previousEta": 4,
+          "newEta": 7,
+          "changeType": "eta_changed",
+          "reason": "Canal Rd slowed, ETA up 3 min"
+        }
+      ],
+      "unserved": []
+    }
+  }
+]
