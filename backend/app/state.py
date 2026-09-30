@@ -205,6 +205,13 @@ class AppState:
             v = self.approvals.get(approval_id)
             return copy.deepcopy(v) if v else None
 
+    def get_assignments(self, status: str | None = None) -> list[dict]:
+        with self._lock:
+            vals = list(self.assignments.values())
+            if status:
+                vals = [a for a in vals if a["status"] == status]
+            return copy.deepcopy(vals)
+
     def get_assignment(self, assignment_id: str) -> dict | None:
         with self._lock:
             v = self.assignments.get(assignment_id)
