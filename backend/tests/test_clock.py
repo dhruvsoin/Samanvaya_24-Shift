@@ -16,12 +16,17 @@ def test_now_returns_scenario_start_format():
     assert len(ts) == 19   # "2026-10-10T09:00:00"
 
 
+def test_start_time_property():
+    c = ScenarioClock()
+    assert c.start_time == "2026-10-10T09:00:00"
+
+
 def test_clock_advances():
     c = ScenarioClock()
-    t1 = c.now()
+    t1 = c.now_dt()
     time.sleep(0.05)
-    t2 = c.now()
-    assert t2 >= t1
+    t2 = c.now_dt()
+    assert t2 > t1
 
 
 def test_speed_2_advances_faster():
@@ -30,9 +35,32 @@ def test_speed_2_advances_faster():
     t1 = c.now()
     time.sleep(0.1)
     t2 = c.now()
-    # at 2x speed, 0.1 real seconds = 0.2 scenario seconds — should still be >= t1
     assert t2 >= t1
     assert c.speed == 2
+
+
+def test_time_warp_speed_x5_advances_5x_faster():
+    c = ScenarioClock()
+    c.reset()
+
+    # Measure scenario time delta at 1x speed over 0.1s real time
+    c.set_speed(1)
+    t0 = c.now_dt()
+    time.sleep(0.1)
+    t1 = c.now_dt()
+    elapsed_1x = (t1 - t0).total_seconds()
+
+    # Measure scenario time delta at 5x speed over 0.1s real time
+    c.set_speed(5)
+    t2 = c.now_dt()
+    time.sleep(0.1)
+    t3 = c.now_dt()
+    elapsed_5x = (t3 - t2).total_seconds()
+
+    ratio = elapsed_5x / elapsed_1x
+    # Real-world sleeps vary slightly on Windows; allow reasonable tolerance around 5.0
+    assert 3.8 <= ratio <= 6.5, f"Expected ratio ~5, got {ratio:.2f}"
+    assert c.speed == 5
 
 
 def test_reset_restores_scenario_start():

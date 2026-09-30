@@ -2,8 +2,8 @@
 clock.py — Scenario clock.
 
 All timestamps in payloads are SCENARIO time, never datetime.now().
-The clock starts at SCENARIO_START (from .env or default) and advances
-at `speed` × real-time rate.
+The clock starts at SCENARIO_START (from config or default 2026-10-10T09:00:00)
+and advances at `speed` × real-time rate.
 
 Usage:
     from app.clock import clock
@@ -17,51 +17,66 @@ import os
 import time
 from datetime import datetime, timedelta
 
+from .config import settings
 
-_SCENARIO_START_DEFAULT = "2026-10-10T09:00:00"
 _FMT = "%Y-%m-%dT%H:%M:%S"
 
 
 class ScenarioClock:
-    def __init__(self) -> None:
-        start_str = os.getenv("SCENARIO_START_TIME", _SCENARIO_START_DEFAULT)
-        self._scenario_start: datetime = datetime.strptime(start_str, _FMT)
-        self._speed: int = int(os.getenv("TIME_WARP_SPEED", "1"))
-        self._real_start: float = time.monotonic()
+    def __init__(self, start_time: str | None = None, initial_speed: int | float | None = None) -> None:
+        cfg_start = getattr(settings, "scenario_start_time", "2026-10-10T09:00:00")
+        self._start_time_str: str = start_time or os.getenv("SCENARIO_START_TIME", cfg_start)
+        self._start_dt: datetime = datetime.strptime(self._start_time_str, _FMT)
+        
+        cfg_speed = getattr(settings, "time_warp_speed", 1)
+        speed_val = initial_speed if initial_speed is not None else int(os.getenv("TIME_WARP_SPEED", str(cfg_speed)))
+        
+        self._speed: float = float(speed_val)
+        self._anchor_scenario_dt: datetime = self._start_dt
+        self._anchor_real: float = time.monotonic()
 
     # ── public API ────────────────────────────────────────────────────
 
-    def now(self) -> str:
-        """Current scenario time as ISO 8601, no timezone."""
-        elapsed_real = time.monotonic() - self._real_start
-        elapsed_scenario = timedelta(seconds=elapsed_real * self._speed)
-        return (self._scenario_start + elapsed_scenario).strftime(_FMT)
+    @property
+    def start_time(self) -> str:
+        """Configured scenario start time string (e.g. '2026-10-10T09:00:00')."""
+        return self._start_time_str
 
     @property
-    def speed(self) -> int:
-        return self._speed
+    def speed(self) -> int | float:
+        """Current scenario speed multiplier."""
+        return int(self._speed) if self._speed.is_integer() else self._speed
 
-    def set_speed(self, speed: int) -> None:
-        """Accepted values: 1, 2, 5, 10 (per contracts/endpoints.md)."""
-        # anchor the scenario time at the current moment before changing speed
-        anchor = self._current_scenario_dt()
-        self._scenario_start = anchor
-        self._real_start = time.monotonic()
-        self._speed = speed
+    def now(self) -> str:
+        """Current scenario time as ISO 8601 string without timezone (YYYY-MM-DDTHH:MM:SS)."""
+        return self.now_dt().strftime(_FMT)
+
+    def now_dt(self) -> datetime:
+        """Current scenario time as a datetime object."""
+        elapsed_real = time.monotonic() - self._anchor_real
+        return self._anchor_scenario_dt + timedelta(seconds=elapsed_real * self._speed)
+
+    def elapsed_scenario_seconds(self) -> float:
+        """Total scenario seconds elapsed since start_time."""
+        return (self.now_dt() - self._start_dt).total_seconds()
+
+    def set_speed(self, speed: int | float) -> None:
+        """
+        Change speed multiplier, anchoring scenario time at the current moment
+        so scenario time advances continuously without jumps or regression.
+        Accepted values typically: 1, 2, 5, 10.
+        """
+        current_dt = self.now_dt()
+        self._anchor_scenario_dt = current_dt
+        self._anchor_real = time.monotonic()
+        self._speed = float(speed)
 
     def reset(self) -> None:
-        """Restore scenario clock to T+0 at speed 1."""
-        start_str = os.getenv("SCENARIO_START_TIME", _SCENARIO_START_DEFAULT)
-        self._scenario_start = datetime.strptime(start_str, _FMT)
-        self._speed = 1
-        self._real_start = time.monotonic()
-
-    # ── internal ──────────────────────────────────────────────────────
-
-    def _current_scenario_dt(self) -> datetime:
-        elapsed_real = time.monotonic() - self._real_start
-        return self._scenario_start + timedelta(seconds=elapsed_real * self._speed)
+        """Restore scenario clock to start_time at speed 1."""
+        self._anchor_scenario_dt = self._start_dt
+        self._anchor_real = time.monotonic()
+        self._speed = 1.0
 
 
-# singleton
+# singleton instance
 clock = ScenarioClock()

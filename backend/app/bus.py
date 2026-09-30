@@ -1,30 +1,32 @@
 """
-bus.py — In-process event bus + WebSocket connection manager.
+bus.py — In-process asyncio pub/sub event bus + WebSocket manager.
 
-Event envelope (from contracts/README.md §5):
+Event envelope (contracts/README.md §5):
     { "id": "evt_001", "type": "<EventType>", "ts": "<scenario time>", "payload": { ... } }
 
-WebSocket channels (from contracts/events.md):
-    /ws/operator          → all events (operator + reviewer)
-    /ws/crew/{unitId}     → assignment.*, unit.status_changed, unit.unavailable for that unit
-    /ws/reporter/{sessionId} → reporter.message_sent, reporter.status_updated for that session
-
-Connection rules:
-    - Client sends plain text "ping"; server replies plain text "pong".
-    - Optional ?since=<lastEventId> replays missed events.
+Key features:
+    - publish(type, payload): builds envelope with sequential ID (evt_001, evt_002, ...),
+      scenario clock timestamp, appends to in-memory log, and dispatches to subscribers.
+      Never blocks the publisher.
+    - subscribe(types, callback): for agents; supports sync or async callbacks.
+      Events for the same entity are strictly delivered in order.
+    - subscribe_queue(types, maxsize): for WebSocket clients (returns asyncio.Queue).
+    - get_events_since(event_id): for replay.
 """
 from __future__ import annotations
 
 import asyncio
 import json
 import logging
+import threading
 from collections import deque
+from collections.abc import Callable, Iterable
+from dataclasses import dataclass
 from typing import Any
 
 from fastapi import WebSocket
 
 from .clock import clock
-from .state import state
 
 logger = logging.getLogger(__name__)
 
@@ -55,70 +57,294 @@ _CREW_EVENTS = {
 _REPORTER_EVENTS = {"reporter.message_sent", "reporter.status_updated"}
 
 
+@dataclass
+class _AgentSub:
+    types: set[str] | None  # None or containing '*' means wildcard
+    callback: Callable[[dict], Any]
+
+    def matches(self, event_type: str) -> bool:
+        if self.types is None or "*" in self.types:
+            return True
+        return event_type in self.types
+
+
+@dataclass
+class _QueueSub:
+    queue: asyncio.Queue[dict]
+    types: set[str] | None  # None means wildcard
+
+    def matches(self, event_type: str) -> bool:
+        if self.types is None or "*" in self.types:
+            return True
+        return event_type in self.types
+
+
 class EventBus:
     """
-    Central event bus.  Call `bus.publish(type, payload)` from any router.
-    Broadcasts to all matching WebSocket subscribers.
-
-    Thread-safe: publish() schedules coroutines into the running loop.
+    Central in-process asyncio pub/sub event bus.
     """
 
     def __init__(self) -> None:
-        # recent event log for ?since= replay (keep last 500)
-        self._log: deque[dict] = deque(maxlen=500)
+        self._seq: int = 0
+        self._log: list[dict] = []
+        self._lock = threading.Lock()
 
-        # WebSocket subscriber sets
+        # Subscriptions
+        self._agent_subs: list[_AgentSub] = []
+        self._queue_subs: list[_QueueSub] = []
+
+        # Entity queues and worker tasks for ordered delivery per entity
+        self._entity_queues: dict[str, asyncio.Queue] = {}
+        self._entity_tasks: dict[str, asyncio.Task] = {}
+
+        # WebSocket connection sets (for backward-compatibility with routers/ws.py)
         self._operator_sockets: set[WebSocket] = set()
-        # crew sockets: {unit_id: set[WebSocket]}
         self._crew_sockets: dict[str, set[WebSocket]] = {}
-        # reporter sockets: {session_id: set[WebSocket]}
         self._reporter_sockets: dict[str, set[WebSocket]] = {}
 
-        # asyncio event loop reference (set on first publish from async context)
-        self._loop: asyncio.AbstractEventLoop | None = None
-
-    # ── event publication ─────────────────────────────────────────────
+    # ── Publication ───────────────────────────────────────────────────
 
     def publish(self, event_type: str, payload: dict[str, Any]) -> dict:
         """
-        Build the event envelope and broadcast to all matching sockets.
-        Returns the envelope so callers can include it in HTTP responses if needed.
-        Safe to call from sync or async code.
+        Builds the envelope (sequential id, scenario clock ts, type, payload),
+        appends to the in-memory event log, and delivers to subscribers.
+        NEVER blocks the publisher.
         """
-        envelope = {
-            "id": state.next_id("evt"),
-            "type": event_type,
-            "ts": clock.now(),
-            "payload": payload,
-        }
-        self._log.append(envelope)
+        with self._lock:
+            self._seq += 1
+            envelope = {
+                "id": f"evt_{self._seq:03d}",
+                "type": event_type,
+                "ts": clock.now(),
+                "payload": payload,
+            }
+            self._log.append(envelope)
+            # Copy subscribers under lock
+            queue_subs = list(self._queue_subs)
+            agent_subs = [s for s in self._agent_subs if s.matches(event_type)]
 
-        # schedule async broadcast
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(self._broadcast(envelope))
-        except RuntimeError:
-            # called from a sync context with no running loop — skip WS delivery
-            # (fine for test environments)
-            pass
+        # 1. Non-blocking delivery to subscriber queues (WebSockets)
+        for q_sub in queue_subs:
+            if q_sub.matches(event_type):
+                try:
+                    q_sub.queue.put_nowait(envelope)
+                except asyncio.QueueFull:
+                    logger.warning("Subscriber queue full; dropping event %s", envelope["id"])
+
+        # 2. Backward-compatible direct WebSocket broadcast
+        self._schedule_ws_broadcast(envelope)
+
+        # 3. Agent subscriber delivery — ordered per entity
+        if agent_subs:
+            callbacks = [s.callback for s in agent_subs]
+            entity_key = self._extract_entity_key(envelope)
+            self._dispatch_agent_callbacks(entity_key, envelope, callbacks)
 
         return envelope
 
-    def events_since(self, last_id: str | None) -> list[dict]:
-        """Return events logged after `last_id` (for ?since= reconnect replay)."""
-        if last_id is None:
-            return []
-        events = list(self._log)
+    # ── Subscriptions ─────────────────────────────────────────────────
+
+    def subscribe(
+        self,
+        types: str | Iterable[str],
+        callback: Callable[[dict], Any],
+    ) -> Callable[[], None]:
+        """
+        Subscribe an agent callback to events.
+        `types` can be a single event type, '*', or an iterable of event types.
+        `callback` can be sync or async and is called with `envelope: dict`.
+        Events for the same entity are guaranteed to be delivered in order.
+        Returns an unsubscribe function.
+        """
+        if isinstance(types, str):
+            type_set = None if types == "*" else {types}
+        else:
+            type_set = set(types)
+
+        sub = _AgentSub(types=type_set, callback=callback)
+        with self._lock:
+            self._agent_subs.append(sub)
+
+        def unsubscribe() -> None:
+            with self._lock:
+                if sub in self._agent_subs:
+                    self._agent_subs.remove(sub)
+
+        return unsubscribe
+
+    def subscribe_queue(
+        self,
+        types: str | Iterable[str] | None = None,
+        maxsize: int = 0,
+    ) -> asyncio.Queue[dict]:
+        """
+        Subscribe an asyncio.Queue to events (ideal for WebSocket clients).
+        `types` optionally filters event types (None or '*' receives all events).
+        Returns an asyncio.Queue that receives event envelopes in publication order.
+        """
+        if types is None or types == "*":
+            type_set = None
+        elif isinstance(types, str):
+            type_set = {types}
+        else:
+            type_set = set(types)
+
+        q: asyncio.Queue[dict] = asyncio.Queue(maxsize=maxsize)
+        q_sub = _QueueSub(queue=q, types=type_set)
+        with self._lock:
+            self._queue_subs.append(q_sub)
+        return q
+
+    def unsubscribe_queue(self, queue: asyncio.Queue) -> None:
+        """Unsubscribe an asyncio.Queue from the event bus."""
+        with self._lock:
+            self._queue_subs = [s for s in self._queue_subs if s.queue is not queue]
+
+    # ── Replay & Query ────────────────────────────────────────────────
+
+    def get_events_since(self, event_id: str | None = None) -> list[dict]:
+        """
+        Return logged events since event_id for replay.
+        If event_id is None, returns all logged events.
+        If event_id is specified, returns all events strictly after that event_id.
+        """
+        with self._lock:
+            events = list(self._log)
+        if not event_id:
+            return events
         found = False
         out = []
         for evt in events:
             if found:
                 out.append(evt)
-            if evt["id"] == last_id:
+            elif evt.get("id") == event_id:
                 found = True
         return out
 
-    # ── WebSocket connection management ───────────────────────────────
+    def events_since(self, last_id: str | None) -> list[dict]:
+        """Backwards compatibility for ?since= query parameter in WebSocket reconnect."""
+        if last_id is None:
+            return []
+        return self.get_events_since(last_id)
+
+    def reset(self) -> None:
+        """Reset the event bus state (for testing)."""
+        with self._lock:
+            self._seq = 0
+            self._log.clear()
+            self._agent_subs.clear()
+            self._queue_subs.clear()
+            for task in list(self._entity_tasks.values()):
+                try:
+                    if not task.done():
+                        loop = task.get_loop()
+                        if not loop.is_closed():
+                            task.cancel()
+                except Exception:
+                    pass
+            self._entity_queues.clear()
+            self._entity_tasks.clear()
+            self._operator_sockets.clear()
+            self._crew_sockets.clear()
+            self._reporter_sockets.clear()
+
+    # ── Internal Entity Ordering & Workers ────────────────────────────
+
+    def _extract_entity_key(self, envelope: dict) -> str:
+        """Extract entity identifier from payload to maintain entity-level ordering."""
+        payload = envelope.get("payload")
+        if not isinstance(payload, dict):
+            return envelope.get("type", "_global_")
+
+        for key in (
+            "incidentId",
+            "unitId",
+            "sessionId",
+            "approvalId",
+            "assignmentId",
+            "roadId",
+            "zoneId",
+            "planId",
+            "messageId",
+            "channelId",
+            "entityId",
+        ):
+            val = payload.get(key)
+            if val is not None and isinstance(val, (str, int)):
+                return f"{key}:{val}"
+
+        # Check nested structures (e.g. payload["assignment"]["unitId"])
+        for parent in ("assignment", "incident", "unit", "approval", "plan"):
+            nested = payload.get(parent)
+            if isinstance(nested, dict):
+                for child_key in ("unitId", "incidentId", "assignmentId", "approvalId", "planId", "id"):
+                    val = nested.get(child_key)
+                    if val is not None and isinstance(val, (str, int)):
+                        return f"{child_key}:{val}"
+
+        return envelope.get("type", "_global_")
+
+    def _dispatch_agent_callbacks(
+        self,
+        entity_key: str,
+        envelope: dict,
+        callbacks: list[Callable[[dict], Any]],
+    ) -> None:
+        """Enqueues events per entity and processes them sequentially in an entity worker."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = None
+
+        if loop is not None and loop.is_running():
+            if entity_key not in self._entity_queues:
+                self._entity_queues[entity_key] = asyncio.Queue()
+            eq = self._entity_queues[entity_key]
+            eq.put_nowait((envelope, callbacks))
+
+            if entity_key not in self._entity_tasks or self._entity_tasks[entity_key].done():
+                self._entity_tasks[entity_key] = loop.create_task(self._run_entity_worker(entity_key))
+        else:
+            # Sync context without running loop: execute synchronous callbacks in order
+            for cb in callbacks:
+                try:
+                    res = cb(envelope)
+                    if asyncio.iscoroutine(res):
+                        res.close()
+                except Exception as ex:
+                    logger.exception("Error in subscriber callback for %s: %s", envelope.get("id"), ex)
+
+    async def _run_entity_worker(self, entity_key: str) -> None:
+        """Processes events for a specific entity in strict FIFO order."""
+        try:
+            eq = self._entity_queues.get(entity_key)
+            if eq is None:
+                return
+
+            while not eq.empty():
+                try:
+                    envelope, callbacks = eq.get_nowait()
+                except asyncio.QueueEmpty:
+                    break
+
+                for cb in callbacks:
+                    try:
+                        res = cb(envelope)
+                        if asyncio.iscoroutine(res):
+                            await res
+                    except asyncio.CancelledError:
+                        raise
+                    except Exception as ex:
+                        logger.exception("Error in agent callback for %s: %s", envelope.get("id"), ex)
+                eq.task_done()
+        except asyncio.CancelledError:
+            pass
+        finally:
+            if entity_key in self._entity_queues and self._entity_queues[entity_key].empty():
+                self._entity_queues.pop(entity_key, None)
+                self._entity_tasks.pop(entity_key, None)
+
+    # ── Backward-compatible WebSocket methods for ws.py ───────────────
 
     async def connect_operator(self, ws: WebSocket) -> None:
         await ws.accept()
@@ -141,24 +367,26 @@ class EventBus:
     def disconnect_reporter(self, ws: WebSocket, session_id: str) -> None:
         self._reporter_sockets.get(session_id, set()).discard(ws)
 
-    # ── internal broadcast ────────────────────────────────────────────
+    def _schedule_ws_broadcast(self, envelope: dict) -> None:
+        try:
+            loop = asyncio.get_running_loop()
+            loop.create_task(self._broadcast(envelope))
+        except RuntimeError:
+            pass
 
     async def _broadcast(self, envelope: dict) -> None:
         msg = json.dumps(envelope)
         event_type = envelope["type"]
 
-        # operator channel gets everything
         if event_type in _OPERATOR_EVENTS:
             await self._send_to_set(self._operator_sockets, msg)
 
-        # crew channel — filter by unitId in payload
         if event_type in _CREW_EVENTS:
             payload = envelope.get("payload", {})
             unit_id = payload.get("unitId") or payload.get("assignment", {}).get("unitId")
             if unit_id and unit_id in self._crew_sockets:
                 await self._send_to_set(self._crew_sockets[unit_id], msg)
 
-        # reporter channel — filter by sessionId in payload
         if event_type in _REPORTER_EVENTS:
             payload = envelope.get("payload", {})
             session_id = payload.get("sessionId")
@@ -176,5 +404,5 @@ class EventBus:
         sockets -= dead
 
 
-# singleton
+# singleton instance
 bus = EventBus()
