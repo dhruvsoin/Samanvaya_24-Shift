@@ -510,52 +510,55 @@ export function EmergencyMap({ onSelectIncident }: Props) {
       <div ref={containerRef} className="absolute inset-0" />
 
       {/* ── Top-Left Sector HUD Badge ── */}
-      <div className="absolute top-3 left-12 z-[1000] hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl glass-panel text-slate-800 text-xs shadow-md">
-        <div className="flex items-center gap-1.5 font-semibold text-slate-900">
-          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+      <div className="absolute top-3 left-14 z-[1000] hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs shadow-md backdrop-blur-md">
+        <div className="flex items-center gap-1.5 font-semibold text-zinc-100">
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
           <span>Sector 4</span>
         </div>
-        <div className="h-3.5 w-px bg-slate-300" />
-        <span className="text-[11px] text-slate-500 font-medium">Adyar River Estuary</span>
-        <div className="h-3.5 w-px bg-slate-300" />
+        <div className="h-3.5 w-px bg-zinc-700" />
+        <span className="text-[11px] text-zinc-400 font-medium whitespace-nowrap">Koramangala / Bellandur</span>
+        <div className="h-3.5 w-px bg-zinc-700" />
         <div className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
           <span>Surge: +1.4m</span>
         </div>
       </div>
 
-      {/* ── Top Floating Toolbar ── */}
-      <div className="absolute top-3 right-3 z-[1000] flex items-center gap-2">
-        {/* Recenter View Button */}
-        <button
-          onClick={handleRecenter}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 glass-panel hover:bg-white transition shadow-sm cursor-pointer"
-          title="Auto-fit all active emergency incidents and responder units"
-        >
-          <Crosshair className="w-3.5 h-3.5 text-blue-600" />
-          <span>Recenter</span>
-        </button>
+      {/* ── Top Floating Toolbar (Right Stacked) ── */}
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col items-end gap-2">
+        {/* Recenter & Map Mode Row */}
+        <div className="flex items-center gap-2">
+          {/* Recenter View Button */}
+          <button
+            onClick={handleRecenter}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition shadow-sm cursor-pointer backdrop-blur-md"
+            title="Auto-fit all active emergency incidents and responder units"
+          >
+            <Crosshair className="w-3.5 h-3.5 text-blue-500" />
+            <span>Recenter</span>
+          </button>
 
-        {/* Map Mode Toggle */}
-        <button
-          onClick={() => setMapMode(mapMode === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 glass-panel hover:bg-white transition shadow-sm cursor-pointer"
-          title={mapMode === 'light' ? 'Switch to Dark Mode map' : 'Switch to Light Mode map'}
-        >
-          {mapMode === 'light' ? (
-            <>
-              <Moon className="w-3.5 h-3.5 text-slate-600" />
-              <span>Dark Map</span>
-            </>
-          ) : (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-500" />
-              <span>Light Map</span>
-            </>
-          )}
-        </button>
+          {/* Map Mode Toggle */}
+          <button
+            onClick={() => setMapMode(mapMode === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition shadow-sm cursor-pointer backdrop-blur-md"
+            title={mapMode === 'light' ? 'Switch to Dark Mode map' : 'Switch to Light Mode map'}
+          >
+            {mapMode === 'light' ? (
+              <>
+                <Moon className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Dark Map</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
+                <span>Light Map</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Layer Visibility Toggles */}
-        <div className="flex items-center gap-1 p-1 rounded-xl shadow-sm glass-panel">
+        <div className="flex items-center gap-1 p-1 rounded-xl shadow-sm bg-zinc-900 border border-zinc-800 backdrop-blur-md">
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, incidents: !p.incidents }))}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
@@ -612,31 +615,31 @@ export function EmergencyMap({ onSelectIncident }: Props) {
 
       {/* ── Legend (Bottom-Left) ── */}
       <div
-        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-xl text-xs shadow-md glass-panel"
+        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-xl text-xs shadow-md bg-zinc-900 border border-zinc-800 backdrop-blur-md"
         style={{ maxWidth: '220px' }}
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Tactical Legend</span>
+          <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Tactical Legend</span>
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         </div>
 
         <div className="space-y-1.5 text-[10px] font-sans">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 border border-rose-300 shrink-0 shadow-xs" />
-            <span className="text-slate-700 font-medium">Critical / SOS Emergency</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-rose-300 shrink-0 shadow-xs" />
+            <span className="text-zinc-300 font-medium">Critical / SOS Emergency</span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-300 shrink-0 shadow-xs" />
-            <span className="text-slate-700 font-medium">High / Advisory Incident</span>
+            <span className="text-zinc-300 font-medium">High / Advisory Incident</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-1.5 py-0.5 rounded bg-blue-100 border border-blue-200 text-blue-800 font-mono text-[9px] font-bold">UNIT</span>
-            <span className="text-slate-700 font-medium">Field Responder</span>
+            <span className="px-1.5 py-0.5 rounded bg-blue-900 border border-blue-800 text-blue-200 font-mono text-[9px] font-bold">UNIT</span>
+            <span className="text-zinc-300 font-medium">Field Responder</span>
           </div>
 
-          <div className="pt-2 border-t border-slate-200/80 space-y-1">
+          <div className="pt-2 border-t border-zinc-800 space-y-1">
             <div className="flex items-center gap-2">
               <div className="w-4 h-1 rounded-full bg-emerald-500" />
               <span className="text-emerald-700 font-semibold">Road Open</span>

@@ -2,15 +2,16 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-/* ─── Clean Enterprise Light Mode (Gov-Tech / Apple Pro Aesthetic) ─── */
+/* ─── Premium Command Center Dark Mode ─── */
 :root {
-  --background: #F8FAFC;
-  --foreground: #0F172A;
-  --card: #FFFFFF;
-  --card-foreground: #0F172A;
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #2563EB;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #09090b;
+  --card-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #3b82f6;
+  --radius: 0.75rem;
 }
 
 * {
@@ -24,9 +25,9 @@ html, body {
 }
 
 body {
-  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: #F8FAFC;
-  color: #0F172A;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -37,104 +38,103 @@ body {
   flex-direction: column;
 }
 
-/* ─── Clean Light Scrollbars ─── */
+/* ─── Sleek Scrollbars ─── */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 3px;
+  background: #3f3f46;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #52525b;
 }
 
-/* ─── Enterprise Structural Utilities ─── */
-.gov-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-}
-
+/* ─── Typography & Utilities ─── */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* ─── Rich Atmospheric & Background Utilities ─── */
+/* ─── Cinematic Backgrounds & Grid ─── */
 .bg-grid-dots {
-  background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .bg-grid-lines {
   background-size: 32px 32px;
-  background-image: linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
-                    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
+/* ─── Premium Glassmorphism ─── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.85);
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  background: rgba(9, 9, 11, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  background: linear-gradient(145deg, rgba(24, 24, 27, 0.9) 0%, rgba(9, 9, 11, 0.95) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+}
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
 }
 
 .glass-dock {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(9, 9, 11, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.glass-subtle {
-  background: rgba(248, 250, 252, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(226, 232, 240, 0.6);
-}
-
-/* ─── Leaflet Clean Light Theme Overrides ─── */
+/* ─── Leaflet Dark Theme Overrides ─── */
 .leaflet-container {
-  background: #F1F5F9 !important;
-  font-family: 'Geist', 'Inter', -apple-system, sans-serif !important;
+  background: #09090b !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+}
+
+/* Invert map tiles for a dark mode look */
+.leaflet-tile-pane {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
 
 .leaflet-popup-content-wrapper {
-  background: #FFFFFF !important;
-  color: #0F172A !important;
-  border: 1px solid #E2E8F0 !important;
+  background: #18181b !important;
+  color: #fafafa !important;
+  border: 1px solid #27272a !important;
   border-radius: 8px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
   padding: 4px !important;
 }
 
 .leaflet-popup-tip {
-  background: #FFFFFF !important;
-  border: 1px solid #E2E8F0 !important;
+  background: #18181b !important;
+  border: 1px solid #27272a !important;
 }
 
 .leaflet-bar a {
-  background-color: #FFFFFF !important;
-  color: #334155 !important;
-  border-bottom: 1px solid #E2E8F0 !important;
-  transition: all 0.15s ease !important;
+  background-color: #18181b !important;
+  color: #a1a1aa !important;
+  border-bottom: 1px solid #27272a !important;
+  transition: all 0.2s ease !important;
 }
 
 .leaflet-bar a:hover {
-  background-color: #F8FAFC !important;
-  color: #0F172A !important;
+  background-color: #27272a !important;
+  color: #fafafa !important;
 }

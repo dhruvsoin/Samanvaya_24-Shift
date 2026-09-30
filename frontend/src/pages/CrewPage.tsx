@@ -176,7 +176,7 @@ function TacticalRouteMap({
   return (
     <div
       ref={mapContainerRef}
-      className="w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative z-10"
+      className="w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-800 relative z-10"
     />
   );
 }
@@ -509,32 +509,32 @@ export function CrewPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8FAFC] text-slate-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans">
       {/* ── Top Header ── */}
-      <header className="px-4 py-2.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0 sticky top-0 z-40">
+      <header className="px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between shrink-0 sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
             <UnitIcon className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-semibold tracking-wider text-slate-500 uppercase">Field Terminal</span>
+              <span className="text-[10px] font-mono font-semibold tracking-wider text-zinc-500 uppercase">Field Terminal</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
-            <p className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
+            <p className="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
               <span className="font-mono text-blue-600 font-bold">{activeUnitConfig.id}</span>
-              <span className="text-slate-300">·</span>
-              <span className="text-slate-600 font-normal">{activeUnitConfig.name} ({activeUnitConfig.role})</span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-400 font-normal">{activeUnitConfig.name} ({activeUnitConfig.role})</span>
             </p>
           </div>
         </div>
 
         {/* Telemetry & Network */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-[11px] font-mono text-slate-600">
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-800 text-[11px] font-mono text-zinc-400">
             <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" />
             <span>94%</span>
-            <span className="text-slate-300">|</span>
+            <span className="text-zinc-600">|</span>
             <Compass className="w-3.5 h-3.5 text-blue-600" />
             <span>GPS Active</span>
           </div>
@@ -561,23 +561,24 @@ export function CrewPage() {
 
           <button
             onClick={handleLogout}
-            className="p-1.5 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors font-medium text-xs"
             title="Log out"
           >
             <LogOut className="w-4 h-4" />
+            <span>Logout</span>
           </button>
         </div>
       </header>
 
       {/* ── Active Responder Switcher Bar ── */}
-      <div className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-500 shrink-0">
             <Radio className="w-3.5 h-3.5 text-blue-600" />
           </div>
           <div>
-            <span className="text-slate-800 font-semibold block leading-tight text-xs">Active Responder Unit:</span>
-            <span className="text-[11px] text-slate-500">Switch vehicle profile</span>
+            <span className="text-zinc-200 font-semibold block leading-tight text-xs">Active Responder Unit:</span>
+            <span className="text-[11px] text-zinc-500">Switch vehicle profile</span>
           </div>
         </div>
 
@@ -595,11 +596,11 @@ export function CrewPage() {
                 className={`py-1.5 px-3 rounded-lg font-mono text-xs font-semibold flex items-center gap-2 transition-colors ${
                   isSelected
                     ? 'bg-blue-50 text-blue-700 border border-blue-300 shadow-xs'
-                    : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950 border border-zinc-800'
                 }`}
                 title={`${u.name} — ${u.role}`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-slate-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-zinc-500'}`} />
                 <span>{u.id}</span>
                 {isSelected && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-0.5" />
@@ -635,9 +636,9 @@ export function CrewPage() {
       <main className="flex-1 p-4 max-w-3xl w-full mx-auto flex flex-col gap-4">
 
         {/* ── Unit Readiness & View Switcher Bar ── */}
-        <section className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 shadow-xs">
+        <section className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium uppercase text-slate-400">Status:</span>
+            <span className="text-[11px] font-medium uppercase text-zinc-500">Status:</span>
             <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               AVAILABLE
             </span>
@@ -648,8 +649,8 @@ export function CrewPage() {
               onClick={() => setActiveView('tasks')}
               className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
                 activeView === 'tasks'
-                  ? 'bg-slate-100 text-slate-900 border border-slate-200 font-semibold'
-                  : 'text-slate-500 hover:text-slate-900'
+                  ? 'bg-zinc-800 text-zinc-100 border border-zinc-800 font-semibold'
+                  : 'text-zinc-500 hover:text-zinc-100'
               }`}
             >
               <ListFilter className="w-3.5 h-3.5" />
@@ -661,7 +662,7 @@ export function CrewPage() {
                 className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
                   activeView === 'route'
                     ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
-                    : 'text-slate-500 hover:text-slate-900'
+                    : 'text-zinc-500 hover:text-zinc-100'
                 }`}
               >
                 <Navigation className="w-3.5 h-3.5 text-blue-600" />
@@ -675,20 +676,20 @@ export function CrewPage() {
         {assignment === undefined && (
           <div className="flex-1 flex flex-col items-center justify-center p-12 gap-3">
             <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-            <p className="text-xs font-mono text-slate-500">Syncing telemetry with Operations Command…</p>
+            <p className="text-xs font-mono text-zinc-500">Syncing telemetry with Operations Command…</p>
           </div>
         )}
 
         {/* VIEW 1: ACTIVE ROUTE & NAVIGATION CONSOLE */}
         {activeView === 'route' && assignment && (
-          <div className={`rounded-xl border transition-all overflow-hidden bg-white shadow-sm ${
-            notificationPing ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200'
+          <div className={`rounded-xl border transition-all overflow-hidden bg-zinc-900 shadow-sm ${
+            notificationPing ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-zinc-800'
           }`}>
             {/* Header */}
-            <div className="p-3.5 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between">
+            <div className="p-3.5 border-b border-zinc-800 bg-zinc-950/80 flex items-center justify-between">
               <button
                 onClick={() => setActiveView('tasks')}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium transition-colors border border-slate-200 shadow-xs"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-950 text-zinc-300 text-xs font-medium transition-colors border border-zinc-800 shadow-xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Tasks List</span>
@@ -698,23 +699,23 @@ export function CrewPage() {
                 <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold uppercase bg-blue-50 text-blue-700 border border-blue-200">
                   {statusStep.replace('_', ' ')}
                 </span>
-                <span className="text-xs font-mono text-slate-400">{assignment.assignmentId}</span>
+                <span className="text-xs font-mono text-zinc-500">{assignment.assignmentId}</span>
               </div>
             </div>
 
             {/* Mission Title */}
-            <div className="px-4 py-3 border-b border-slate-100">
-              <h2 className="text-sm font-semibold text-slate-900 leading-snug">
+            <div className="px-4 py-3 border-b border-zinc-800">
+              <h2 className="text-sm font-semibold text-zinc-100 leading-snug">
                 {assignment.incidentSummary}
               </h2>
-              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-mono">
+              <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1.5 font-mono">
                 <MapPin className="w-3.5 h-3.5 text-rose-500" />
                 <span>{assignment.location.label} · {assignment.location.zoneId}</span>
               </p>
             </div>
 
             {/* Step Tracker */}
-            <div className="px-4 py-2.5 bg-slate-50/50 border-b border-slate-100">
+            <div className="px-4 py-2.5 bg-zinc-950/50 border-b border-zinc-800">
               <div className="grid grid-cols-4 gap-2 text-center">
                 {[
                   { step: 'sent', label: '1. Dispatched' },
@@ -734,7 +735,7 @@ export function CrewPage() {
                         isCurrent ? 'bg-blue-600' : isPassed ? 'bg-emerald-500' : 'bg-slate-200'
                       }`} />
                       <span className={`text-[10px] font-mono uppercase ${
-                        isCurrent ? 'text-blue-600 font-semibold' : isPassed ? 'text-emerald-700 font-medium' : 'text-slate-400'
+                        isCurrent ? 'text-blue-600 font-semibold' : isPassed ? 'text-emerald-700 font-medium' : 'text-zinc-500'
                       }`}>
                         {s.label}
                       </span>
@@ -748,11 +749,11 @@ export function CrewPage() {
               {/* Tactical Route Map */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-700 text-xs flex items-center gap-1.5">
+                  <span className="font-semibold text-zinc-300 text-xs flex items-center gap-1.5">
                     <Navigation className="w-3.5 h-3.5 text-blue-600" />
                     Field Route Navigation
                   </span>
-                  <span className="text-[11px] text-slate-500 font-mono">
+                  <span className="text-[11px] text-zinc-500 font-mono">
                     Staging: {activeUnitConfig.staging}
                   </span>
                 </div>
@@ -770,20 +771,20 @@ export function CrewPage() {
 
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
+                <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <span className="text-[11px] text-zinc-500 flex items-center gap-1.5 font-medium">
                     <Users className="w-3.5 h-3.5 text-amber-600" /> People at Risk
                   </span>
-                  <p className="text-base font-bold text-slate-900 mt-1">
-                    {assignment.peopleAffected} <span className="text-xs font-normal text-slate-500">citizens</span>
+                  <p className="text-base font-bold text-zinc-100 mt-1">
+                    {assignment.peopleAffected} <span className="text-xs font-normal text-zinc-500">citizens</span>
                   </p>
                 </div>
-                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                  <span className="text-[11px] text-slate-500 flex items-center gap-1.5 font-medium">
+                <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <span className="text-[11px] text-zinc-500 flex items-center gap-1.5 font-medium">
                     <Clock className="w-3.5 h-3.5 text-blue-600" /> Estimated Arrival
                   </span>
                   <p className="text-base font-bold text-blue-600 mt-1">
-                    {assignment.etaMinutes} <span className="text-xs font-normal text-slate-500">min</span>
+                    {assignment.etaMinutes} <span className="text-xs font-normal text-zinc-500">min</span>
                   </p>
                 </div>
               </div>
@@ -794,7 +795,7 @@ export function CrewPage() {
                   <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-800 uppercase tracking-wider">
                     <Compass className="w-3.5 h-3.5 text-blue-600" /> Navigation Guidance
                   </div>
-                  <p className="text-xs text-slate-700 leading-relaxed">
+                  <p className="text-xs text-zinc-300 leading-relaxed">
                     {assignment.instructions}
                   </p>
                 </div>
@@ -805,7 +806,7 @@ export function CrewPage() {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${assignment.location.lat},${assignment.location.lng}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-lg bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-xs"
+                className="w-full py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-950 text-zinc-300 border border-zinc-800 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-xs"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
                 <span>Open in External Navigation App</span>
@@ -828,7 +829,7 @@ export function CrewPage() {
                       onClick={() => handleRespond(false)}
                       disabled={!!loading}
                       id="btn-decline-assignment"
-                      className="py-2.5 px-4 rounded-lg text-xs font-semibold bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                      className="py-2.5 px-4 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                     >
                       {loading === 'decline' ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
                       DECLINE
@@ -875,17 +876,17 @@ export function CrewPage() {
                 {statusStep === 'completed' && (
                   <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-center space-y-1">
                     <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto" />
-                    <p className="text-xs font-semibold text-slate-900">Mission successfully completed</p>
-                    <p className="text-[11px] font-mono text-slate-500">Returning unit to standby status…</p>
+                    <p className="text-xs font-semibold text-zinc-100">Mission successfully completed</p>
+                    <p className="text-[11px] font-mono text-zinc-500">Returning unit to standby status…</p>
                   </div>
                 )}
 
                 {/* Problem Reporter */}
-                <div className="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
-                  <span className="text-slate-500">Route impedance or hazard?</span>
+                <div className="pt-2 flex items-center justify-between border-t border-zinc-800 text-xs">
+                  <span className="text-zinc-500">Route impedance or hazard?</span>
                   <button
                     onClick={() => setShowProblemDialog(true)}
-                    className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 hover:border-rose-200 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
                   >
                     <AlertOctagon className="w-3.5 h-3.5 text-rose-600" />
                     Report Route Hazard
@@ -907,10 +908,10 @@ export function CrewPage() {
                     <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[10px] font-semibold uppercase">
                       ASSIGNED TO {activeUnitId}
                     </span>
-                    <span className="text-xs font-mono text-slate-500">{assignment.assignmentId}</span>
+                    <span className="text-xs font-mono text-zinc-500">{assignment.assignmentId}</span>
                   </div>
-                  <h3 className="text-xs font-semibold text-slate-900 line-clamp-1">{assignment.incidentSummary}</h3>
-                  <p className="text-[11px] text-slate-600 font-mono flex items-center gap-1">
+                  <h3 className="text-xs font-semibold text-zinc-100 line-clamp-1">{assignment.incidentSummary}</h3>
+                  <p className="text-[11px] text-zinc-400 font-mono flex items-center gap-1">
                     <MapPin className="w-3 h-3 text-rose-500" />
                     <span>{assignment.location.label} · ETA {assignment.etaMinutes}m</span>
                   </p>
@@ -927,17 +928,17 @@ export function CrewPage() {
             )}
 
             {/* Standby Status Hero */}
-            <div className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     SECTOR PATROL ACTIVE
                   </span>
-                  <span className="text-xs font-mono text-slate-500">{activeUnitConfig.zone}</span>
+                  <span className="text-xs font-mono text-zinc-500">{activeUnitConfig.zone}</span>
                 </div>
-                <h2 className="text-sm font-semibold text-slate-900">Active Sector Emergency Calls</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <h2 className="text-sm font-semibold text-zinc-100">Active Sector Emergency Calls</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">
                   Select a priority task to claim or inspect its navigation route.
                 </p>
               </div>
@@ -945,7 +946,7 @@ export function CrewPage() {
               <button
                 onClick={() => handleSelectTaskAndGoToRoute()}
                 disabled={!!loading}
-                className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shrink-0 shadow-xs"
+                className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-950 text-zinc-300 border border-zinc-800 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shrink-0 shadow-xs"
               >
                 {loading === 'select_task' ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -959,18 +960,18 @@ export function CrewPage() {
             {/* List of Tasks */}
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs px-1">
-                <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                   <ListFilter className="w-3.5 h-3.5 text-blue-600" />
                   Available Tasks ({activeSectorIncidents.length})
                 </span>
-                <span className="text-slate-400 text-[11px]">Tap to review route</span>
+                <span className="text-zinc-500 text-[11px]">Tap to review route</span>
               </div>
 
               {activeSectorIncidents.length === 0 ? (
-                <div className="p-8 rounded-xl bg-white border border-dashed border-slate-300 text-center space-y-1">
+                <div className="p-8 rounded-xl bg-zinc-900 border border-dashed border-slate-300 text-center space-y-1">
                   <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto" />
-                  <p className="text-xs font-semibold text-slate-800">No active unassigned calls</p>
-                  <p className="text-[11px] text-slate-500">All emergency calls in this sector are resolved or assigned.</p>
+                  <p className="text-xs font-semibold text-zinc-200">No active unassigned calls</p>
+                  <p className="text-[11px] text-zinc-500">All emergency calls in this sector are resolved or assigned.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -982,12 +983,12 @@ export function CrewPage() {
                         className={`p-3.5 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           isAlreadyAssignedToMe
                             ? 'bg-blue-50/60 border-blue-200'
-                            : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+                            : 'bg-zinc-900 border-zinc-800 hover:border-slate-300 shadow-xs'
                         }`}
                       >
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 font-semibold">
+                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold">
                               {inc.severity || 'assessing'}
                             </span>
                             <span className="text-xs font-mono font-semibold text-blue-600">{inc.incidentId}</span>
@@ -998,9 +999,9 @@ export function CrewPage() {
                             )}
                           </div>
 
-                          <h4 className="text-xs font-semibold text-slate-900 leading-tight">{inc.summary}</h4>
+                          <h4 className="text-xs font-semibold text-zinc-100 leading-tight">{inc.summary}</h4>
 
-                          <div className="flex items-center gap-3 text-[11px] text-slate-500 font-mono flex-wrap">
+                          <div className="flex items-center gap-3 text-[11px] text-zinc-500 font-mono flex-wrap">
                             <span className="flex items-center gap-1">
                               <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
                               <span className="truncate">{inc.location?.label || 'Sector Location'}</span>
@@ -1030,31 +1031,31 @@ export function CrewPage() {
 
             {/* Resolved / Completed Missions History */}
             {resolvedIncidents.length > 0 && (
-              <div className="space-y-2.5 pt-3 border-t border-slate-200">
+              <div className="space-y-2.5 pt-3 border-t border-zinc-800">
                 <div className="flex items-center justify-between text-xs px-1">
-                  <span className="text-xs font-semibold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                     <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
                     Resolved Missions Log ({resolvedIncidents.length})
                   </span>
-                  <span className="text-slate-400 font-mono text-[11px]">Central Log Sync</span>
+                  <span className="text-zinc-500 font-mono text-[11px]">Central Log Sync</span>
                 </div>
 
                 <div className="space-y-1.5">
                   {resolvedIncidents.map((inc) => (
                     <div
                       key={inc.incidentId}
-                      className="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between gap-3 text-xs shadow-xs"
+                      className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3 text-xs shadow-xs"
                     >
                       <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             RESOLVED
                           </span>
-                          <span className="font-mono text-slate-500">{inc.incidentId}</span>
+                          <span className="font-mono text-zinc-500">{inc.incidentId}</span>
                         </div>
-                        <p className="font-medium text-slate-800 truncate text-xs">{inc.summary}</p>
+                        <p className="font-medium text-zinc-200 truncate text-xs">{inc.summary}</p>
                       </div>
-                      <span className="shrink-0 px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-mono">
+                      <span className="shrink-0 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-800 text-[10px] font-mono">
                         {inc.peopleAffected} assisted
                       </span>
                     </div>
@@ -1065,11 +1066,11 @@ export function CrewPage() {
 
             {/* Field Sector Intelligence & Hub Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-              <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2 shadow-xs">
+              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2 shadow-xs">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 uppercase tracking-wider">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Sector Advisory
                 </div>
-                <ul className="space-y-1.5 text-xs text-slate-600">
+                <ul className="space-y-1.5 text-xs text-zinc-400">
                   <li className="flex items-start gap-1.5">
                     <span className="text-rose-600 font-bold">[-]</span>
                     <span>100 Feet Ring Road closed (depth 1.2m).</span>
@@ -1085,13 +1086,13 @@ export function CrewPage() {
                 </ul>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2 shadow-xs">
+              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2 shadow-xs">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-800 uppercase tracking-wider">
                   <LifeBuoy className="w-3.5 h-3.5 text-blue-600" /> Staging & Logistics Hub
                 </div>
-                <div className="space-y-1 text-xs text-slate-600">
-                  <p className="font-semibold text-slate-900">{activeUnitConfig.staging}</p>
-                  <p className="text-slate-500 text-[11px] font-mono">Zone: {activeUnitConfig.zone}</p>
+                <div className="space-y-1 text-xs text-zinc-400">
+                  <p className="font-semibold text-zinc-100">{activeUnitConfig.staging}</p>
+                  <p className="text-zinc-500 text-[11px] font-mono">Zone: {activeUnitConfig.zone}</p>
                   <div className="flex items-center gap-2 pt-1">
                     <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono border border-emerald-200 font-medium">
                       EQUIPMENT: VERIFIED
@@ -1105,14 +1106,14 @@ export function CrewPage() {
             </div>
 
             {/* Quick Field Hazard Broadcast */}
-            <div className="p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
               <div>
-                <p className="text-xs font-semibold text-slate-900">Spotted an unmapped road block or powerline?</p>
-                <p className="text-[11px] text-slate-500">Broadcast hazard report directly to Central Command EOC.</p>
+                <p className="text-xs font-semibold text-zinc-100">Spotted an unmapped road block or powerline?</p>
+                <p className="text-[11px] text-zinc-500">Broadcast hazard report directly to Central Command EOC.</p>
               </div>
               <button
                 onClick={() => setShowProblemDialog(true)}
-                className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
+                className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 hover:border-rose-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
               >
                 <AlertOctagon className="w-3.5 h-3.5 text-rose-600" />
                 Report Hazard
@@ -1126,21 +1127,21 @@ export function CrewPage() {
       {/* ── Problem Reporting Modal ── */}
       {showProblemDialog && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
               <div className="flex items-center gap-2 text-rose-700 font-semibold text-xs uppercase tracking-wider">
                 <AlertTriangle className="w-4 h-4 text-rose-600" />
                 <span>Transmit Field Hazard</span>
               </div>
               <button
                 onClick={() => setShowProblemDialog(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="p-1 rounded text-zinc-500 hover:text-zinc-400 hover:bg-zinc-800"
               >
                 <XCircle className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-zinc-400">
               Select the obstruction condition encountered on route. Central EOC will instantly recalculate route vectors.
             </p>
 
@@ -1153,10 +1154,10 @@ export function CrewPage() {
                 <button
                   key={item.kind}
                   onClick={() => handleProblem(item.kind)}
-                  className="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-left transition-colors space-y-0.5"
+                  className="p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-left transition-colors space-y-0.5"
                 >
-                  <p className="text-xs font-semibold text-slate-900">{item.label}</p>
-                  <p className="text-[11px] text-slate-500">{item.desc}</p>
+                  <p className="text-xs font-semibold text-zinc-100">{item.label}</p>
+                  <p className="text-[11px] text-zinc-500">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -1164,7 +1165,7 @@ export function CrewPage() {
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setShowProblemDialog(false)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:bg-zinc-800"
               >
                 Cancel
               </button>

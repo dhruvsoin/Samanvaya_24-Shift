@@ -61,7 +61,7 @@ export function PhoneInModal({ onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onWheel={(e) => e.stopPropagation()}>
       <button className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} aria-label="Close" />
       <div className="relative w-full max-w-lg rounded-xl bg-white border border-slate-200 shadow-2xl">
 

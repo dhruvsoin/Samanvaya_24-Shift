@@ -25,26 +25,26 @@ export function ResourceBoard() {
   const deployed = units.filter((u) => ['en_route', 'on_scene', 'assigned'].includes(u.status)).length;
 
   return (
-    <div className="flex flex-col shrink-0 bg-white select-none border-b border-slate-200" style={{ maxHeight: '55%' }}>
+    <div className="flex flex-col shrink-0 bg-zinc-950 select-none border-b border-zinc-800" style={{ maxHeight: '55%' }}>
       {/* Header */}
-      <div className="px-3.5 py-2.5 flex items-center justify-between shrink-0 border-b border-slate-200 bg-slate-50/80">
+      <div className="px-3.5 py-2.5 flex items-center justify-between shrink-0 border-b border-zinc-800 bg-zinc-900">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-700">Resources</h2>
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-100">Resources</h2>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
               {available} Available
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+          <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">
             {deployed} unit{deployed === 1 ? '' : 's'} currently deployed
           </p>
         </div>
       </div>
 
       {/* Unit list */}
-      <div className="overflow-y-auto flex-1 p-2 space-y-1.5 bg-slate-50/40">
+      <div className="overflow-y-auto flex-1 p-2 space-y-1.5 bg-zinc-950/50">
         {units.length === 0 ? (
-          <p className="text-[11px] font-medium px-3 py-6 text-center text-slate-400">
+          <p className="text-[11px] font-medium px-3 py-6 text-center text-zinc-500">
             Awaiting fleet status…
           </p>
         ) : (
@@ -65,21 +65,21 @@ function UnitRow({ unit }: { unit: Unit }) {
 
   return (
     <div
-      className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5 hover:border-slate-300 hover:shadow-xs transition-all shadow-none"
+      className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-2.5 hover:border-zinc-700 hover:bg-zinc-800/80 transition-all shadow-none"
       id={`unit-row-${unit.unitId}`}
     >
-      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">
         {iconText}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-bold text-slate-900">{unit.unitId}</p>
+          <p className="text-xs font-bold text-zinc-100">{unit.unitId}</p>
           <UnitStatusBadge status={unit.status} />
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-500 mt-0.5">
-          <span className="truncate font-medium">{unit.name}</span>
+        <div className="flex items-center justify-between text-[11px] text-zinc-400 mt-0.5">
+          <span className="truncate font-medium text-zinc-300">{unit.name}</span>
           {assignment && (
-            <span className="font-mono text-blue-600 ml-1 shrink-0 font-bold bg-blue-50 px-1 rounded">
+            <span className="font-mono text-blue-400 ml-1 shrink-0 font-bold bg-blue-500/20 px-1 rounded">
               → {assignment.incidentId}
             </span>
           )}

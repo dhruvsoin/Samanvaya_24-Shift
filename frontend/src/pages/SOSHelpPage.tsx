@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { api } from '@/api/client';
 import { useAppStore } from '@/store';
+import { useAuthStore } from '@/store/auth';
 import type { IncidentType, Language, Incident } from '@contracts/types';
 
 interface I18nDefinition {
@@ -428,6 +429,7 @@ export function SOSHelpPage() {
 
   const setIncident = useAppStore((s) => s.setIncident);
   const pushOpLog = useAppStore((s) => s.pushOpLog);
+  const { isAuthenticated, logout } = useAuthStore();
 
   const t = I18N[language] || I18N.en;
 
@@ -561,12 +563,33 @@ export function SOSHelpPage() {
               <Phone className="w-3.5 h-3.5" />
               <span>{t.header.call112}</span>
             </a>
-            <Link
-              to="/login"
-              className="text-xs text-slate-500 hover:text-slate-900 px-2 py-1 rounded font-medium"
-            >
-              {t.header.staffLogin}
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/command"
+                  className="text-xs text-slate-500 hover:text-slate-900 px-3 py-1.5 rounded-lg font-medium transition-colors border border-transparent hover:bg-slate-100"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/login';
+                  }}
+                  className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-[11px] text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all shadow-sm"
+                  title="Log out"
+                >
+                  <span className="whitespace-nowrap uppercase tracking-wider">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="text-xs text-slate-500 hover:text-slate-900 px-2 py-1 rounded font-medium"
+              >
+                {t.header.staffLogin}
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -589,7 +612,7 @@ export function SOSHelpPage() {
                 Emergency Flood Rescue & Public Evacuation
               </h2>
               <p className="text-xs text-slate-200 mt-1 max-w-md line-clamp-2">
-                Real-time geo-located rescue boats and medical teams deployed across Chennai sector zones.
+                Real-time geo-located rescue boats and medical teams deployed across Bengaluru sector zones.
               </p>
             </div>
           </div>
