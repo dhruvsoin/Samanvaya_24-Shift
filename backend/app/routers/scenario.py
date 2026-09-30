@@ -109,57 +109,43 @@ def rain_surge(body: RainSurgeRequest, _=Depends(require_operator)) -> dict:
             "observedAt": ts,
         },
     }
-    updated = state.update_system_status(patch)
-    bus.publish("status.updated", {"status": updated})
-    return updated
+    return state.update_system_status(patch, publish=True)
 
 
 @router.post("/outage")
 def outage(body: OutageRequest, _=Depends(require_operator)) -> dict:
     """
-    Zone comms outage.  Emits zone.comms_degraded or zone.comms_restored.
+    Zone comms outage. Emits zone.comms_degraded or zone.comms_restored and updates status.
     Per contracts: active=true triggers SMS fallback; active=false restores.
     """
-    zone = state.get_zone(body.zone_id)
+    zone = state.set_zone_comms(body.zone_id, body.active, publish=True)
     if zone is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Zone {body.zone_id} not found")
-    new_status = "degraded" if body.active else "ok"
-    state.update_zone_comms(body.zone_id, new_status)
-    zone["commsStatus"] = new_status
-
-    if body.active:
-        bus.publish("zone.comms_degraded", {
-            "zoneId": body.zone_id,
-            "fallbackChannel": "sms",
-        })
-    else:
-        bus.publish("zone.comms_restored", {"zoneId": body.zone_id})
-
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Zone {body.zone_id} not found",
+        )
     return zone
 
 
 @router.post("/time-warp")
 def time_warp(body: TimeWarpRequest, _=Depends(require_operator)) -> dict:
     """
-    Changes scenario clock speed.  Allowed: 1, 2, 5, 10.
+    Changes scenario clock speed. Allowed: 1, 2, 5, 10.
     Emits status.updated with new speed.
     """
     if body.speed not in (1, 2, 5, 10):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            detail="speed must be 1, 2, 5 or 10")
-    clock.set_speed(body.speed)
-    patch = {"scenarioTime": clock.now(), "speed": body.speed}
-    updated = state.update_system_status(patch)
-    bus.publish("status.updated", {"status": updated})
-    return updated
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="speed must be 1, 2, 5 or 10",
+        )
+    return state.set_speed(body.speed, publish=True)
 
 
 @router.post("/reset")
 def reset(_=Depends(require_operator)) -> dict:
     """
     Restore seed state: units, roads, zones all reset; incidents, plans,
-    approvals cleared.  Emits status.updated.
+    approvals cleared. Emits status.updated.
     """
     state.reset()
     clock.reset()

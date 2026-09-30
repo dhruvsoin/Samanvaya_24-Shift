@@ -113,7 +113,13 @@ class EventBus:
 
     # ── Publication ───────────────────────────────────────────────────
 
-    def publish(self, event_type: str, payload: dict[str, Any]) -> dict:
+    def publish(
+        self,
+        event_type: str,
+        payload: dict[str, Any],
+        ts: str | None = None,
+        event_id: str | None = None,
+    ) -> dict:
         """
         Builds the envelope (sequential id, scenario clock ts, type, payload),
         appends to the in-memory event log, and delivers to subscribers.
@@ -122,9 +128,9 @@ class EventBus:
         with self._lock:
             self._seq += 1
             envelope = {
-                "id": f"evt_{self._seq:03d}",
+                "id": event_id or f"evt_{self._seq:03d}",
                 "type": event_type,
-                "ts": clock.now(),
+                "ts": ts or clock.now(),
                 "payload": payload,
             }
             self._log.append(envelope)

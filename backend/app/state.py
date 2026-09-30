@@ -381,6 +381,7 @@ class AppState:
 
         if publish:
             bus.publish("incident.assessed", {"incident": incident_copy})
+            self.recompute_overall_severity(publish=True)
         return incident_copy
 
     def close_incident(
@@ -406,6 +407,7 @@ class AppState:
                 "closedAt": ts,
                 "outcome": outcome,
             })
+            self.recompute_overall_severity(publish=True)
         return incident_copy
 
     def set_road_status(
@@ -444,6 +446,7 @@ class AppState:
     ) -> dict | None:
         """
         Updates zone communications status and publishes zone.comms_degraded or zone.comms_restored.
+        Also recomputes commsOverall and publishes status.updated if changed.
         """
         with self._lock:
             zone = self.zones.get(zone_id)
@@ -451,8 +454,15 @@ class AppState:
                 return None
             zone["commsStatus"] = "degraded" if active_outage else "ok"
             zone_copy = copy.deepcopy(zone)
+            any_degraded = any(z.get("commsStatus") == "degraded" for z in self.zones.values())
+            new_comms = "degraded" if any_degraded else "ok"
+            comms_changed = (self.system_status.get("commsOverall") != new_comms)
+            if comms_changed:
+                self.system_status["commsOverall"] = new_comms
 
         if publish:
+            if comms_changed:
+                self.update_system_status({"commsOverall": new_comms}, publish=True)
             if active_outage:
                 bus.publish("zone.comms_degraded", {
                     "zoneId": zone_id,
@@ -579,6 +589,222 @@ class AppState:
         if publish:
             bus.publish("status.updated", {"status": status_copy})
         return status_copy
+
+    def recompute_overall_severity(self, publish: bool = True) -> str:
+        """
+        Recomputes overall system severity from all active, open incidents.
+        Publishes status.updated if overallSeverity changed.
+        """
+        rank_map = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+        inv_map = {1: "low", 2: "medium", 3: "high", 4: "critical"}
+        with self._lock:
+            open_incs = [
+                i for i in self.incidents.values()
+                if i.get("status") not in ("closed", "resolved") and i.get("severity")
+            ]
+            if not open_incs:
+                new_sev = "low"
+            else:
+                max_rank = max(rank_map.get(i["severity"], 1) for i in open_incs)
+                new_sev = inv_map.get(max_rank, "low")
+
+            changed = (self.system_status.get("overallSeverity") != new_sev)
+            if changed:
+                self.system_status["overallSeverity"] = new_sev
+
+        if changed and publish:
+            self.update_system_status({"overallSeverity": new_sev}, publish=True)
+        return new_sev
+
+    def set_rain(self, rain_info: dict, publish: bool = True) -> dict:
+        """
+        Updates rain data in system status and emits status.updated if changed.
+        """
+        with self._lock:
+            curr = self.system_status.get("rain", {})
+            changed = (
+                curr.get("intensity") != rain_info.get("intensity")
+                or curr.get("mmPerHour") != rain_info.get("mmPerHour")
+                or curr.get("freshness") != rain_info.get("freshness")
+            )
+            self.system_status["rain"] = copy.deepcopy(rain_info)
+
+        if changed and publish:
+            return self.update_system_status({"rain": rain_info}, publish=True)
+        return self.get_system_status()
+
+    def set_speed(self, speed: int, publish: bool = True) -> dict:
+        """
+        Sets clock speed, updates system status, and emits status.updated if changed.
+        """
+        clock.set_speed(speed)
+        with self._lock:
+            changed = (self.system_status.get("speed") != speed)
+            self.system_status["speed"] = speed
+
+        if changed and publish:
+            return self.update_system_status({"speed": speed}, publish=True)
+        return self.get_system_status()
+
+    def apply_event(self, event: dict) -> None:
+        """
+        Applies an event envelope to update the in-memory state store.
+        Used for replaying scripted demos and keeping state synced with events.
+        """
+        etype = event.get("type")
+        payload = event.get("payload", {})
+        ts = event.get("ts", clock.now())
+
+        with self._lock:
+            if etype == "incident.reported":
+                inc = payload.get("incident")
+                if inc:
+                    self.incidents[inc["incidentId"]] = copy.deepcopy(inc)
+
+            elif etype == "incident.assessed":
+                inc = payload.get("incident")
+                if inc:
+                    self.incidents[inc["incidentId"]] = copy.deepcopy(inc)
+
+            elif etype == "incident.updated":
+                inc = payload.get("incident")
+                if inc and inc.get("incidentId") in self.incidents:
+                    self.incidents[inc["incidentId"]].update(copy.deepcopy(inc))
+
+            elif etype == "incident.closed":
+                inc_id = payload.get("incidentId")
+                if inc_id in self.incidents:
+                    self.incidents[inc_id]["status"] = "closed"
+                    self.incidents[inc_id]["closedAt"] = payload.get("closedAt", ts)
+
+            elif etype == "plan.published":
+                plan = payload.get("plan")
+                if plan:
+                    p_copy = copy.deepcopy(plan)
+                    for i, p in enumerate(self.plans):
+                        if p["planId"] == p_copy["planId"]:
+                            self.plans[i] = p_copy
+                            break
+                    else:
+                        self.plans.append(p_copy)
+
+            elif etype == "approval.requested":
+                appr = payload.get("approval")
+                if appr:
+                    self.approvals[appr["approvalId"]] = copy.deepcopy(appr)
+
+            elif etype == "approval.resolved":
+                appr_id = payload.get("approvalId")
+                if appr_id in self.approvals:
+                    decision = payload.get("decision")
+                    self.approvals[appr_id]["status"] = "approved" if decision in ("approve", "choose_other") else "rejected"
+                    self.approvals[appr_id]["chosenOptionId"] = payload.get("chosenOptionId")
+                    self.approvals[appr_id]["decidedBy"] = payload.get("decidedBy", "operator")
+                    self.approvals[appr_id]["decidedAt"] = payload.get("decidedAt", ts)
+
+            elif etype == "assignment.sent":
+                asn = payload.get("assignment")
+                if asn:
+                    self.assignments[asn["assignmentId"]] = copy.deepcopy(asn)
+
+            elif etype == "assignment.accepted":
+                asn_id = payload.get("assignmentId")
+                if asn_id in self.assignments:
+                    self.assignments[asn_id]["status"] = "accepted"
+                    self.assignments[asn_id]["respondedAt"] = ts
+
+            elif etype == "assignment.declined":
+                asn_id = payload.get("assignmentId")
+                if asn_id in self.assignments:
+                    self.assignments[asn_id]["status"] = "declined"
+                    self.assignments[asn_id]["respondedAt"] = ts
+
+            elif etype == "assignment.timeout":
+                asn_id = payload.get("assignmentId")
+                if asn_id in self.assignments:
+                    self.assignments[asn_id]["status"] = "timed_out"
+
+            elif etype == "assignment.cancelled":
+                asn_id = payload.get("assignmentId")
+                if asn_id in self.assignments:
+                    self.assignments[asn_id]["status"] = "cancelled"
+
+            elif etype == "unit.status_changed":
+                u_id = payload.get("unitId")
+                if u_id in self.units:
+                    self.units[u_id]["status"] = payload.get("status")
+                    if payload.get("location"):
+                        self.units[u_id]["location"] = copy.deepcopy(payload["location"])
+
+            elif etype == "unit.unavailable":
+                u_id = payload.get("unitId")
+                if u_id in self.units:
+                    self.units[u_id]["status"] = "offline"
+
+            elif etype == "road.status_changed":
+                r_id = payload.get("roadId")
+                if r_id in self.roads:
+                    self.roads[r_id]["status"] = payload.get("status")
+
+            elif etype == "zone.comms_degraded":
+                z_id = payload.get("zoneId")
+                if z_id in self.zones:
+                    self.zones[z_id]["commsStatus"] = "degraded"
+                    self.system_status["commsOverall"] = "degraded"
+
+            elif etype == "zone.comms_restored":
+                z_id = payload.get("zoneId")
+                if z_id in self.zones:
+                    self.zones[z_id]["commsStatus"] = "ok"
+                    any_deg = any(z.get("commsStatus") == "degraded" for z in self.zones.values())
+                    self.system_status["commsOverall"] = "degraded" if any_deg else "ok"
+
+            elif etype == "status.updated":
+                st = payload.get("status")
+                if st:
+                    self.system_status.update(copy.deepcopy(st))
+
+            elif etype == "reporter.message_sent":
+                entry_id = payload.get("messageId", f"MSG-{len(self.comms_log) + 1}")
+                self.comms_log.append({
+                    "entryId": entry_id,
+                    "ts": ts,
+                    "direction": "out" if payload.get("from") == "system" else "in",
+                    "channel": payload.get("channel", "chat"),
+                    "recipient": {
+                        "kind": "reporter",
+                        "id": payload.get("sessionId", "reporter"),
+                    },
+                    "text": payload.get("text", ""),
+                    "delivery": "delivered",
+                    "zoneId": None,
+                })
+
+            elif etype == "comms.delivery_failed":
+                entry_id = payload.get("messageId", f"MSG-{len(self.comms_log) + 1}")
+                self.comms_log.append({
+                    "entryId": entry_id,
+                    "ts": ts,
+                    "direction": "out",
+                    "channel": payload.get("channel", "chat"),
+                    "recipient": payload.get("recipient", {"kind": "crew", "id": "unknown"}),
+                    "text": "Delivery failed",
+                    "delivery": "failed",
+                    "zoneId": payload.get("zoneId"),
+                })
+
+            elif etype == "comms.channel_switched":
+                entry_id = f"COM-{len(self.comms_log) + 1}"
+                self.comms_log.append({
+                    "entryId": entry_id,
+                    "ts": ts,
+                    "direction": "out",
+                    "channel": payload.get("to", "sms"),
+                    "recipient": payload.get("recipient", {"kind": "crew", "id": "unknown"}),
+                    "text": f"Channel switched: {payload.get('reason', '')}",
+                    "delivery": "sent",
+                    "zoneId": None,
+                })
 
     def append_comms_log(self, entry: dict) -> None:
         with self._lock:
