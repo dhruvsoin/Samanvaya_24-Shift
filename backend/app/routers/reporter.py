@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 
-from ..auth import create_token, require_reporter
+from ..auth import create_reporter_session, require_reporter
 from ..bus import bus
 from ..clock import clock
 from ..models import ReporterMessageRequest, ReporterSessionRequest
@@ -28,16 +28,7 @@ def create_session(body: ReporterSessionRequest) -> dict:
     Creates an anonymous reporter session.
     Returns: ReporterSession { sessionId, token, language }
     """
-    session_id = state.next_id("SES")
-    language = body.language or "en"
-    token = create_token(sub=session_id, role="reporter", unit_id=None)
-    session = {
-        "sessionId": session_id,
-        "token": token,
-        "language": language,
-    }
-    state.upsert_reporter_session(session)
-    return session
+    return create_reporter_session(body.language or "en")
 
 
 @router.post("/message")

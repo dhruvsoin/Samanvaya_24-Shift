@@ -11,9 +11,12 @@ Endpoints for Person 3:
     Swagger UI   → http://localhost:8000/docs
     OpenAPI JSON → http://localhost:8000/openapi.json
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
+from .auth import _decode
 from .config import settings
 from .routers import approvals, auth, crew, incidents, plan, reporter, reports, scenario, state, ws
 
@@ -28,8 +31,6 @@ app = FastAPI(
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────
-# Explicitly lists localhost:5173 (Vite) so P3 can hit the API in dev.
-# Controlled via CORS_ORIGINS env var in production.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -37,6 +38,63 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ── Middleware: Reviewer POST Guard ───────────────────────────────────
+# Reviewers are read-only and get 403 on every POST except /auth/demo
+@app.middleware("http")
+async def reviewer_post_guard(request: Request, call_next):
+    if request.method == "POST" and not request.url.path.startswith("/auth/demo"):
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header[7:].strip()
+            try:
+                claims = _decode(token)
+                if claims.get("role") == "reviewer":
+                    return JSONResponse(
+                        status_code=403,
+                        content={
+                            "error": {
+                                "code": "forbidden",
+                                "message": "Reviewers are read-only and cannot perform POST operations",
+                            }
+                        },
+                    )
+            except Exception:
+                pass
+    return await call_next(request)
+
+
+# ── Error Formatting ──────────────────────────────────────────────────
+# Shape per contracts/README.md §6 and types.ts: { "error": { "code": "...", "message": "..." } }
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    code_map = {
+        400: "bad_request",
+        401: "unauthorized",
+        403: "forbidden",
+        404: "not_found",
+        409: "conflict",
+        422: "validation_error",
+        500: "internal_error",
+    }
+    code = code_map.get(exc.status_code, "error")
+    if isinstance(exc.detail, dict) and "error" in exc.detail:
+        content = exc.detail
+    elif isinstance(exc.detail, dict) and "code" in exc.detail:
+        content = {"error": exc.detail}
+    else:
+        content = {"error": {"code": code, "message": str(exc.detail)}}
+    return JSONResponse(status_code=exc.status_code, content=content, headers=exc.headers)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={"error": {"code": "validation_error", "message": str(exc.errors())}},
+    )
+
 
 # ── Routers ───────────────────────────────────────────────────────────
 app.include_router(auth.router)
