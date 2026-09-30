@@ -725,3 +725,32 @@ class CrewProblemRequest(_Base):
     kind: Literal["road_blocked", "vehicle_stuck", "other"]
     note: Optional[str] = None             # optional
     client_request_id: str
+
+
+# ── Logs & Reports ───────────────────────────────────────────────────
+
+class DecisionLogEntry(_Base):
+    decision_id: str
+    ts: str
+    agent: Union[AgentName, Literal["operator"]]
+    decision: str
+    reason: str
+    incident_id: Optional[str] = None
+    plan_id: Optional[str] = None
+    approval_id: Optional[str] = None
+
+
+class CommsLogRecipient(_Base):
+    kind: Literal["reporter", "crew", "operator"]
+    id: str
+
+
+class CommsLogEntry(_Base):
+    entry_id: str
+    ts: str
+    direction: Literal["in", "out"]
+    channel: Channel
+    recipient: CommsLogRecipient
+    text: str
+    delivery: Literal["sent", "delivered", "failed"]
+    zone_id: Optional[str] = None
