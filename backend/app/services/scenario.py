@@ -248,6 +248,34 @@ def set_outage(zone_id: str, active: bool) -> dict[str, Any]:
     zone = state.set_zone_comms(zone_id, active, fallback_channel="sms", publish=True)
     if zone is None:
         raise ValueError(f"Zone {zone_id} not found")
+
+    if active:
+        from ..comms import dispatch
+        for unit in state.get_units():
+            u_zone = unit.get("zoneId") or (unit.get("location") or {}).get("zoneId")
+            if u_zone == zone_id:
+                dispatch(
+                    recipient=unit["unitId"],
+                    text=f"Advisory: network outage in {zone_id}. Switching channel to SMS fallback.",
+                    kind="crew",
+                    zone_id=zone_id,
+                )
+
+        notified_sessions: set[str] = set()
+        for inc in state.get_incidents():
+            if inc.get("status") not in ("closed", "resolved"):
+                loc = inc.get("location") or {}
+                if loc.get("zoneId") == zone_id:
+                    sess_id = inc.get("reporterSessionId")
+                    if sess_id and sess_id not in notified_sessions:
+                        notified_sessions.add(sess_id)
+                        dispatch(
+                            recipient=sess_id,
+                            text=f"Network outage detected in your area ({zone_id}). Updates will arrive via SMS.",
+                            kind="reporter",
+                            zone_id=zone_id,
+                        )
+
     return zone
 
 

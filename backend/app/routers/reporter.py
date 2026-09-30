@@ -47,6 +47,10 @@ def send_message(body: ReporterMessageRequest,
     message_id = state.next_id("MSG")
     ts = clock.now()
 
+    from ..comms import dispatch, get_channel_for_recipient, resolve_zone
+    zone_id = resolve_zone(body.session_id, "reporter")
+    channel = get_channel_for_recipient(body.session_id, "reporter", zone_id=zone_id)
+
     bus.publish("reporter.message_sent", {
         "sessionId": body.session_id,
         "messageId": message_id,
@@ -54,21 +58,31 @@ def send_message(body: ReporterMessageRequest,
         "text": body.text,
         "translatedText": None,   # P4-Comms will fill translation
         "language": body.language or session.get("language", "en"),
-        "channel": "chat",
+        "channel": channel,
     })
 
-    # Log it
+    # Log inbound
     log_id = state.next_id("LOG")
     state.append_comms_log({
         "entryId": log_id,
         "ts": ts,
         "direction": "in",
-        "channel": "chat",
+        "channel": channel,
         "recipient": {"kind": "operator", "id": "operator"},
         "text": body.text,
         "delivery": "sent",
-        "zoneId": None,
+        "zoneId": zone_id,
     })
+
+    # Dispatch system acknowledgment reply to reporter
+    lang = body.language or session.get("language", "en")
+    ack_text = "ನಿಮ್ಮ ಸಂದೇಶ ತಲುಪಿದೆ. ಸಹಾಯ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ." if lang == "kn" else "Your message has reached us. Help is being arranged."
+    dispatch(
+        recipient=body.session_id,
+        text=ack_text,
+        kind="reporter",
+        zone_id=zone_id,
+    )
 
     return {"messageId": message_id}
 
