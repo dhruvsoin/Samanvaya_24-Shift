@@ -28,7 +28,7 @@ def is_unit_eligible(unit: dict[str, Any], incident: dict[str, Any], config: dic
     eligibility_map = config.get("eligibility", {
         "medical": ["ambulance"],
         "flooded_home": ["boat", "rescue_team"],
-        "trapped": ["boat", "rescue_team"],
+        "trapped_person": ["boat", "rescue_team"],
         "stranded_vehicle": ["rescue_team", "boat"],
         "road_blocked": ["pump"],
     })
@@ -106,7 +106,7 @@ def compute_etas(
         eta_matrix[inc_id] = {}
 
         for unit in units:
-            unit_id = unit["id"]
+            unit_id = unit.get("unitId") or unit.get("id")
             if not is_unit_eligible(unit, inc, config):
                 continue
 

@@ -12,7 +12,7 @@
   },
   {
     "id": "INC-02",
-    "type": "trapped",
+    "type": "trapped_person",
     "severity": "high",
     "status": "reported",
     "location": { "lat": 10.005, "lon": 76.305 },

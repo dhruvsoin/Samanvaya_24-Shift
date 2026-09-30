@@ -35,7 +35,7 @@
   "eligibility": {
     "medical": ["ambulance"],
     "flooded_home": ["boat", "rescue_team"],
-    "trapped": ["boat", "rescue_team"],
+    "trapped_person": ["boat", "rescue_team"],
     "stranded_vehicle": ["rescue_team", "boat"],
     "road_blocked": ["pump"]
   },

@@ -65,7 +65,7 @@ def solve(
     for inc in incidents:
         inc_id = inc["id"]
         for unit in units:
-            u_id = unit["id"]
+            u_id = unit.get("unitId") or unit.get("id")
             if inc_id in etas and u_id in etas[inc_id]:
                 x[(u_id, inc_id)] = model.NewBoolVar(f"x_{u_id}_{inc_id}")
 
@@ -78,7 +78,7 @@ def solve(
 
     # Constraint 2: At most one incident per unit
     for unit in units:
-        u_id = unit["id"]
+        u_id = unit.get("unitId") or unit.get("id")
         unit_vars = [x[(u_id, inc_id)] for inc_id in etas if (u_id, inc_id) in x]
         if unit_vars:
             model.Add(sum(unit_vars) <= 1)
@@ -166,7 +166,6 @@ def solve(
 
                 unserved.append({
                     "incidentId": inc_id,
-                    "severity": severity,
                     "reason": reason,
                 })
     else:
@@ -174,7 +173,6 @@ def solve(
         for inc in incidents:
             unserved.append({
                 "incidentId": inc["id"],
-                "severity": inc.get("severity", "medium"),
                 "reason": "Solver timeout or infeasible constraints",
             })
 

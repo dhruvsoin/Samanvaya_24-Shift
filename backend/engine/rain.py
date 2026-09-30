@@ -50,8 +50,8 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
                     edge_data["status"] = new_status
                     changes.append({
                         "roadId": target_road_id,
-                        "oldStatus": current_status,
-                        "newStatus": new_status,
+                        "status": new_status,
+                        "previousStatus": current_status,
                         "reason": reason,
                     })
             else:
@@ -61,8 +61,8 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
                     edge_data["status"] = default_status
                     changes.append({
                         "roadId": target_road_id,
-                        "oldStatus": current_status,
-                        "newStatus": default_status,
+                        "status": default_status,
+                        "previousStatus": current_status,
                         "reason": f"Conditions cleared; rain reduced to {intensity}",
                     })
 

@@ -45,8 +45,8 @@ def diff_plans(
     all_incident_ids = sorted(list(set(prev_entries.keys()) | set(new_entries.keys())))
 
     # Extract closed and slowed roads for route diagnostics
-    closed_roads = {rc["roadId"]: rc for rc in road_changes if rc.get("newStatus") == "closed"}
-    slowed_roads = {rc["roadId"]: rc for rc in road_changes if rc.get("newStatus") == "slow"}
+    closed_roads = {rc["roadId"]: rc for rc in road_changes if rc.get("status") == "closed"}
+    slowed_roads = {rc["roadId"]: rc for rc in road_changes if rc.get("status") == "slow"}
 
     changes: list[dict[str, Any]] = []
 

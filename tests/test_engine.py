@@ -70,8 +70,8 @@ def test_acceptance_criteria_2_rain_rerouting_and_diff(seed_data):
 
     # Phase 2: Heavy Rain
     road_changes = apply_rain(graph, "heavy")
-    assert any(rc["roadId"] == "ROAD-04" and rc["newStatus"] == "closed" for rc in road_changes)
-    assert any(rc["roadId"] == "ROAD-05" and rc["newStatus"] == "slow" for rc in road_changes)
+    assert any(rc["roadId"] == "ROAD-04" and rc["status"] == "closed" for rc in road_changes)
+    assert any(rc["roadId"] == "ROAD-05" and rc["status"] == "slow" for rc in road_changes)
 
     etas_002 = compute_etas(graph, units, incidents, rain="heavy")
     plan_002 = solve(etas_002, incidents, units, previous_plan=plan_001)
