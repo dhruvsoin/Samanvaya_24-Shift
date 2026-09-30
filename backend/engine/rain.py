@@ -52,9 +52,6 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
                         "status": new_status,
                         "previousStatus": current_status,
                         "reason": reason,
-                        # Aliases for backward compatibility
-                        "oldStatus": current_status,
-                        "newStatus": new_status,
                     })
             else:
                 default_status = rule.get("defaultStatus", "open")
@@ -65,8 +62,6 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
                         "status": default_status,
                         "previousStatus": current_status,
                         "reason": f"Rain cleared: restored to {default_status}",
-                        "oldStatus": current_status,
-                        "newStatus": default_status,
                     })
 
     return changes
