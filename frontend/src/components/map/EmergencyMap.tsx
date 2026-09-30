@@ -33,124 +33,113 @@ import type { Unit } from '@contracts/types';
 
 // Basemap Tile Providers
 const TILE_PROVIDERS = {
+  light: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20,
+  },
   dark: {
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: 'abcd',
     maxZoom: 20,
   },
-  light: {
-    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    subdomains: 'abc',
-    maxZoom: 19,
-  },
 };
 
-// Tactical High-Contrast Markers
+// Enterprise Clean Markers
 function createIncidentIcon(severity: string | null, peopleAffected: number = 1): L.DivIcon {
   const isCritical = severity === 'critical';
   const colors: Record<string, { main: string; bg: string; border: string }> = {
-    critical: { main: '#f43f5e', bg: '#881337', border: '#fda4af' },
-    high:     { main: '#fb923c', bg: '#7c2d12', border: '#fdba74' },
-    medium:   { main: '#facc15', bg: '#713f12', border: '#fef08a' },
-    low:      { main: '#34d399', bg: '#064e3b', border: '#a7f3d0' },
+    critical: { main: '#BE123C', bg: '#FFF1F2', border: '#FDA4AF' },
+    high:     { main: '#B45309', bg: '#FFFBEB', border: '#FCD34D' },
+    medium:   { main: '#1D4ED8', bg: '#EFF6FF', border: '#93C5FD' },
+    low:      { main: '#047857', bg: '#ECFDF5', border: '#6EE7B7' },
   };
-  const colorCfg = severity && colors[severity] ? colors[severity] : { main: '#94a3b8', bg: '#1e293b', border: '#cbd5e1' };
-  const iconSymbol = severity && SEVERITY_CONFIG[severity as keyof typeof SEVERITY_CONFIG]?.icon || '⚠️';
+  const colorCfg = severity && colors[severity] ? colors[severity] : { main: '#475569', bg: '#F8FAFC', border: '#CBD5E1' };
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:40px;height:40px;">
-        ${isCritical ? '<div class="marker-pulse-critical" style="position:absolute;inset:-4px;border-radius:50%;"></div>' : ''}
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:32px;height:32px;cursor:pointer;">
+        ${isCritical ? '<div style="position:absolute;inset:-3px;border-radius:50%;border:2px solid #BE123C;animation:ping 2s cubic-bezier(0,0,0.2,1) infinite;opacity:0.4;"></div>' : ''}
         <div style="
-          width:36px;height:36px;border-radius:50%;
-          background:${colorCfg.bg};border:2.5px solid ${colorCfg.border};
+          width:26px;height:26px;border-radius:50%;
+          background:#FFFFFF;border:2px solid ${colorCfg.main};
           display:flex;align-items:center;justify-content:center;
-          font-size:16px;cursor:pointer;
-          box-shadow:0 0 14px ${colorCfg.main}aa, 0 4px 10px rgba(0,0,0,0.8);
+          box-shadow:0 2px 8px rgba(15,23,42,0.18);
           position:relative;z-index:2;
         ">
-          ${iconSymbol}
+          <div style="width:8px;height:8px;border-radius:50%;background:${colorCfg.main};"></div>
           <div style="
             position:absolute;bottom:-4px;right:-4px;
-            background:#0f172a;border:1px solid ${colorCfg.border};
-            color:#fff;border-radius:8px;font-size:9px;font-weight:800;
-            padding:0.5px 3.5px;font-family:monospace;box-shadow:0 1px 3px rgba(0,0,0,0.7);
-          ">👥${peopleAffected}</div>
+            background:${colorCfg.bg};border:1px solid ${colorCfg.border};
+            color:${colorCfg.main};border-radius:9999px;font-size:9px;font-weight:700;
+            padding:0px 4px;font-family:Inter,system-ui,sans-serif;
+          ">${peopleAffected}</div>
         </div>
       </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
   });
 }
 
 function createUnitIcon(unit: Unit): L.DivIcon {
-  const emoji = UNIT_TYPE_ICONS[unit.type] ?? '🚗';
-  const statusColors: Record<string, { border: string; glow: string }> = {
-    available:   { border: '#34d399', glow: '#10b981' },
-    en_route:    { border: '#60a5fa', glow: '#3b82f6' },
-    on_scene:    { border: '#fbbf24', glow: '#f59e0b' },
-    unreachable: { border: '#f87171', glow: '#ef4444' },
-    offline:     { border: '#64748b', glow: '#475569' },
-    assigned:    { border: '#a78bfa', glow: '#8b5cf6' },
+  const statusColors: Record<string, { dot: string; border: string; bg: string }> = {
+    available:   { dot: '#059669', border: '#A7F3D0', bg: '#ECFDF5' },
+    en_route:    { dot: '#2563EB', border: '#BFDBFE', bg: '#EFF6FF' },
+    on_scene:    { dot: '#D97706', border: '#FDE68A', bg: '#FFFBEB' },
+    unreachable: { dot: '#E11D48', border: '#FECDD3', bg: '#FFF1F2' },
+    offline:     { dot: '#64748B', border: '#E2E8F0', bg: '#F8FAFC' },
+    assigned:    { dot: '#4F46E5', border: '#C7D2FE', bg: '#EEF2FF' },
   };
-  const color = statusColors[unit.status] ?? { border: '#94a3b8', glow: '#64748b' };
+  const color = statusColors[unit.status] ?? { dot: '#64748B', border: '#E2E8F0', bg: '#F8FAFC' };
 
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        position:relative;display:flex;flex-direction:column;align-items:center;
-        cursor:pointer;
+        display:inline-flex;align-items:center;gap:4px;
+        background:#FFFFFF;border:1px solid #CBD5E1;
+        padding:2px 6px;border-radius:4px;cursor:pointer;
+        box-shadow:0 2px 6px rgba(15,23,42,0.12);white-space:nowrap;
       ">
-        <div style="
-          width:34px;height:34px;border-radius:8px;
-          background:#0f172a;border:2.5px solid ${color.border};
-          display:flex;align-items:center;justify-content:center;
-          font-size:16px;box-shadow:0 0 12px ${color.glow}88, 0 4px 8px rgba(0,0,0,0.8);
-        ">
-          ${emoji}
-        </div>
-        <div style="
-          margin-top:2px;background:#020617;border:1px solid ${color.border};
-          color:#f1f5f9;font-size:9px;font-weight:800;font-family:monospace;
-          padding:0px 4px;border-radius:4px;white-space:nowrap;
-          box-shadow:0 2px 4px rgba(0,0,0,0.8);
-        ">
-          ${unit.unitId}
-        </div>
+        <span style="width:6px;height:6px;border-radius:50%;background:${color.dot};display:inline-block;flex-shrink:0;"></span>
+        <span style="font-family:Inter,system-ui,sans-serif;font-size:10px;font-weight:600;color:#0F172A;">${unit.unitId}</span>
       </div>
     `,
-    iconSize: [36, 48],
-    iconAnchor: [18, 24],
+    iconSize: [60, 22],
+    iconAnchor: [30, 11],
   });
 }
 
 function createFacilityIcon(type: string): L.DivIcon {
-  const icons: Record<string, string> = { shelter: '🏫', hospital: '🏥', depot: '🏭' };
-  const icon = icons[type] ?? '🏢';
+  const labels: Record<string, string> = { shelter: 'SHELTER', hospital: 'HOSPITAL', depot: 'DEPOT' };
+  const label = labels[type] ?? 'FACILITY';
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        width:30px;height:30px;border-radius:6px;
-        background:#090d16;border:2px solid #38bdf8;
-        display:flex;align-items:center;justify-content:center;
-        font-size:14px;box-shadow:0 0 10px rgba(56,189,248,0.5);
-      ">${icon}</div>
+        display:inline-flex;align-items:center;gap:3px;
+        background:#FFFFFF;border:1px solid #93C5FD;
+        padding:2px 5px;border-radius:4px;
+        color:#1D4ED8;font-family:Inter,system-ui,sans-serif;font-size:9px;font-weight:600;
+        box-shadow:0 2px 4px rgba(15,23,42,0.1);
+      ">
+        <span style="width:4px;height:4px;border-radius:50%;background:#2563EB;"></span>
+        <span>${label}</span>
+      </div>
     `,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+    iconSize: [60, 20],
+    iconAnchor: [30, 10],
   });
 }
 
 const ROAD_COLORS: Record<string, string> = {
-  open: '#10b981',   // Neon Emerald
-  slow: '#f59e0b',   // Bright Amber
-  closed: '#ef4444', // Neon Red
+  open: '#059669',   // Clean Forest Green
+  slow: '#D97706',   // Clean Amber
+  closed: '#DC2626', // Clean Red
 };
 
 interface Props {
@@ -163,7 +152,7 @@ export function EmergencyMap({ onSelectIncident }: Props) {
   const tileLayerRef = useRef<L.TileLayer | null>(null);
 
   // Basemap & Layer controls
-  const [mapMode, setMapMode] = useState<'dark' | 'light'>('dark');
+  const [mapMode, setMapMode] = useState<'dark' | 'light'>('light');
   const [visibleLayers, setVisibleLayers] = useState({
     incidents: true,
     units: true,
@@ -204,11 +193,11 @@ export function EmergencyMap({ onSelectIncident }: Props) {
       zoomControl: false, // We use custom position / styled controls
     });
 
-    // Custom dark zoom control in top-left
+    // Custom zoom control in top-left
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
-    // Initial tile layer (CartoDB Dark Matter)
-    const provider = TILE_PROVIDERS.dark;
+    // Initial tile layer (CartoDB Positron Light)
+    const provider = TILE_PROVIDERS.light;
     const tiles = L.tileLayer(provider.url, {
       attribution: provider.attribution,
       subdomains: provider.subdomains,
@@ -310,18 +299,18 @@ export function EmergencyMap({ onSelectIncident }: Props) {
         const marker = layers.incidents[incident.incidentId];
         const icon = createIncidentIcon(incident.severity, incident.peopleAffected);
         const popupContent = `
-          <div style="font-family:Inter,sans-serif;min-width:200px;padding:4px 0;">
-            <div style="display:flex;align-items:center;justify-content:between;margin-bottom:6px;">
-              <span style="font-weight:800;color:#f8fafc;font-size:13px;letter-spacing:0.5px;">${incident.incidentId}</span>
-              <span style="font-size:10px;font-weight:700;color:#f43f5e;background:#88133744;border:1px solid #f43f5e55;padding:1px 6px;border-radius:4px;text-transform:uppercase;">
-                ${incident.severity ?? 'Pending'}
+          <div style="font-family:Inter,system-ui,sans-serif;min-width:210px;padding:4px 0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-weight:700;color:#0F172A;font-size:13px;">${incident.incidentId}</span>
+              <span style="font-size:10px;font-weight:600;color:#BE123C;background:#FFF1F2;border:1px solid #FECDD3;padding:1px 6px;border-radius:4px;text-transform:uppercase;">
+                ${incident.severity ?? 'Assessing'}
               </span>
             </div>
-            <p style="color:#e2e8f0;margin:0 0 4px;font-size:12px;font-weight:600;">${incident.summary || 'Emergency Reported'}</p>
-            <p style="color:#94a3b8;margin:0 0 4px;font-size:11px;">📍 ${incident.location.label || ''}</p>
-            <div style="display:flex;align-items:center;gap:12px;margin-top:6px;font-size:11px;color:#38bdf8;font-weight:600;">
+            <p style="color:#1E293B;margin:0 0 4px;font-size:12px;font-weight:500;">${incident.summary || 'Emergency Reported'}</p>
+            <p style="color:#64748B;margin:0 0 6px;font-size:11px;">📍 ${incident.location.label || ''}</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:6px;font-size:11px;color:#2563EB;font-weight:600;border-top:1px solid #F1F5F9;padding-top:4px;">
               <span>👥 ${incident.peopleAffected} People</span>
-              <span>⚡ Status: ${incident.status}</span>
+              <span>Status: ${incident.status}</span>
             </div>
           </div>`;
 
@@ -363,12 +352,12 @@ export function EmergencyMap({ onSelectIncident }: Props) {
         const marker = layers.units[unit.unitId];
         const icon = createUnitIcon(unit);
         const popupContent = `
-          <div style="font-family:Inter,sans-serif;padding:4px 0;">
-            <p style="font-weight:800;color:#f8fafc;margin:0 0 2px;font-size:13px;">${unit.unitId} · ${unit.name}</p>
-            <p style="color:#38bdf8;margin:0;font-size:11px;font-weight:700;text-transform:uppercase;">
+          <div style="font-family:Inter,system-ui,sans-serif;padding:4px 0;">
+            <p style="font-weight:700;color:#0F172A;margin:0 0 2px;font-size:13px;">${unit.unitId} · ${unit.name}</p>
+            <p style="color:#2563EB;margin:0;font-size:11px;font-weight:600;text-transform:uppercase;">
               STATUS: ${unit.status.replace('_', ' ')}
             </p>
-            ${unit.assignedIncidentId ? `<p style="color:#fbbf24;margin:6px 0 0;font-size:11px;font-weight:600;">→ Assigned to ${unit.assignedIncidentId}</p>` : ''}
+            ${unit.assignedIncidentId ? `<p style="color:#D97706;margin:6px 0 0;font-size:11px;font-weight:500;">→ Assigned to ${unit.assignedIncidentId}</p>` : ''}
           </div>`;
 
         if (marker) {
@@ -407,24 +396,24 @@ export function EmergencyMap({ onSelectIncident }: Props) {
 
         const isClosed = road.status === 'closed';
         const isSlow = road.status === 'slow';
-        const color = ROAD_COLORS[road.status] ?? '#10b981';
-        const weight = isClosed ? 6 : isSlow ? 5 : 4;
-        const dashArray = isClosed ? '10,8' : undefined;
+        const color = ROAD_COLORS[road.status] ?? '#059669';
+        const weight = isClosed ? 5 : isSlow ? 4 : 3.5;
+        const dashArray = isClosed ? '8,6' : undefined;
 
         const popup = `
-          <div style="font-family:Inter,sans-serif;padding:3px 0;">
-            <p style="font-weight:800;color:#f8fafc;margin:0 0 2px;font-size:12px;">${road.name}</p>
-            <p style="color:${color};margin:0;font-size:11px;font-weight:800;text-transform:uppercase;">
-              ROAD ${road.status} ${isClosed ? '⛔ NO ENTRY' : ''}
+          <div style="font-family:Inter,system-ui,sans-serif;padding:3px 0;">
+            <p style="font-weight:700;color:#0F172A;margin:0 0 2px;font-size:12px;">${road.name}</p>
+            <p style="color:${color};margin:0;font-size:11px;font-weight:600;text-transform:uppercase;">
+              ROAD ${road.status} ${isClosed ? '(Closed to traffic)' : ''}
             </p>
           </div>`;
 
         if (layers.roads[road.roadId]) {
-          layers.roads[road.roadId].setStyle({ color, weight, dashArray, opacity: 0.95 });
+          layers.roads[road.roadId].setStyle({ color, weight, dashArray, opacity: 0.9 });
           layers.roads[road.roadId].setPopupContent(popup);
         } else {
           const coords = road.geometry.map(([lat, lng]) => [lat, lng] as L.LatLngTuple);
-          const line = L.polyline(coords, { color, weight, opacity: 0.95, dashArray })
+          const line = L.polyline(coords, { color, weight, opacity: 0.9, dashArray })
             .addTo(map)
             .bindPopup(popup);
           layers.roads[road.roadId] = line;
@@ -453,13 +442,13 @@ export function EmergencyMap({ onSelectIncident }: Props) {
       if (!Array.isArray(zone.polygon) || zone.polygon.length === 0) continue;
 
       const isDegraded = zone.commsStatus === 'degraded';
-      const color = isDegraded ? '#f59e0b' : '#38bdf8';
-      const fillOpacity = isDegraded ? 0.16 : 0.05;
+      const color = isDegraded ? '#D97706' : '#2563EB';
+      const fillOpacity = isDegraded ? 0.12 : 0.05;
       const popup = `
-        <div style="font-family:Inter,sans-serif;padding:4px 0;">
-          <p style="font-weight:800;color:#f8fafc;margin:0 0 2px;font-size:12px;">${zone.name}</p>
-          <p style="color:${isDegraded ? '#fbbf24' : '#34d399'};margin:0;font-size:11px;font-weight:800;">
-            ${isDegraded ? '⚠️ COMMS DEGRADED · SMS MESH ACTIVE' : '✅ COMMS OPERATIONAL'}
+        <div style="font-family:Inter,system-ui,sans-serif;padding:4px 0;">
+          <p style="font-weight:700;color:#0F172A;margin:0 0 2px;font-size:12px;">${zone.name}</p>
+          <p style="color:${isDegraded ? '#B45309' : '#047857'};margin:0;font-size:11px;font-weight:600;">
+            ${isDegraded ? 'Communications degraded · SMS fallback' : 'Communications normal'}
           </p>
         </div>`;
 
@@ -473,7 +462,7 @@ export function EmergencyMap({ onSelectIncident }: Props) {
           fillColor: color,
           fillOpacity,
           weight: 2,
-          dashArray: '8,6',
+          dashArray: '6,6',
         }).addTo(map).bindPopup(popup);
         layers.zones[zone.zoneId] = polygon;
       }
@@ -502,9 +491,9 @@ export function EmergencyMap({ onSelectIncident }: Props) {
 
       const icon = createFacilityIcon(fac.type);
       const popup = `
-        <div style="font-family:Inter,sans-serif;padding:4px 0;">
-          <p style="font-weight:800;color:#f8fafc;margin:0 0 2px;font-size:12px;">${fac.name}</p>
-          <p style="color:#94a3b8;margin:0;font-size:11px;">${fac.type.toUpperCase()} · ${fac.capacity ? `${fac.capacity} Capacity` : 'Active Hub'}</p>
+        <div style="font-family:Inter,system-ui,sans-serif;padding:4px 0;">
+          <p style="font-weight:700;color:#0F172A;margin:0 0 2px;font-size:12px;">${fac.name}</p>
+          <p style="color:#64748B;margin:0;font-size:11px;">${fac.type.toUpperCase()} · ${fac.capacity ? `${fac.capacity} Capacity` : 'Active Facility'}</p>
         </div>`;
       layers.facilities[fac.facilityId] = L.marker([fac.location.lat, fac.location.lng], { icon })
         .addTo(map)
@@ -516,159 +505,155 @@ export function EmergencyMap({ onSelectIncident }: Props) {
   const activeUnitsCount = Object.keys(unitsById).length;
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-slate-950">
+    <div className="relative h-full w-full overflow-hidden bg-slate-100">
       {/* Map DOM Canvas */}
       <div ref={containerRef} className="absolute inset-0" />
 
-      {/* ── Top Floating Tactical HUD & Layer Toolbar ── */}
-      <div className="absolute top-3 right-3 z-[1000] flex items-center gap-2">
-        {/* Recenter View Button */}
-        <button
-          onClick={handleRecenter}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition active:scale-95 shadow-lg backdrop-blur-md"
-          style={{
-            background: 'hsl(222,47%,10%,0.92)',
-            border: '1px solid hsl(217,33%,22%)',
-          }}
-          title="Auto-fit all active emergency incidents and responder units"
-        >
-          <Crosshair className="w-3.5 h-3.5 text-blue-400" />
-          <span>Recenter</span>
-        </button>
+      {/* ── Top-Left Sector HUD Badge ── */}
+      <div className="absolute top-3 left-14 z-[1000] hidden md:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs shadow-md backdrop-blur-md">
+        <div className="flex items-center gap-1.5 font-semibold text-zinc-100">
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          <span>Sector 4</span>
+        </div>
+        <div className="h-3.5 w-px bg-zinc-700" />
+        <span className="text-[11px] text-zinc-400 font-medium whitespace-nowrap">Koramangala / Bellandur</span>
+        <div className="h-3.5 w-px bg-zinc-700" />
+        <div className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+          <span>Surge: +1.4m</span>
+        </div>
+      </div>
 
-        {/* Dark / Light Basemap Mode Toggle */}
-        <button
-          onClick={() => setMapMode(mapMode === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition active:scale-95 shadow-lg backdrop-blur-md"
-          style={{
-            background: 'hsl(222,47%,10%,0.92)',
-            border: '1px solid hsl(217,33%,22%)',
-          }}
-          title={mapMode === 'dark' ? 'Switch to Standard Daylight map' : 'Switch to Tactical Dark Matter map'}
-        >
-          {mapMode === 'dark' ? (
-            <>
-              <Sun className="w-3.5 h-3.5 text-amber-400" />
-              <span>Street View</span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-3.5 h-3.5 text-blue-400" />
-              <span>Dark Tactical</span>
-            </>
-          )}
-        </button>
+      {/* ── Top Floating Toolbar (Right Stacked) ── */}
+      <div className="absolute top-3 right-3 z-[1000] flex flex-col items-end gap-2">
+        {/* Recenter & Map Mode Row */}
+        <div className="flex items-center gap-2">
+          {/* Recenter View Button */}
+          <button
+            onClick={handleRecenter}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition shadow-sm cursor-pointer backdrop-blur-md"
+            title="Auto-fit all active emergency incidents and responder units"
+          >
+            <Crosshair className="w-3.5 h-3.5 text-blue-500" />
+            <span>Recenter</span>
+          </button>
+
+          {/* Map Mode Toggle */}
+          <button
+            onClick={() => setMapMode(mapMode === 'dark' ? 'light' : 'dark')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-zinc-300 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 transition shadow-sm cursor-pointer backdrop-blur-md"
+            title={mapMode === 'light' ? 'Switch to Dark Mode map' : 'Switch to Light Mode map'}
+          >
+            {mapMode === 'light' ? (
+              <>
+                <Moon className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Dark Map</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-500" />
+                <span>Light Map</span>
+              </>
+            )}
+          </button>
+        </div>
 
         {/* Layer Visibility Toggles */}
-        <div
-          className="flex items-center gap-1 p-1 rounded-xl shadow-lg backdrop-blur-md"
-          style={{
-            background: 'hsl(222,47%,10%,0.92)',
-            border: '1px solid hsl(217,33%,22%)',
-          }}
-        >
+        <div className="flex items-center gap-1 p-1 rounded-xl shadow-sm bg-zinc-900 border border-zinc-800 backdrop-blur-md">
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, incidents: !p.incidents }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.incidents
-                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'bg-rose-500 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Incidents"
           >
-            <Flame className="w-3 h-3 text-rose-400" />
-            <span>{activeIncidentsCount}</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.incidents ? 'bg-white' : 'bg-rose-600'}`} />
+            <span>Incidents ({activeIncidentsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, units: !p.units }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.units
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Units"
           >
-            <Car className="w-3 h-3 text-blue-400" />
-            <span>{activeUnitsCount}</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.units ? 'bg-white' : 'bg-blue-600'}`} />
+            <span>Fleet ({activeUnitsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, roads: !p.roads }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.roads
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Road Network"
           >
-            <span>🛣️</span>
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.roads ? 'bg-white' : 'bg-emerald-600'}`} />
+            <span>Roads</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, zones: !p.zones }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.zones
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Hazard Zones"
           >
-            <AlertTriangle className="w-3 h-3 text-amber-400" />
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.zones ? 'bg-white' : 'bg-amber-600'}`} />
+            <span>Zones</span>
           </button>
         </div>
       </div>
 
-      {/* ── High-Contrast Legend (Bottom-Left) ── */}
+      {/* ── Legend (Bottom-Left) ── */}
       <div
-        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-2xl text-xs shadow-2xl backdrop-blur-md transition-all"
-        style={{
-          background: 'hsl(222,47%,8%,0.94)',
-          border: '1px solid hsl(217,33%,22%)',
-          maxWidth: '220px',
-        }}
+        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-xl text-xs shadow-md bg-zinc-900 border border-zinc-800 backdrop-blur-md"
+        style={{ maxWidth: '220px' }}
       >
-        <p className="font-extrabold text-white text-[11px] uppercase tracking-wider mb-2 flex items-center justify-between">
-          <span>TACTICAL MAP INTEL</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">Tactical Legend</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        </div>
 
-        <div className="space-y-1.5 text-[11px]">
+        <div className="space-y-1.5 text-[10px] font-sans">
           <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-rose-600 border border-rose-300 shadow-[0_0_8px_#f43f5e] shrink-0" />
-            <span className="text-slate-200 font-semibold">Critical SOS Emergency</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-amber-300 shrink-0" />
-            <span className="text-slate-300">High / Medium Incident</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-rose-300 shrink-0 shadow-xs" />
+            <span className="text-zinc-300 font-medium">Critical / SOS Emergency</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-base leading-none">🚑⛵</span>
-            <span className="text-slate-300">Rescue Units (Ambulance / Boat)</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-300 shrink-0 shadow-xs" />
+            <span className="text-zinc-300 font-medium">High / Advisory Incident</span>
           </div>
 
-          <div className="pt-1 border-t border-slate-800 space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 rounded bg-emerald-500 shadow-[0_0_6px_#10b981]" />
-              <span className="text-emerald-400 font-bold text-[10px]">ROAD OPEN (SAFE)</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 rounded bg-amber-500" />
-              <span className="text-amber-400 font-bold text-[10px]">ROAD SLOW / WATERLOGGED</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1.5 rounded bg-rose-600 shadow-[0_0_8px_#ef4444]" style={{ border: '1px dashed #fff' }} />
-              <span className="text-rose-400 font-bold text-[10px]">ROAD CLOSED (SUBMERGED)</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="px-1.5 py-0.5 rounded bg-blue-900 border border-blue-800 text-blue-200 font-mono text-[9px] font-bold">UNIT</span>
+            <span className="text-zinc-300 font-medium">Field Responder</span>
           </div>
 
-          <div className="pt-1 border-t border-slate-800 flex items-center gap-2">
-            <div className="w-4 h-3 rounded bg-amber-500/20 border border-dashed border-amber-400" />
-            <span className="text-amber-300 font-medium text-[10px]">Comms Degraded Sector</span>
+          <div className="pt-2 border-t border-zinc-800 space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-1 rounded-full bg-emerald-500" />
+              <span className="text-emerald-700 font-semibold">Road Open</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-1 rounded-full bg-amber-500" />
+              <span className="text-amber-700 font-semibold">Road Slow (Flooded)</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-1 rounded-full bg-rose-600" />
+              <span className="text-rose-700 font-semibold">Road Impassable</span>
+            </div>
           </div>
         </div>
       </div>

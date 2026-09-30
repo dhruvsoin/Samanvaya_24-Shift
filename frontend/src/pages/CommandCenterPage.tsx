@@ -40,32 +40,38 @@ export function CommandCenterPage() {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[#09090b] text-slate-100 select-none">
       {/* Pending approval banner */}
       {pendingApprovals > 0 && !isReadOnly && (
         <div
-          className="flex items-center justify-between px-4 py-2 text-sm font-medium animate-fade-in shrink-0"
-          style={{ background: 'hsl(48,96%,53%,0.12)', borderBottom: '1px solid hsl(48,96%,53%,0.25)', color: 'hsl(48,96%,65%)' }}
+          className="flex items-center justify-between px-4 py-2 text-xs font-medium shrink-0 bg-amber-950/40 border-b border-amber-900/50 text-amber-200"
         >
-          <span>⚡ {pendingApprovals} decision{pendingApprovals > 1 ? 's' : ''} need{pendingApprovals === 1 ? 's' : ''} your approval</span>
-          <a href="/command/approvals" className="font-bold underline-offset-2 underline">Review now →</a>
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span>Action Required: {pendingApprovals} operational decision{pendingApprovals > 1 ? 's' : ''} awaiting operator sign-off</span>
+          </span>
+          <a href="/command/approvals" className="font-semibold text-amber-400 underline hover:text-amber-300 transition-colors">
+            Review Decisions →
+          </a>
         </div>
       )}
 
       {/* Plan trigger notification */}
       {currentPlan?.trigger && (
         <div
-          className="px-4 py-1.5 text-xs shrink-0"
-          style={{ background: 'hsl(217,91%,60%,0.06)', borderBottom: '1px solid hsl(217,91%,60%,0.1)', color: 'hsl(217,91%,65%)' }}
+          className="px-4 py-1.5 text-xs shrink-0 bg-blue-950/40 border-b border-blue-900/50 text-blue-200 flex items-center justify-between"
         >
-          <span className="font-mono font-medium">[{currentPlan.planId}]</span> {currentPlan.trigger}
+          <span>
+            <span className="font-semibold text-blue-400">[{currentPlan.planId}]</span> {currentPlan.trigger}
+          </span>
+          <span className="text-[10px] font-medium text-blue-400 uppercase tracking-wider">Solver Active</span>
         </div>
       )}
 
       {/* Main three-column layout */}
-      <div className="flex flex-1 overflow-hidden gap-px" style={{ background: 'hsl(217,33%,18%)' }}>
-        {/* LEFT: Incident Queue */}
-        <div className="w-72 shrink-0 flex flex-col overflow-hidden" style={{ background: 'hsl(222,47%,6%)' }}>
+      <div className="flex flex-1 overflow-hidden divide-x divide-zinc-800">
+        {/* LEFT: Incident Queue (320px) */}
+        <div className="w-80 shrink-0 flex flex-col overflow-hidden bg-zinc-950">
           <IncidentQueue
             isReadOnly={isReadOnly}
             onSelectIncident={setSelectedIncidentId}
@@ -74,17 +80,16 @@ export function CommandCenterPage() {
           />
         </div>
 
-        {/* CENTER: Map — shrinks slightly when drawer is open to prevent overlap */}
-        <div className="flex-1 overflow-hidden min-w-0">
+        {/* CENTER: Cartography */}
+        <div className="flex-1 overflow-hidden min-w-0 relative bg-zinc-900">
           <EmergencyMap onSelectIncident={setSelectedIncidentId} />
         </div>
 
         {/* RIGHT: Drawer (when incident selected) OR Resource board + Agent stream */}
         <div
-          className="shrink-0 flex flex-col overflow-hidden transition-all duration-300"
+          className="shrink-0 flex flex-col overflow-hidden transition-all duration-300 bg-zinc-950"
           style={{
-            width: selectedIncidentId ? '26rem' : '18rem',
-            background: 'hsl(222,47%,6%)',
+            width: selectedIncidentId ? '26rem' : '20rem',
           }}
         >
           {selectedIncidentId ? (
@@ -96,7 +101,7 @@ export function CommandCenterPage() {
           ) : (
             <>
               <ResourceBoard />
-              <div className="flex-1 overflow-hidden border-t" style={{ borderColor: 'hsl(217,33%,18%)' }}>
+              <div className="flex-1 overflow-hidden border-t border-zinc-800">
                 <AgentStream />
               </div>
             </>
@@ -106,7 +111,7 @@ export function CommandCenterPage() {
 
       {/* BOTTOM: Replay controls (mock mode only) */}
       {import.meta.env.VITE_USE_MOCKS === 'true' && (
-        <div className="shrink-0" style={{ borderTop: '1px solid hsl(217,33%,18%)' }}>
+        <div className="shrink-0 border-t border-zinc-800 bg-zinc-950">
           <ReplayControls />
         </div>
       )}

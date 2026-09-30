@@ -1,14 +1,6 @@
 /**
  * CrewPage — tactical mobile-first interface for emergency rescue crews.
- *
- * Features:
- * - High-contrast Tactical HUD for low-light & outdoor visibility
- * - Ongoing Tasks overview: lists assigned missions + active sector calls
- * - Interactive Leaflet Route Map: visualizes route from unit staging to emergency target
- * - Step-by-step tactical mission tracker (Accept -> En Route -> Arrived -> Completed)
- * - Telemetry & readiness controls (Available / Restocking / Standby)
- * - Rapid field hazard reporting (road blocked, vehicle stuck)
- * - Multi-unit switcher for seamless demonstration across unit types
+ * Obsidian Command design system: clean, minimal, human-crafted tactical terminal.
  */
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import L from 'leaflet';
@@ -33,20 +25,17 @@ import {
   BatteryCharging,
   Compass,
   AlertOctagon,
-  ShieldAlert,
-  ChevronRight,
   ExternalLink,
   LifeBuoy,
-  PhoneCall,
   Flame,
   Truck,
   Anchor,
   Droplet,
-  Layers,
   ArrowLeft,
   ListFilter,
+  ShieldCheck,
 } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { Assignment, Incident } from '@contracts/types';
 
 function newRequestId(): string {
@@ -63,10 +52,10 @@ type MissionStep = 'sent' | 'accepted' | 'en_route' | 'on_scene' | 'completed';
 
 // Units configuration with default staging coordinates
 const AVAILABLE_UNITS = [
-  { id: 'AMB-01', name: 'Ambulance 1', icon: Truck, iconChar: '🚑', role: 'Medical Trauma & Oxygen', zone: 'ZONE-B', lat: 12.9150, lng: 77.6400, staging: 'City General Hospital' },
-  { id: 'BOAT-01', name: 'Boat 1', icon: Anchor, iconChar: '⛵', role: 'Water Rescue & Evacuation', zone: 'ZONE-A', lat: 12.9300, lng: 77.6100, staging: 'Lakeside Launch Point' },
-  { id: 'RES-01', name: 'Rescue Squad 1', icon: Flame, iconChar: '🚒', role: 'Structural Extrication', zone: 'ZONE-B', lat: 12.9200, lng: 77.6300, staging: 'Silk Board Command Post' },
-  { id: 'PUMP-01', name: 'Water Pump 1', icon: Droplet, iconChar: '💧', role: 'High-Capacity Dewatering', zone: 'ZONE-B', lat: 12.9150, lng: 77.6400, staging: 'Sub-station Staging Depot' },
+  { id: 'AMB-01', name: 'Ambulance 1', icon: Truck, role: 'Medical Trauma & Oxygen', zone: 'ZONE-B', lat: 12.9150, lng: 77.6400, staging: 'City General Hospital' },
+  { id: 'BOAT-01', name: 'Boat 1', icon: Anchor, role: 'Water Rescue & Evacuation', zone: 'ZONE-A', lat: 12.9300, lng: 77.6100, staging: 'Lakeside Launch Point' },
+  { id: 'RES-01', name: 'Rescue Squad 1', icon: Flame, role: 'Structural Extrication', zone: 'ZONE-B', lat: 12.9200, lng: 77.6300, staging: 'Silk Board Command Post' },
+  { id: 'PUMP-01', name: 'Water Pump 1', icon: Droplet, role: 'High-Capacity Dewatering', zone: 'ZONE-B', lat: 12.9150, lng: 77.6400, staging: 'Sub-station Staging Depot' },
 ];
 
 /**
@@ -77,12 +66,10 @@ function TacticalRouteMap({
   unitLocation,
   targetLocation,
   unitCode,
-  unitIconChar = '🚑',
 }: {
   unitLocation: { lat: number; lng: number };
   targetLocation: { lat: number; lng: number; label: string };
   unitCode: string;
-  unitIconChar?: string;
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -100,56 +87,55 @@ function TacticalRouteMap({
     });
     mapInstanceRef.current = map;
 
-    // CartoDB Dark Matter tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // CartoDB Positron Light tiles
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 19,
       subdomains: 'abcd',
     }).addTo(map);
 
-    // Unit Marker
+    // Unit Marker (Clean enterprise pill)
     const unitIcon = L.divIcon({
       className: '',
       html: `
         <div style="
-          width:36px;height:36px;border-radius:10px;
-          background:#1e3a8a;border:2.5px solid #60a5fa;
+          min-width:38px;height:24px;padding:0 6px;border-radius:4px;
+          background:#FFFFFF;border:1.5px solid #2563EB;
           display:flex;align-items:center;justify-content:center;
-          font-size:17px;box-shadow:0 0 16px rgba(96,165,250,0.8);
+          font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;
+          color:#2563EB;box-shadow:0 2px 6px rgba(15,23,42,0.12);
         ">
-          ${unitIconChar}
+          ${unitCode}
         </div>
       `,
-      iconSize: [36, 36],
-      iconAnchor: [18, 18],
+      iconSize: [38, 24],
+      iconAnchor: [19, 12],
     });
 
-    // Emergency Target Marker with Radar Pulse
+    // Emergency Target Marker (Clean enterprise target indicator)
     const targetIcon = L.divIcon({
       className: '',
       html: `
-        <div style="position:relative;display:flex;align-items:center;justify-content:center;width:42px;height:42px;">
-          <div class="marker-pulse-critical" style="position:absolute;inset:-4px;border-radius:50%;"></div>
-          <div style="
-            width:36px;height:36px;border-radius:50%;
-            background:#881337;border:2.5px solid #fda4af;
-            display:flex;align-items:center;justify-content:center;
-            font-size:17px;box-shadow:0 0 16px #f43f5e;position:relative;z-index:2;
-          ">
-            🚨
-          </div>
+        <div style="
+          min-width:44px;height:24px;padding:0 6px;border-radius:4px;
+          background:#FFFFFF;border:1.5px solid #BE123C;
+          display:flex;align-items:center;justify-content:center;
+          font-family:Inter,system-ui,sans-serif;font-size:11px;font-weight:700;
+          color:#BE123C;box-shadow:0 2px 6px rgba(15,23,42,0.12);
+        ">
+          TARGET
         </div>
       `,
-      iconSize: [42, 42],
-      iconAnchor: [21, 21],
+      iconSize: [44, 24],
+      iconAnchor: [22, 12],
     });
 
     L.marker([unitLocation.lat, unitLocation.lng], { icon: unitIcon })
       .addTo(map)
-      .bindPopup(`<div style="font-family:sans-serif;color:#0f172a;font-weight:bold;font-size:12px;">📍 ${unitCode} Staging Origin</div>`);
+      .bindPopup(`<div style="font-family:Inter,sans-serif;color:#0F172A;font-weight:600;font-size:11px;">Origin: ${unitCode} Staging</div>`);
 
     L.marker([targetLocation.lat, targetLocation.lng], { icon: targetIcon })
       .addTo(map)
-      .bindPopup(`<div style="font-family:sans-serif;color:#0f172a;font-weight:bold;font-size:12px;">🚨 Destination: ${targetLocation.label}</div>`);
+      .bindPopup(`<div style="font-family:Inter,sans-serif;color:#0F172A;font-weight:600;font-size:11px;">Target: ${targetLocation.label}</div>`);
 
     // Realistic multi-point route path avoiding deep flood zones
     const midLat = (unitLocation.lat + targetLocation.lat) / 2 + 0.003;
@@ -160,18 +146,18 @@ function TacticalRouteMap({
       [targetLocation.lat, targetLocation.lng],
     ];
 
-    // Neon Route polyline glow under-layer
+    // Route casing
     L.polyline(routeCoords, {
-      color: '#38bdf8',
-      weight: 8,
-      opacity: 0.35,
+      color: '#93C5FD',
+      weight: 6,
+      opacity: 0.5,
     }).addTo(map);
 
-    // High-visibility cyan navigation line
+    // Primary route line
     L.polyline(routeCoords, {
-      color: '#06b6d4',
-      weight: 4,
-      dashArray: '8, 8',
+      color: '#2563EB',
+      weight: 3,
+      opacity: 0.95,
     }).addTo(map);
 
     map.fitBounds(L.latLngBounds(routeCoords), { padding: [40, 40] });
@@ -185,19 +171,18 @@ function TacticalRouteMap({
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [unitLocation, targetLocation, unitCode, unitIconChar]);
+  }, [unitLocation, targetLocation, unitCode]);
 
   return (
     <div
       ref={mapContainerRef}
-      className="w-full h-64 sm:h-72 rounded-2xl overflow-hidden border border-cyan-500/40 shadow-2xl relative z-10"
-      style={{ background: '#020617' }}
+      className="w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-800 relative z-10"
     />
   );
 }
 
 export function CrewPage() {
-  const { displayName, unitId: authUnitId, logout } = useAuthStore();
+  const { unitId: authUnitId, logout } = useAuthStore();
   const navigate = useNavigate();
 
   // Active unit selector
@@ -211,7 +196,7 @@ export function CrewPage() {
   const [queue, setQueue] = useState<QueuedAction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [statusStep, setStatusStep] = useState<MissionStep>('sent');
-  const [unitReadiness, setUnitReadiness] = useState<'ready' | 'restock' | 'standby'>('ready');
+  const [unitReadiness] = useState<'ready' | 'restock' | 'standby'>('ready');
   const [showProblemDialog, setShowProblemDialog] = useState(false);
   const [notificationPing, setNotificationPing] = useState(false);
 
@@ -386,7 +371,7 @@ export function CrewPage() {
           category: 'crew_en_route',
           incidentId: targetIncidentId ?? null,
           unitId: activeUnitId,
-          text: `🚗 ${activeUnitId} en route to ${targetIncidentId ?? 'incident'}`,
+          text: `Unit ${activeUnitId} en route to ${targetIncidentId ?? 'incident'}`,
           detail: currAssignment?.location?.label ?? currAssignment?.incidentSummary ?? '',
         });
       } else if (action === 'arrived') {
@@ -402,35 +387,30 @@ export function CrewPage() {
           category: 'crew_arrived',
           incidentId: targetIncidentId ?? null,
           unitId: activeUnitId,
-          text: `📍 ${activeUnitId} arrived on scene at ${targetIncidentId ?? 'incident'}`,
+          text: `Unit ${activeUnitId} arrived on scene at ${targetIncidentId ?? 'incident'}`,
           detail: currAssignment?.location?.label ?? '',
         });
       } else if (action === 'task_complete') {
         setStatusStep('completed');
 
-        // 1. Immediately mark incident resolved in store so it disappears from queues & tasks lists
         if (targetIncidentId) {
           closeIncident(targetIncidentId, 'resolved');
         }
 
-        // 2. Mark assignment completed in store so it won't be matched by storeAssignments selector
         if (targetAssignmentId) {
           patchAssignment(targetAssignmentId, { status: 'completed' });
         }
 
-        // 3. Free up unit to available standby
         setUnit(activeUnitId, { status: 'available', assignedIncidentId: null });
 
-        // 4. Log completion to operation audit log
         pushOpLog({
           category: 'task_complete',
           incidentId: targetIncidentId ?? null,
           unitId: activeUnitId,
-          text: `✅ ${activeUnitId} completed mission — ${targetIncidentId ?? 'incident'} RESOLVED`,
+          text: `Unit ${activeUnitId} completed mission — ${targetIncidentId ?? 'incident'} resolved`,
           detail: `${currAssignment?.incidentSummary ?? ''} · ${currAssignment?.peopleAffected ?? 0} people assisted`,
         });
 
-        // 5. Clear active assignment and return to tasks view
         setTimeout(() => {
           setAssignment(null);
           setStatusStep('sent');
@@ -447,7 +427,6 @@ export function CrewPage() {
       api.crew.reportProblem({ kind, note, clientRequestId })
     );
     setShowProblemDialog(false);
-    alert('Hazard report transmitted to Central Command EOC.');
   }
 
   // Select a task from the list and transition to active route navigation
@@ -530,79 +509,80 @@ export function CrewPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-blue-600">
-      {/* ── Top Tactical HUD Header ── */}
-      <header className="px-4 py-3 bg-slate-900/95 backdrop-blur border-b border-slate-800 flex items-center justify-between shrink-0 sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-zinc-950 text-zinc-100 font-sans">
+      {/* ── Top Header ── */}
+      <header className="px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between shrink-0 sticky top-0 z-40">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold">
-            <UnitIcon className="w-5 h-5 text-blue-400" />
+          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+            <UnitIcon className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black tracking-widest text-blue-400 uppercase">CREW TACTICAL HUD</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-[10px] font-mono font-semibold tracking-wider text-zinc-500 uppercase">Field Terminal</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             </div>
-            <p className="text-sm font-bold text-white flex items-center gap-1.5">
-              <span>{activeUnitConfig.id}</span>
-              <span className="text-slate-500 font-normal">·</span>
-              <span className="text-slate-300 text-xs font-medium">{activeUnitConfig.name} ({activeUnitConfig.role})</span>
+            <p className="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
+              <span className="font-mono text-blue-600 font-bold">{activeUnitConfig.id}</span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-400 font-normal">{activeUnitConfig.name} ({activeUnitConfig.role})</span>
             </p>
           </div>
         </div>
 
         {/* Telemetry & Network */}
         <div className="flex items-center gap-2 sm:gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
-            <BatteryCharging className="w-3.5 h-3.5 text-emerald-400" />
+          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-md bg-zinc-800 border border-zinc-800 text-[11px] font-mono text-zinc-400">
+            <BatteryCharging className="w-3.5 h-3.5 text-emerald-600" />
             <span>94%</span>
-            <span className="text-slate-600">|</span>
-            <Compass className="w-3.5 h-3.5 text-blue-400" />
-            <span>GPS FIX</span>
+            <span className="text-zinc-600">|</span>
+            <Compass className="w-3.5 h-3.5 text-blue-600" />
+            <span>GPS Active</span>
           </div>
 
           <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold border ${
+            className={`flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-mono font-medium border ${
               isOnline
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-rose-50 text-rose-700 border-rose-200'
             }`}
           >
             {isOnline ? (
               <>
-                <Wifi className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">ONLINE</span>
+                <Wifi className="w-3 h-3 text-emerald-600" />
+                <span>ONLINE</span>
               </>
             ) : (
               <>
-                <WifiOff className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">OFFLINE (MESH)</span>
+                <WifiOff className="w-3 h-3 text-rose-600" />
+                <span>OFFLINE MESH</span>
               </>
             )}
           </div>
 
           <button
             onClick={handleLogout}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors font-medium text-xs"
             title="Log out"
           >
             <LogOut className="w-4 h-4" />
+            <span>Logout</span>
           </button>
         </div>
       </header>
 
       {/* ── Active Responder Switcher Bar ── */}
-      <div className="bg-slate-900/80 border-b border-slate-800 px-4 sm:px-6 py-3.5 sm:py-4 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm shadow-inner">
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
-            <Radio className="w-4 h-4 animate-pulse" />
+          <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-800 flex items-center justify-center text-zinc-500 shrink-0">
+            <Radio className="w-3.5 h-3.5 text-blue-600" />
           </div>
           <div>
-            <span className="text-slate-100 font-bold block leading-tight text-xs sm:text-sm">Active Responder Unit:</span>
-            <span className="text-[11px] text-slate-400 font-medium">Select field vehicle profile</span>
+            <span className="text-zinc-200 font-semibold block leading-tight text-xs">Active Responder Unit:</span>
+            <span className="text-[11px] text-zinc-500">Switch vehicle profile</span>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {AVAILABLE_UNITS.map((u) => {
             const isSelected = u.id === activeUnitId;
             const Icon = u.icon;
@@ -613,17 +593,17 @@ export function CrewPage() {
                   setActiveUnitId(u.id);
                   setAssignment(undefined);
                 }}
-                className={`py-2 px-3.5 sm:px-4 rounded-xl font-bold flex items-center gap-2 transition-all duration-150 active:scale-95 ${
+                className={`py-1.5 px-3 rounded-lg font-mono text-xs font-semibold flex items-center gap-2 transition-colors ${
                   isSelected
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 border border-blue-400/50 ring-2 ring-blue-500/30'
-                    : 'bg-slate-950/80 text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800 hover:border-slate-700'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-300 shadow-xs'
+                    : 'bg-zinc-900 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-950 border border-zinc-800'
                 }`}
                 title={`${u.name} — ${u.role}`}
               >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
-                <span className="tracking-wide text-xs sm:text-sm">{u.id}</span>
+                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-blue-600' : 'text-zinc-500'}`} />
+                <span>{u.id}</span>
                 {isSelected && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-0.5" />
                 )}
               </button>
             );
@@ -633,61 +613,59 @@ export function CrewPage() {
 
       {/* ── Offline Queue / Error Alerts ── */}
       {queue.length > 0 && (
-        <div className="px-4 py-2 bg-amber-500/15 border-b border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+        <div className="px-4 py-2 bg-amber-50 border-b border-amber-200 text-amber-800 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
-            <span><strong>{queue.length} actions queued locally.</strong> Will automatically sync when reconnecting to central node.</span>
+            <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
+            <span><strong>{queue.length} actions queued locally.</strong> Will sync when reconnecting to central node.</span>
           </div>
-          <span className="px-1.5 py-0.5 rounded bg-amber-400/20 text-[10px] font-mono font-bold">LORA MESH READY</span>
+          <span className="px-1.5 py-0.5 rounded bg-amber-100 text-[10px] font-mono text-amber-800 font-semibold">MESH STANDBY</span>
         </div>
       )}
 
       {error && (
-        <div className="px-4 py-2 bg-rose-500/15 border-b border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+        <div className="px-4 py-2 bg-rose-50 border-b border-rose-200 text-rose-800 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
-          <button onClick={() => setError(null)} className="underline text-[11px] font-semibold">Dismiss</button>
+          <button onClick={() => setError(null)} className="underline text-[11px] font-medium">Dismiss</button>
         </div>
       )}
 
       {/* ── Main Container ── */}
-      <main className="flex-1 p-4 max-w-2xl w-full mx-auto flex flex-col gap-4">
+      <main className="flex-1 p-4 max-w-3xl w-full mx-auto flex flex-col gap-4">
 
         {/* ── Unit Readiness & View Switcher Bar ── */}
-        <section className="p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 flex items-center justify-between gap-2 shadow-sm">
+        <section className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-2 shadow-xs">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status:</span>
-            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-              unitReadiness === 'ready'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : unitReadiness === 'restock'
-                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                : 'bg-slate-800 text-slate-400 border border-slate-700'
-            }`}>
-              {unitReadiness === 'ready' ? '● AVAILABLE' : unitReadiness === 'restock' ? '▲ RESTOCKING' : '■ OFF DUTY'}
+            <span className="text-[11px] font-medium uppercase text-zinc-500">Status:</span>
+            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              AVAILABLE
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => setActiveView('tasks')}
-              className={`px-3 py-1 text-xs font-bold rounded-lg flex items-center gap-1 transition ${
-                activeView === 'tasks' ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-800 text-slate-400 hover:text-white'
+              className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                activeView === 'tasks'
+                  ? 'bg-zinc-800 text-zinc-100 border border-zinc-800 font-semibold'
+                  : 'text-zinc-500 hover:text-zinc-100'
               }`}
             >
               <ListFilter className="w-3.5 h-3.5" />
-              <span>Ongoing Tasks ({activeSectorIncidents.length + (assignment ? 1 : 0)})</span>
+              <span>Tasks ({activeSectorIncidents.length + (assignment ? 1 : 0)})</span>
             </button>
             {assignment && (
               <button
                 onClick={() => setActiveView('route')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg flex items-center gap-1 transition ${
-                  activeView === 'route' ? 'bg-cyan-600 text-white shadow-sm' : 'bg-slate-800 text-slate-400 hover:text-white'
+                className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                  activeView === 'route'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
+                    : 'text-zinc-500 hover:text-zinc-100'
                 }`}
               >
-                <Navigation className="w-3.5 h-3.5" />
+                <Navigation className="w-3.5 h-3.5 text-blue-600" />
                 <span>Active Route</span>
               </button>
             )}
@@ -696,51 +674,49 @@ export function CrewPage() {
 
         {/* ── Loading State ── */}
         {assignment === undefined && (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-            <p className="text-sm text-slate-400">Syncing telemetry with Operations Command…</p>
+          <div className="flex-1 flex flex-col items-center justify-center p-12 gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+            <p className="text-xs font-mono text-zinc-500">Syncing telemetry with Operations Command…</p>
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            VIEW 1: ACTIVE ROUTE & NAVIGATION CONSOLE (SELECTED TASK)
-            ═══════════════════════════════════════════════════════════════════════ */}
+        {/* VIEW 1: ACTIVE ROUTE & NAVIGATION CONSOLE */}
         {activeView === 'route' && assignment && (
-          <div className={`rounded-2xl border transition-all duration-300 shadow-2xl overflow-hidden ${
-            notificationPing ? 'ring-4 ring-rose-500 animate-pulse' : 'border-slate-800 bg-slate-900/90'
+          <div className={`rounded-xl border transition-all overflow-hidden bg-zinc-900 shadow-sm ${
+            notificationPing ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-zinc-800'
           }`}>
-            {/* Header: Emergency Mission Header with Back to Tasks Button */}
-            <div className="p-4 bg-gradient-to-r from-rose-950/70 via-slate-900 to-cyan-950/40 border-b border-slate-800 flex items-center justify-between">
+            {/* Header */}
+            <div className="p-3.5 border-b border-zinc-800 bg-zinc-950/80 flex items-center justify-between">
               <button
                 onClick={() => setActiveView('tasks')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-bold transition active:scale-95"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-950 text-zinc-300 text-xs font-medium transition-colors border border-zinc-800 shadow-xs"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Ongoing Tasks List</span>
+                <span>Tasks List</span>
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold uppercase bg-blue-50 text-blue-700 border border-blue-200">
                   {statusStep.replace('_', ' ')}
                 </span>
-                <span className="text-xs font-mono text-cyan-400 font-bold">{assignment.assignmentId}</span>
+                <span className="text-xs font-mono text-zinc-500">{assignment.assignmentId}</span>
               </div>
             </div>
 
             {/* Mission Title */}
-            <div className="px-4 py-3 bg-slate-900 border-b border-slate-800">
-              <h2 className="text-lg sm:text-xl font-extrabold text-white leading-tight">
+            <div className="px-4 py-3 border-b border-zinc-800">
+              <h2 className="text-sm font-semibold text-zinc-100 leading-snug">
                 {assignment.incidentSummary}
               </h2>
-              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-rose-400" />
+              <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1.5 font-mono">
+                <MapPin className="w-3.5 h-3.5 text-rose-500" />
                 <span>{assignment.location.label} · {assignment.location.zoneId}</span>
               </p>
             </div>
 
-            {/* Tactical Step Tracker */}
-            <div className="px-4 py-3 bg-slate-950/60 border-b border-slate-800/80">
-              <div className="grid grid-cols-4 gap-1 text-center">
+            {/* Step Tracker */}
+            <div className="px-4 py-2.5 bg-zinc-950/50 border-b border-zinc-800">
+              <div className="grid grid-cols-4 gap-2 text-center">
                 {[
                   { step: 'sent', label: '1. Dispatched' },
                   { step: 'accepted', label: '2. Accepted' },
@@ -756,10 +732,10 @@ export function CrewPage() {
                   return (
                     <div key={idx} className="flex flex-col items-center gap-1">
                       <div className={`h-1.5 w-full rounded-full transition-all ${
-                        isCurrent ? 'bg-cyan-500 shadow-lg shadow-cyan-500/50' : isPassed ? 'bg-emerald-500' : 'bg-slate-800'
+                        isCurrent ? 'bg-blue-600' : isPassed ? 'bg-emerald-500' : 'bg-slate-200'
                       }`} />
-                      <span className={`text-[10px] font-semibold uppercase ${
-                        isCurrent ? 'text-cyan-400' : isPassed ? 'text-emerald-400' : 'text-slate-500'
+                      <span className={`text-[10px] font-mono uppercase ${
+                        isCurrent ? 'text-blue-600 font-semibold' : isPassed ? 'text-emerald-700 font-medium' : 'text-zinc-500'
                       }`}>
                         {s.label}
                       </span>
@@ -770,15 +746,15 @@ export function CrewPage() {
             </div>
 
             <div className="p-4 space-y-4">
-              {/* ── Interactive Leaflet Route Map ── */}
+              {/* Tactical Route Map */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Navigation className="w-4 h-4 text-cyan-400 animate-pulse" />
-                    Interactive Tactical Route Map
+                  <span className="font-semibold text-zinc-300 text-xs flex items-center gap-1.5">
+                    <Navigation className="w-3.5 h-3.5 text-blue-600" />
+                    Field Route Navigation
                   </span>
-                  <span className="text-[11px] text-slate-400 font-mono">
-                    Staging: {activeUnitConfig.staging} → Destination
+                  <span className="text-[11px] text-zinc-500 font-mono">
+                    Staging: {activeUnitConfig.staging}
                   </span>
                 </div>
 
@@ -790,63 +766,61 @@ export function CrewPage() {
                     label: assignment.location.label,
                   }}
                   unitCode={activeUnitConfig.id}
-                  unitIconChar={activeUnitConfig.iconChar}
                 />
               </div>
 
-              {/* Key Mission Stats */}
+              {/* Stats */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
-                  <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                    <Users className="w-4 h-4 text-amber-400" /> Citizens at Risk
+                <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <span className="text-[11px] text-zinc-500 flex items-center gap-1.5 font-medium">
+                    <Users className="w-3.5 h-3.5 text-amber-600" /> People at Risk
                   </span>
-                  <p className="text-xl font-extrabold text-white mt-1">
-                    {assignment.peopleAffected} <span className="text-xs font-normal text-slate-400">people</span>
+                  <p className="text-base font-bold text-zinc-100 mt-1">
+                    {assignment.peopleAffected} <span className="text-xs font-normal text-zinc-500">citizens</span>
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
-                  <span className="text-xs text-slate-400 flex items-center gap-1.5 font-medium">
-                    <Clock className="w-4 h-4 text-blue-400" /> Optimal ETA
+                <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800">
+                  <span className="text-[11px] text-zinc-500 flex items-center gap-1.5 font-medium">
+                    <Clock className="w-3.5 h-3.5 text-blue-600" /> Estimated Arrival
                   </span>
-                  <p className="text-xl font-extrabold text-cyan-400 mt-1">
-                    {assignment.etaMinutes} <span className="text-xs font-normal text-slate-400">minutes</span>
+                  <p className="text-base font-bold text-blue-600 mt-1">
+                    {assignment.etaMinutes} <span className="text-xs font-normal text-zinc-500">min</span>
                   </p>
                 </div>
               </div>
 
-              {/* AI Dispatch Guidance & Flood Avoidance */}
+              {/* Instructions */}
               {assignment.instructions && (
-                <div className="p-3.5 rounded-xl bg-blue-950/30 border border-blue-500/30 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-blue-400 uppercase tracking-wider">
-                    <Compass className="w-4 h-4" /> AI Tactical Route Advisory
+                <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-800 uppercase tracking-wider">
+                    <Compass className="w-3.5 h-3.5 text-blue-600" /> Navigation Guidance
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                  <p className="text-xs text-zinc-300 leading-relaxed">
                     {assignment.instructions}
                   </p>
                 </div>
               )}
 
-              {/* External GPS Route Button */}
+              {/* External GPS button */}
               <a
                 href={`https://www.google.com/maps/dir/?api=1&destination=${assignment.location.lat},${assignment.location.lng}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                className="w-full py-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-950 text-zinc-300 border border-zinc-800 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors shadow-xs"
               >
-                <ExternalLink className="w-3.5 h-3.5 text-blue-400" />
-                <span>Open Destination Coordinates in Google Maps App</span>
+                <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                <span>Open in External Navigation App</span>
               </a>
 
-              {/* ── Primary Action Controls ── */}
+              {/* Action Controls */}
               <div className="pt-2 space-y-3">
-                {/* 1. When newly Dispatched: Accept or Decline */}
                 {statusStep === 'sent' && (
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       onClick={() => handleRespond(true)}
                       disabled={!!loading}
                       id="btn-accept-assignment"
-                      className="py-3.5 px-4 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/40 flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+                      className="py-2.5 px-4 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                     >
                       {loading === 'accept' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                       ACCEPT MISSION
@@ -855,71 +829,67 @@ export function CrewPage() {
                       onClick={() => handleRespond(false)}
                       disabled={!!loading}
                       id="btn-decline-assignment"
-                      className="py-3.5 px-4 rounded-xl font-bold text-sm bg-rose-950/60 hover:bg-rose-900/50 text-rose-300 border border-rose-800/60 flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+                      className="py-2.5 px-4 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
                     >
                       {loading === 'decline' ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                      CANNOT TAKE
+                      DECLINE
                     </button>
                   </div>
                 )}
 
-                {/* 2. When Accepted: Mark En Route */}
                 {statusStep === 'accepted' && (
                   <button
                     onClick={() => handleStatusUpdate('en_route')}
                     disabled={!!loading}
                     id="btn-en-route"
-                    className="w-full py-4 rounded-xl font-bold text-base bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/50 flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                   >
-                    {loading === 'en_route' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                    START NAVIGATION · EN ROUTE
+                    {loading === 'en_route' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
+                    BEGIN TRANSIT · EN ROUTE
                   </button>
                 )}
 
-                {/* 3. When En Route: Mark Arrived */}
                 {statusStep === 'en_route' && (
                   <button
                     onClick={() => handleStatusUpdate('arrived')}
                     disabled={!!loading}
                     id="btn-arrived"
-                    className="w-full py-4 rounded-xl font-bold text-base bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-900/40 flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 rounded-lg text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                   >
-                    {loading === 'arrived' ? <Loader2 className="w-5 h-5 animate-spin" /> : <Flag className="w-5 h-5" />}
-                    ARRIVED ON SCENE · COMMENCE RESCUE
+                    {loading === 'arrived' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Flag className="w-4 h-4" />}
+                    ARRIVED ON SCENE
                   </button>
                 )}
 
-                {/* 4. When On Scene: Complete Task */}
                 {statusStep === 'on_scene' && (
                   <button
                     onClick={() => handleStatusUpdate('task_complete')}
                     disabled={!!loading}
                     id="btn-task-complete"
-                    className="w-full py-4 rounded-xl font-bold text-base bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/50 flex items-center justify-center gap-2 transition active:scale-95 disabled:opacity-50"
+                    className="w-full py-3 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
                   >
-                    {loading === 'task_complete' ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-                    PATIENT SECURED · MISSION COMPLETE
+                    {loading === 'task_complete' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                    TASK COMPLETED · SECURED
                   </button>
                 )}
 
-                {/* 5. When Completed */}
                 {statusStep === 'completed' && (
-                  <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-center space-y-1">
-                    <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto" />
-                    <p className="font-bold text-white">Mission successfully logged!</p>
-                    <p className="text-xs text-slate-400">Returning unit to active standby patrol…</p>
+                  <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-center space-y-1">
+                    <CheckCircle className="w-5 h-5 text-emerald-600 mx-auto" />
+                    <p className="text-xs font-semibold text-zinc-100">Mission successfully completed</p>
+                    <p className="text-[11px] font-mono text-zinc-500">Returning unit to standby status…</p>
                   </div>
                 )}
 
-                {/* Problem Reporter Trigger */}
-                <div className="pt-2 flex items-center justify-between border-t border-slate-800/80 text-xs">
-                  <span className="text-slate-400">Ground hazard encountered?</span>
+                {/* Problem Reporter */}
+                <div className="pt-2 flex items-center justify-between border-t border-zinc-800 text-xs">
+                  <span className="text-zinc-500">Route impedance or hazard?</span>
                   <button
                     onClick={() => setShowProblemDialog(true)}
-                    className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-semibold flex items-center gap-1 transition"
+                    className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 hover:border-rose-200 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
                   >
-                    <AlertOctagon className="w-3.5 h-3.5" />
-                    Report Road Block / Stuck
+                    <AlertOctagon className="w-3.5 h-3.5 text-rose-600" />
+                    Report Route Hazard
                   </button>
                 </div>
               </div>
@@ -927,139 +897,130 @@ export function CrewPage() {
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════════════════
-            VIEW 2: ONGOING TASKS LIST & STANDBY SECTOR FEED
-            ═══════════════════════════════════════════════════════════════════════ */}
+        {/* VIEW 2: ONGOING TASKS LIST */}
         {activeView === 'tasks' && (
           <div className="space-y-4">
-            {/* Active Mission Banner (if one is currently assigned) */}
+            {/* Active Mission Banner (if assigned) */}
             {assignment && (
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/80 via-slate-900 to-cyan-950/50 border border-cyan-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="p-1 rounded bg-cyan-500 text-slate-950 font-black text-[10px] uppercase">
+                    <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono text-[10px] font-semibold uppercase">
                       ASSIGNED TO {activeUnitId}
                     </span>
-                    <span className="text-xs font-mono font-bold text-cyan-300">{assignment.assignmentId}</span>
+                    <span className="text-xs font-mono text-zinc-500">{assignment.assignmentId}</span>
                   </div>
-                  <h3 className="text-sm font-bold text-white line-clamp-1">{assignment.incidentSummary}</h3>
-                  <p className="text-xs text-slate-400 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5 text-rose-400" />
+                  <h3 className="text-xs font-semibold text-zinc-100 line-clamp-1">{assignment.incidentSummary}</h3>
+                  <p className="text-[11px] text-zinc-400 font-mono flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-rose-500" />
                     <span>{assignment.location.label} · ETA {assignment.etaMinutes}m</span>
                   </p>
                 </div>
 
                 <button
                   onClick={() => setActiveView('route')}
-                  className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-lg shadow-cyan-900/40 flex items-center justify-center gap-1.5 transition shrink-0 active:scale-95"
+                  className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shrink-0 shadow-sm"
                 >
-                  <Navigation className="w-4 h-4" />
-                  <span>GO TO ROUTE MAP →</span>
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>VIEW ROUTE →</span>
                 </button>
               </div>
             )}
 
             {/* Standby Status Hero */}
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 shadow-xl relative overflow-hidden">
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                      <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                      SECTOR PATROL ACTIVE
-                    </span>
-                    <span className="text-xs font-mono text-slate-400">{activeUnitConfig.zone}</span>
-                  </div>
-                  <h2 className="text-lg font-black text-white">Ongoing Emergency Tasks in Sector</h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Select any task below to inspect its coordinates and follow the tactical navigation route.
-                  </p>
+            <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    SECTOR PATROL ACTIVE
+                  </span>
+                  <span className="text-xs font-mono text-zinc-500">{activeUnitConfig.zone}</span>
                 </div>
-
-                <button
-                  onClick={() => handleSelectTaskAndGoToRoute()}
-                  disabled={!!loading}
-                  className="px-4 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-900/40 flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50 shrink-0"
-                >
-                  {loading === 'select_task' ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Radio className="w-4 h-4 text-amber-300" />
-                  )}
-                  <span>REQUEST DISPATCH CALL</span>
-                </button>
+                <h2 className="text-sm font-semibold text-zinc-100">Active Sector Emergency Calls</h2>
+                <p className="text-xs text-zinc-500 mt-0.5">
+                  Select a priority task to claim or inspect its navigation route.
+                </p>
               </div>
+
+              <button
+                onClick={() => handleSelectTaskAndGoToRoute()}
+                disabled={!!loading}
+                className="px-3.5 py-2 rounded-lg text-xs font-semibold bg-zinc-900 hover:bg-zinc-950 text-zinc-300 border border-zinc-800 flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50 shrink-0 shadow-xs"
+              >
+                {loading === 'select_task' ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Radio className="w-3.5 h-3.5 text-blue-600" />
+                )}
+                <span>Request Dispatch Call</span>
+              </button>
             </div>
 
-            {/* ── List of All Ongoing Tasks ── */}
+            {/* List of Tasks */}
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs px-1">
-                <span className="font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                  <ListFilter className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <ListFilter className="w-3.5 h-3.5 text-blue-600" />
                   Available Tasks ({activeSectorIncidents.length})
                 </span>
-                <span className="text-slate-500">Tap to select task & open route</span>
+                <span className="text-zinc-500 text-[11px]">Tap to review route</span>
               </div>
 
               {activeSectorIncidents.length === 0 ? (
-                <div className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 text-center space-y-2">
-                  <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto" />
-                  <p className="text-sm font-bold text-white">No active emergency calls</p>
-                  <p className="text-xs text-slate-400">All sector calls resolved or standby patrol active.</p>
+                <div className="p-8 rounded-xl bg-zinc-900 border border-dashed border-slate-300 text-center space-y-1">
+                  <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto" />
+                  <p className="text-xs font-semibold text-zinc-200">No active unassigned calls</p>
+                  <p className="text-[11px] text-zinc-500">All emergency calls in this sector are resolved or assigned.</p>
                 </div>
               ) : (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {activeSectorIncidents.map((inc) => {
                     const isAlreadyAssignedToMe = inc.assignedUnitIds.includes(activeUnitId);
                     return (
                       <div
                         key={inc.incidentId}
-                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                        className={`p-3.5 rounded-xl border transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           isAlreadyAssignedToMe
-                            ? 'bg-blue-950/30 border-blue-500/40 shadow-lg'
-                            : 'bg-slate-900/70 border-slate-800 hover:border-slate-700'
+                            ? 'bg-blue-50/60 border-blue-200'
+                            : 'bg-zinc-900 border-zinc-800 hover:border-slate-300 shadow-xs'
                         }`}
                       >
-                        <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              inc.severity === 'critical' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' :
-                              inc.severity === 'high' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
-                              'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                            }`}>
-                              {inc.severity || 'Critical'}
+                            <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-800 text-zinc-300 font-semibold">
+                              {inc.severity || 'assessing'}
                             </span>
-                            <span className="text-xs font-mono font-bold text-white">{inc.incidentId}</span>
+                            <span className="text-xs font-mono font-semibold text-blue-600">{inc.incidentId}</span>
                             {isAlreadyAssignedToMe && (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">
                                 ASSIGNED TO YOU
                               </span>
                             )}
                           </div>
 
-                          <h4 className="text-sm font-bold text-white leading-tight">{inc.summary}</h4>
+                          <h4 className="text-xs font-semibold text-zinc-100 leading-tight">{inc.summary}</h4>
 
-                          <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                          <div className="flex items-center gap-3 text-[11px] text-zinc-500 font-mono flex-wrap">
                             <span className="flex items-center gap-1">
-                              <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                              <MapPin className="w-3 h-3 text-rose-500 shrink-0" />
                               <span className="truncate">{inc.location?.label || 'Sector Location'}</span>
                             </span>
                             <span>·</span>
                             <span className="flex items-center gap-1">
-                              <Users className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              <Users className="w-3 h-3 text-amber-600 shrink-0" />
                               <span>{inc.peopleAffected ?? 1} citizens at risk</span>
                             </span>
                           </div>
                         </div>
 
-                        {/* Action: Select task and go to route */}
                         <button
                           onClick={() => handleSelectTaskAndGoToRoute(inc)}
                           disabled={!!loading}
-                          className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-blue-900/40 active:scale-95 disabled:opacity-50"
+                          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-50 shadow-sm"
                         >
-                          <Navigation className="w-3.5 h-3.5 text-cyan-300" />
-                          <span>Select Task & Go to Route →</span>
+                          <Navigation className="w-3.5 h-3.5" />
+                          <span>Select Task & Route →</span>
                         </button>
                       </div>
                     );
@@ -1068,41 +1029,34 @@ export function CrewPage() {
               )}
             </div>
 
-            {/* ── Resolved / Completed Missions History ── */}
+            {/* Resolved / Completed Missions History */}
             {resolvedIncidents.length > 0 && (
-              <div className="space-y-2.5 pt-3 border-t border-slate-800/80">
+              <div className="space-y-2.5 pt-3 border-t border-zinc-800">
                 <div className="flex items-center justify-between text-xs px-1">
-                  <span className="font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    Resolved / Completed Missions ({resolvedIncidents.length})
+                  <span className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    Resolved Missions Log ({resolvedIncidents.length})
                   </span>
-                  <span className="text-slate-500 font-medium">Recorded in Central Log</span>
+                  <span className="text-zinc-500 font-mono text-[11px]">Central Log Sync</span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   {resolvedIncidents.map((inc) => (
                     <div
                       key={inc.incidentId}
-                      className="p-3.5 rounded-xl bg-slate-900/40 border border-slate-800/70 flex items-center justify-between gap-3 text-xs"
+                      className="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3 text-xs shadow-xs"
                     >
-                      <div className="space-y-1 min-w-0">
+                      <div className="space-y-0.5 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             RESOLVED
                           </span>
-                          <span className="font-mono font-bold text-slate-300">{inc.incidentId}</span>
+                          <span className="font-mono text-zinc-500">{inc.incidentId}</span>
                         </div>
-                        <p className="font-semibold text-slate-200 truncate">{inc.summary}</p>
-                        <p className="text-slate-400 flex items-center gap-1 text-[11px]">
-                          <MapPin className="w-3 h-3 text-slate-500 shrink-0" />
-                          <span className="truncate">{inc.location?.label}</span>
-                          <span>·</span>
-                          <Users className="w-3 h-3 text-slate-500 shrink-0" />
-                          <span>{inc.peopleAffected} citizens assisted</span>
-                        </p>
+                        <p className="font-medium text-zinc-200 truncate text-xs">{inc.summary}</p>
                       </div>
-                      <span className="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
-                        COMPLETED
+                      <span className="shrink-0 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-800 text-[10px] font-mono">
+                        {inc.peopleAffected} assisted
                       </span>
                     </div>
                   ))}
@@ -1110,41 +1064,41 @@ export function CrewPage() {
               </div>
             )}
 
-            {/* Field Sector Intelligence & Hazards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">
-                  <AlertTriangle className="w-4 h-4" /> Live Sector Hazards
+            {/* Field Sector Intelligence & Hub Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2 shadow-xs">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Sector Advisory
                 </div>
-                <ul className="space-y-2 text-xs text-slate-300">
+                <ul className="space-y-1.5 text-xs text-zinc-400">
                   <li className="flex items-start gap-1.5">
-                    <span className="text-rose-400">●</span>
-                    <span>100 Feet Ring Road closed due to 1.2m water logging.</span>
+                    <span className="text-rose-600 font-bold">[-]</span>
+                    <span>100 Feet Ring Road closed (depth 1.2m).</span>
                   </li>
                   <li className="flex items-start gap-1.5">
-                    <span className="text-amber-400">●</span>
-                    <span>Submerged culvert near Sony World Signal — slow crawl.</span>
+                    <span className="text-amber-600 font-bold">[-]</span>
+                    <span>Culvert at Sony World Signal — slow transit.</span>
                   </li>
                   <li className="flex items-start gap-1.5">
-                    <span className="text-emerald-400">●</span>
-                    <span>Inner Ring Road flyover clear for high-clearance units.</span>
+                    <span className="text-emerald-600 font-bold">[+]</span>
+                    <span>Inner Ring Road flyover open for emergency vehicles.</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider mb-2">
-                  <LifeBuoy className="w-4 h-4" /> Staging & Supply Hub
+              <div className="p-3.5 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2 shadow-xs">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-800 uppercase tracking-wider">
+                  <LifeBuoy className="w-3.5 h-3.5 text-blue-600" /> Staging & Logistics Hub
                 </div>
-                <div className="space-y-1.5 text-xs text-slate-300">
-                  <p className="font-semibold text-white">{activeUnitConfig.staging}</p>
-                  <p className="text-slate-400">Current Base Staging Zone: {activeUnitConfig.zone}</p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
-                      SUPPLIES: READY
+                <div className="space-y-1 text-xs text-zinc-400">
+                  <p className="font-semibold text-zinc-100">{activeUnitConfig.staging}</p>
+                  <p className="text-zinc-500 text-[11px] font-mono">Zone: {activeUnitConfig.zone}</p>
+                  <div className="flex items-center gap-2 pt-1">
+                    <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-mono border border-emerald-200 font-medium">
+                      EQUIPMENT: VERIFIED
                     </span>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
-                      CREW: DEPLOYED
+                    <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-mono border border-blue-200 font-medium">
+                      CREW: 3
                     </span>
                   </div>
                 </div>
@@ -1152,17 +1106,17 @@ export function CrewPage() {
             </div>
 
             {/* Quick Field Hazard Broadcast */}
-            <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
               <div>
-                <p className="text-xs font-bold text-white">Spotted a new road blockage or road cave-in?</p>
-                <p className="text-xs text-slate-400">Broadcast hazard report directly to Central Command EOC.</p>
+                <p className="text-xs font-semibold text-zinc-100">Spotted an unmapped road block or powerline?</p>
+                <p className="text-[11px] text-zinc-500">Broadcast hazard report directly to Central Command EOC.</p>
               </div>
               <button
                 onClick={() => setShowProblemDialog(true)}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 shrink-0"
+                className="w-full sm:w-auto px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-50 text-zinc-300 hover:text-rose-700 border border-zinc-800 hover:border-rose-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shrink-0 shadow-xs"
               >
-                <AlertOctagon className="w-4 h-4" />
-                Broadcast Field Hazard
+                <AlertOctagon className="w-3.5 h-3.5 text-rose-600" />
+                Report Hazard
               </button>
             </div>
           </div>
@@ -1172,38 +1126,38 @@ export function CrewPage() {
 
       {/* ── Problem Reporting Modal ── */}
       {showProblemDialog && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <div className="flex items-center gap-2 text-rose-400 font-bold">
-                <AlertTriangle className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+              <div className="flex items-center gap-2 text-rose-700 font-semibold text-xs uppercase tracking-wider">
+                <AlertTriangle className="w-4 h-4 text-rose-600" />
                 <span>Transmit Field Hazard</span>
               </div>
               <button
                 onClick={() => setShowProblemDialog(false)}
-                className="p-1 rounded text-slate-400 hover:text-white"
+                className="p-1 rounded text-zinc-500 hover:text-zinc-400 hover:bg-zinc-800"
               >
-                <XCircle className="w-5 h-5" />
+                <XCircle className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-300">
-              Select the condition encountered on the route. Central EOC will instantly re-calculate travel times and notify other units.
+            <p className="text-xs text-zinc-400">
+              Select the obstruction condition encountered on route. Central EOC will instantly recalculate route vectors.
             </p>
 
-            <div className="grid grid-cols-1 gap-2.5">
+            <div className="grid grid-cols-1 gap-2">
               {[
-                { kind: 'road_blocked' as const, label: '🚧 Road Submerged / Blocked by Tree', desc: 'Water depth > 1m or debris impassable' },
-                { kind: 'vehicle_stuck' as const, label: '🚨 Rescue Vehicle Disabled / Stuck', desc: 'Engine drowned or mechanical fault' },
-                { kind: 'other' as const, label: '⚠️ Severe Current / Secondary Hazard', desc: 'Live powerline or crowd surge' },
+                { kind: 'road_blocked' as const, label: 'Road Submerged / Blocked by Debris', desc: 'Water depth > 1m or fallen trees impassable' },
+                { kind: 'vehicle_stuck' as const, label: 'Rescue Vehicle Stuck / Mechanical', desc: 'Engine flooded or structural impediment' },
+                { kind: 'other' as const, label: 'Live Powerline / Structural Collapse', desc: 'Active high-voltage or wall hazard' },
               ].map((item) => (
                 <button
                   key={item.kind}
                   onClick={() => handleProblem(item.kind)}
-                  className="p-3 rounded-xl bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-rose-500/40 text-left transition space-y-0.5"
+                  className="p-3 rounded-lg bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-left transition-colors space-y-0.5"
                 >
-                  <p className="text-xs font-bold text-white">{item.label}</p>
-                  <p className="text-[11px] text-slate-400">{item.desc}</p>
+                  <p className="text-xs font-semibold text-zinc-100">{item.label}</p>
+                  <p className="text-[11px] text-zinc-500">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -1211,7 +1165,7 @@ export function CrewPage() {
             <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setShowProblemDialog(false)}
-                className="px-4 py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:bg-zinc-800"
               >
                 Cancel
               </button>

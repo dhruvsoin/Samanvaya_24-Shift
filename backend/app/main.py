@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse
 
 from .auth import _decode
 from .config import settings
-from .routers import approvals, auth, crew, incidents, plan, reporter, reports, scenario, state, ws
+from .routers import approvals, auth, crew, incidents, plan, reporter, reports, scenario, sms, state, ws
 
 app = FastAPI(
     title=settings.app_title,
@@ -106,6 +106,7 @@ app.include_router(scenario.router)    # POST /scenario/*
 app.include_router(reporter.router)    # POST /reporter/*
 app.include_router(crew.router)        # GET+POST /crew/*
 app.include_router(reports.router)     # GET /reports/* /comms/log /decisions
+app.include_router(sms.router)         # POST /sms/*, GET /sms/outbox
 app.include_router(ws.router)          # WS /ws/*
 
 

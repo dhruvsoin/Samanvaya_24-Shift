@@ -25,23 +25,27 @@ export function ResourceBoard() {
   const deployed = units.filter((u) => ['en_route', 'on_scene', 'assigned'].includes(u.status)).length;
 
   return (
-    <div className="flex flex-col shrink-0" style={{ maxHeight: '55%' }}>
+    <div className="flex flex-col shrink-0 bg-zinc-950 select-none border-b border-zinc-800" style={{ maxHeight: '55%' }}>
       {/* Header */}
-      <div className="px-3 py-3 flex items-center justify-between shrink-0"
-        style={{ borderBottom: '1px solid hsl(217,33%,18%)' }}>
+      <div className="px-3.5 py-2.5 flex items-center justify-between shrink-0 border-b border-zinc-800 bg-zinc-900">
         <div>
-          <h2 className="text-sm font-semibold text-white">Resources</h2>
-          <p className="text-xs mt-0.5" style={{ color: 'hsl(215,20%,50%)' }}>
-            {available} avail · {deployed} deployed
+          <div className="flex items-center gap-2">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-100">Resources</h2>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              {available} Available
+            </span>
+          </div>
+          <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">
+            {deployed} unit{deployed === 1 ? '' : 's'} currently deployed
           </p>
         </div>
       </div>
 
       {/* Unit list */}
-      <div className="overflow-y-auto flex-1 py-1">
+      <div className="overflow-y-auto flex-1 p-2 space-y-1.5 bg-zinc-950/50">
         {units.length === 0 ? (
-          <p className="text-xs px-3 py-4 text-center" style={{ color: 'hsl(215,20%,40%)' }}>
-            Loading units…
+          <p className="text-[11px] font-medium px-3 py-6 text-center text-zinc-500">
+            Awaiting fleet status…
           </p>
         ) : (
           units.map((unit) => <UnitRow key={unit.unitId} unit={unit} />)
@@ -52,7 +56,7 @@ export function ResourceBoard() {
 }
 
 function UnitRow({ unit }: { unit: Unit }) {
-  const icon = UNIT_TYPE_ICONS[unit.type] ?? '🚗';
+  const iconText = UNIT_TYPE_ICONS[unit.type] ?? 'UNIT';
   const assignmentsById = useAppStore((s) => s.assignmentsById);
   // Find current assignment for this unit
   const assignment = Object.values(assignmentsById).find(
@@ -61,23 +65,25 @@ function UnitRow({ unit }: { unit: Unit }) {
 
   return (
     <div
-      className="px-3 py-2 flex items-center gap-2.5"
+      className="p-2.5 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center gap-2.5 hover:border-zinc-700 hover:bg-zinc-800/80 transition-all shadow-none"
       id={`unit-row-${unit.unitId}`}
     >
-      <span className="text-lg shrink-0" role="img" aria-label={unit.type}>{icon}</span>
+      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-blue-500/20 text-blue-400 border border-blue-500/30 shrink-0">
+        {iconText}
+      </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-semibold text-white mono">{unit.unitId}</p>
+          <p className="text-xs font-bold text-zinc-100">{unit.unitId}</p>
           <UnitStatusBadge status={unit.status} />
         </div>
-        <p className="text-xs mt-0.5 truncate" style={{ color: 'hsl(215,20%,50%)' }}>
-          {unit.name}
-        </p>
-        {assignment && (
-          <p className="text-xs mono mt-0.5" style={{ color: 'hsl(217,91%,60%)' }}>
-            → {assignment.incidentId}
-          </p>
-        )}
+        <div className="flex items-center justify-between text-[11px] text-zinc-400 mt-0.5">
+          <span className="truncate font-medium text-zinc-300">{unit.name}</span>
+          {assignment && (
+            <span className="font-mono text-blue-400 ml-1 shrink-0 font-bold bg-blue-500/20 px-1 rounded">
+              → {assignment.incidentId}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
