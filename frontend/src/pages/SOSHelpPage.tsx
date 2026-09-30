@@ -513,7 +513,7 @@ export function SOSHelpPage() {
         category: 'sos_received',
         incidentId: createdIncident.incidentId,
         unitId: null,
-        text: `🆘 Citizen SOS received: ${createdIncident.incidentId}`,
+        text: `Citizen SOS received: ${createdIncident.incidentId}`,
         detail: `${selectedMeta?.label || selectedType} · ${peopleCount} ${peopleLabel} · ${address} · Language: ${language.toUpperCase()}`,
       });
 

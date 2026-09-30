@@ -148,21 +148,21 @@ export function PlanDiffPage() {
             <span>Select Tactical Plan:</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             {[
-              { id: 'PLAN-002', label: 'Plan v2 (Flooded Underpass Reroute Diff)', plan: MOCK_PLAN_V2 as unknown as Plan },
+              { id: 'PLAN-002', label: 'Plan v2 (Flooded Underpass Reroute)', plan: MOCK_PLAN_V2 as unknown as Plan },
               { id: 'PLAN-003', label: 'Plan v3 (Surge Evacuation Optimization)', plan: MOCK_PLAN_V3 as unknown as Plan },
-              { id: 'PLAN-001', label: 'Plan v1 (Initial Baseline Deployment)', plan: MOCK_PLAN_V1 as unknown as Plan },
+              { id: 'PLAN-001', label: 'Plan v1 (Initial Baseline)', plan: MOCK_PLAN_V1 as unknown as Plan },
             ].map((p) => {
               const isSelected = activePlan.planId === p.id;
               return (
                 <button
                   key={p.id}
                   onClick={() => handleSelectPlan(p.plan)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`px-3 py-1.5 rounded text-xs font-mono font-medium transition-all ${
                     isSelected
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-900/50 border border-blue-400/40 ring-2 ring-blue-500/20'
-                      : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                      ? 'bg-[#131B2E] text-[#38BDF8] border border-[#38BDF8]/50 shadow-sm'
+                      : 'bg-[#0F172A] text-slate-400 hover:text-slate-200 border border-[#1E293B] hover:border-[#334155]'
                   }`}
                 >
                   {p.label}
@@ -173,48 +173,49 @@ export function PlanDiffPage() {
         </div>
 
         {/* Plan Header Card */}
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-slate-800 shadow-xl space-y-4">
+        <div className="p-5 rounded-lg bg-[#0F172A] border border-[#1E293B] shadow-sm space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <span className="p-2 rounded-xl bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                  <TrendingUp className="w-5 h-5" />
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="p-1.5 rounded bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/30">
+                  <TrendingUp className="w-4 h-4" />
                 </span>
-                <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
+                <h1 className="text-xl font-bold text-slate-100 flex items-center gap-2">
                   Tactical Plan Diff
-                  <span className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30">
                     {activePlan.planId} v{activePlan.version}
                   </span>
                 </h1>
               </div>
 
-              <p className="mt-2 text-sm text-slate-300">
-                <strong className="text-white">Trigger:</strong> {activePlan.trigger}
+              <p className="mt-2 text-xs text-slate-300 font-sans leading-relaxed">
+                <span className="text-slate-400 font-mono uppercase tracking-wider text-[10px] mr-1">Trigger:</span>
+                {activePlan.trigger}
               </p>
 
-              <div className="flex items-center gap-3 mt-2 text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-2 mt-2 text-[11px] font-mono text-slate-400">
                 <span>Published: {activePlan.publishedAt.replace('T', ' ')}</span>
                 {activePlan.previousPlanId && (
                   <>
                     <span>·</span>
-                    <span className="text-cyan-400">Diff Against: {activePlan.previousPlanId}</span>
+                    <span className="text-[#38BDF8]">Diff Against: {activePlan.previousPlanId}</span>
                   </>
                 )}
               </div>
             </div>
 
             {/* Quick Metrics Badges */}
-            <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5" />
+            <div className="flex flex-wrap gap-1.5 shrink-0">
+              <span className="px-2.5 py-1 rounded text-xs font-mono font-medium bg-amber-500/10 text-amber-300 border border-amber-500/25 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                 {changedRows.length} Changed
               </span>
-              <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
-                <Plus className="w-3.5 h-3.5" />
+              <span className="px-2.5 py-1 rounded text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                 {activePlan.changes.filter((c) => c.change === 'added').length} Added
               </span>
-              <span className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700 flex items-center gap-1.5">
-                <Minus className="w-3.5 h-3.5" />
+              <span className="px-2.5 py-1 rounded text-xs font-mono font-medium bg-[#131B2E] text-slate-400 border border-[#1E293B] flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
                 {unchangedRows.length} Unchanged
               </span>
             </div>
@@ -223,19 +224,19 @@ export function PlanDiffPage() {
 
         {/* Pending approval banner */}
         {pendingApprovalCount > 0 && (
-          <div className="flex items-center justify-between p-4 rounded-xl bg-amber-500/10 border-2 border-amber-500/30 text-amber-300">
+          <div className="flex items-center justify-between p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
             <div className="flex items-center gap-2.5">
-              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
               <div>
-                <p className="font-bold text-white text-sm">
-                  ⚡ Operator Decision Required
+                <p className="font-semibold text-slate-100 text-xs">
+                  Operator Decision Required
                 </p>
-                <p className="text-xs text-amber-200/80">
-                  {pendingApprovalCount} tactical recommendation pending operator review before plan execution.
+                <p className="text-[11px] text-amber-300/80 font-mono">
+                  {pendingApprovalCount} tactical recommendation pending operator review before solver publish.
                 </p>
               </div>
             </div>
-            <Link to="/command/approvals" className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 transition shadow-md shrink-0">
+            <Link to="/command/approvals" className="px-3 py-1.5 rounded text-xs font-mono font-medium bg-amber-400 text-[#0B0F17] hover:bg-amber-300 transition-colors shadow-sm shrink-0">
               Review Approvals →
             </Link>
           </div>
@@ -244,16 +245,18 @@ export function PlanDiffPage() {
         {/* Changed rows table */}
         {changedRows.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold mb-3 text-white">Changed Assignments</h2>
-            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(217,33%,18%)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-200">Changed Tactical Assignments</h2>
+              <span className="text-[11px] font-mono text-slate-400">{changedRows.length} entries modified</span>
+            </div>
+            <div className="rounded-lg overflow-hidden border border-[#1E293B] bg-[#0F172A]">
               {/* Table header */}
-              <div className="grid grid-cols-[24px_1fr_1fr_1fr_2fr] gap-0"
-                style={{ background: 'hsl(222,47%,10%)' }}>
+              <div className="grid grid-cols-[24px_1.2fr_1fr_1fr_2fr] gap-0 bg-[#0B0F17] border-b border-[#1E293B]">
                 <div />
-                <div className="py-2.5 px-3 text-xs font-semibold" style={{ color: 'hsl(215,20%,50%)' }}>Incident</div>
-                <div className="py-2.5 px-3 text-xs font-semibold border-l" style={{ color: 'hsl(215,20%,50%)', borderColor: 'hsl(217,33%,18%)' }}>BEFORE</div>
-                <div className="py-2.5 px-3 text-xs font-semibold border-l" style={{ color: 'hsl(215,20%,50%)', borderColor: 'hsl(217,33%,18%)' }}>AFTER</div>
-                <div className="py-2.5 px-3 text-xs font-semibold border-l" style={{ color: 'hsl(215,20%,50%)', borderColor: 'hsl(217,33%,18%)' }}>Reason</div>
+                <div className="py-2 px-3 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400">Incident</div>
+                <div className="py-2 px-3 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 border-l border-[#1E293B]">PREVIOUS</div>
+                <div className="py-2 px-3 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 border-l border-[#1E293B]">NEW SOLVER ASSIGNMENT</div>
+                <div className="py-2 px-3 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 border-l border-[#1E293B]">Optimization Reason</div>
               </div>
 
               {changedRows.map((change, i) => (
@@ -272,10 +275,10 @@ export function PlanDiffPage() {
         {/* Unchanged rows (collapsed) */}
         {unchangedRows.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold mb-3" style={{ color: 'hsl(215,20%,50%)' }}>
-              Unchanged ({unchangedRows.length})
+            <h2 className="text-xs font-semibold uppercase tracking-wider mb-2 text-slate-400">
+              Unchanged Baseline ({unchangedRows.length})
             </h2>
-            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid hsl(217,33%,14%)' }}>
+            <div className="rounded-lg overflow-hidden border border-[#1E293B] bg-[#0F172A]/70">
               {unchangedRows.map((change, i) => (
                 <PlanChangeRow
                   key={change.incidentId + i}
@@ -292,19 +295,18 @@ export function PlanDiffPage() {
         {/* Unserved incidents */}
         {activePlan.unserved.length > 0 && (
           <section>
-            <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" style={{ color: 'hsl(0,84%,60%)' }} />
-              <span style={{ color: 'hsl(0,84%,60%)' }}>Unserved Incidents ({activePlan.unserved.length})</span>
+            <h2 className="text-xs font-semibold uppercase tracking-wider mb-2 text-rose-400 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              <span>Unserved Incidents ({activePlan.unserved.length})</span>
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {activePlan.unserved.map((u) => {
                 const inc = incidentsById[u.incidentId];
                 return (
-                  <div key={u.incidentId} className="flex items-center gap-3 p-3 rounded-lg"
-                    style={{ background: 'hsl(0,84%,60%,0.08)', border: '1px solid hsl(0,84%,60%,0.2)' }}>
-                    <span className="font-bold mono text-sm" style={{ color: 'hsl(0,84%,60%)' }}>{u.incidentId}</span>
-                    <span className="text-sm text-white">{inc?.location.label ?? '—'}</span>
-                    <span className="text-sm ml-auto" style={{ color: 'hsl(215,20%,55%)' }}>{u.reason}</span>
+                  <div key={u.incidentId} className="flex items-center gap-3 p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs">
+                    <span className="font-mono font-semibold text-rose-400">{u.incidentId}</span>
+                    <span className="text-slate-200">{inc?.location.label ?? '—'}</span>
+                    <span className="text-slate-400 ml-auto font-mono text-[11px]">{u.reason}</span>
                   </div>
                 );
               })}
@@ -328,11 +330,13 @@ function PlanChangeRow({ change, incident, unitsById, isLast }: {
 
   return (
     <div
-      className={`grid grid-cols-[24px_1fr_1fr_1fr_2fr] gap-0 ${!isLast ? 'border-b' : ''} ${isHighlighted ? 'diff-highlight' : ''}`}
-      style={{
-        borderColor: 'hsl(217,33%,14%)',
-        background: isHighlighted ? cfg.bg : 'transparent',
-      }}
+      className={`grid grid-cols-[24px_1.2fr_1fr_1fr_2fr] gap-0 text-xs ${!isLast ? 'border-b border-[#1E293B]' : ''} ${
+        change.change === 'changed'
+          ? 'bg-amber-500/[0.04]'
+          : change.change === 'added'
+          ? 'bg-emerald-500/[0.04]'
+          : ''
+      }`}
     >
       {/* Change type indicator */}
       <div className="flex items-center justify-center py-3" style={{ background: `${cfg.color}15` }}>
@@ -341,39 +345,39 @@ function PlanChangeRow({ change, incident, unitsById, isLast }: {
 
       {/* Incident */}
       <div className="py-3 px-3">
-        <p className="text-xs font-bold mono" style={{ color: 'hsl(217,91%,60%)' }}>{change.incidentId}</p>
-        <p className="text-xs mt-0.5 truncate" style={{ color: 'hsl(215,20%,55%)' }}>
+        <p className="text-xs font-mono font-semibold text-[#38BDF8]">{change.incidentId}</p>
+        <p className="text-[11px] text-slate-300 mt-0.5 truncate">
           {incident?.location.label ?? '—'}
         </p>
       </div>
 
       {/* Before */}
-      <div className="py-3 px-3 border-l" style={{ borderColor: 'hsl(217,33%,14%)' }}>
+      <div className="py-2.5 px-3 border-l border-[#1E293B]">
         {change.before ? (
           <>
             <UnitChip unitId={change.before.unitId} unitsById={unitsById} />
-            <p className="text-xs mt-1 mono" style={{ color: 'hsl(215,20%,50%)' }}>ETA {change.before.etaMinutes} min</p>
+            <p className="text-[11px] mt-1 font-mono text-slate-400">ETA {change.before.etaMinutes} min</p>
           </>
         ) : (
-          <span className="text-xs" style={{ color: 'hsl(215,20%,35%)' }}>—</span>
+          <span className="text-xs text-slate-500 font-mono">—</span>
         )}
       </div>
 
       {/* After */}
-      <div className="py-3 px-3 border-l" style={{ borderColor: 'hsl(217,33%,14%)' }}>
+      <div className="py-2.5 px-3 border-l border-[#1E293B]">
         {change.after ? (
           <>
             <UnitChip unitId={change.after.unitId} unitsById={unitsById} />
-            <p className="text-xs mt-1 mono" style={{ color: cfg.color }}>ETA {change.after.etaMinutes} min</p>
+            <p className="text-[11px] mt-1 font-mono font-medium" style={{ color: cfg.color }}>ETA {change.after.etaMinutes} min</p>
           </>
         ) : (
-          <span className="text-xs" style={{ color: 'hsl(0,84%,60%)' }}>Removed</span>
+          <span className="text-xs text-rose-400 font-mono">Removed</span>
         )}
       </div>
 
       {/* Reason */}
-      <div className="py-3 px-3 border-l flex items-center" style={{ borderColor: 'hsl(217,33%,14%)' }}>
-        <p className="text-xs leading-snug" style={{ color: isHighlighted ? 'hsl(215,20%,70%)' : 'hsl(215,20%,40%)' }}>
+      <div className="py-2.5 px-3 border-l border-[#1E293B] flex items-center">
+        <p className="text-xs leading-relaxed text-slate-300">
           {change.reason}
         </p>
       </div>
@@ -386,12 +390,11 @@ function UnitChip({ unitId, unitsById }: {
   unitsById: ReturnType<typeof useAppStore.getState>['unitsById'];
 }) {
   const unit = unitsById[unitId];
-  const icon = unit ? UNIT_TYPE_ICONS[unit.type] ?? '🚗' : '🚗';
+  const tag = unit ? UNIT_TYPE_ICONS[unit.type] ?? 'UNIT' : 'UNIT';
   return (
-    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium"
-      style={{ background: 'hsl(222,47%,14%)', color: 'white', border: '1px solid hsl(217,33%,22%)' }}>
-      <span>{icon}</span>
-      <span className="mono">{unitId}</span>
+    <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-mono bg-[#1E293B] text-slate-200 border border-[#334155]">
+      <span className="text-[9px] text-[#38BDF8] font-bold">{tag}</span>
+      <span className="font-semibold">{unitId}</span>
     </div>
   );
 }

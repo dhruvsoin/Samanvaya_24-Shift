@@ -64,119 +64,138 @@ export function TopBar({ wsStatus }: Props) {
 
   return (
     <header
-      className="flex items-center gap-3 px-4 h-14 shrink-0 z-50"
-      style={{ background: 'hsl(222,47%,7%)', borderBottom: '1px solid hsl(217,33%,18%)' }}
+      className="flex items-center justify-between px-4 h-12 shrink-0 z-50 bg-[#0B0F17] border-b border-[#1E293B] select-none"
     >
-      {/* Brand */}
-      <span className="text-white font-bold text-sm tracking-widest mr-2 shrink-0">SAMANVAYA</span>
-
-      {/* Severity pill */}
-      <div
-        className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold shrink-0"
-        style={{ background: sevCfg.bg, border: `1px solid ${sevCfg.border}`, color: sevCfg.text }}
-        title={`Overall severity: ${sev.toUpperCase()}`}
-      >
-        <span className="w-2 h-2 rounded-full animate-pulse-slow" style={{ background: sevCfg.dot }} />
-        {sevCfg.label}
-      </div>
-
-      {/* Rain */}
-      {rain && (
-        <div className="flex items-center gap-1.5 text-xs shrink-0" title={`Rain: ${rain.intensity} (${rain.mmPerHour}mm/h)`}>
-          <CloudRain className="w-3.5 h-3.5" style={{ color: 'hsl(215,20%,55%)' }} />
-          <span style={{ color: 'hsl(215,20%,75%)' }}>{RAIN_ICONS[rain.intensity]} {rain.intensity}</span>
-          {freshCfg && (
-            <span className="font-bold text-xs mono" style={{ color: freshCfg.color }}>
-              [{freshCfg.label}]
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Divider */}
-      <div className="w-px h-4 shrink-0" style={{ background: 'hsl(217,33%,22%)' }} />
-
-      {/* Comms status */}
-      <div
-        className="flex items-center gap-1 text-xs shrink-0"
-        style={{ color: systemStatus?.commsOverall === 'degraded' ? 'hsl(48,96%,53%)' : 'hsl(215,20%,55%)' }}
-        title={`Communications: ${systemStatus?.commsOverall ?? 'unknown'}`}
-      >
-        <Radio className="w-3.5 h-3.5" />
-        <span className="font-medium">{systemStatus?.commsOverall === 'degraded' ? 'DEGRADED · SMS' : 'COMMS OK'}</span>
-      </div>
-
-      {/* WebSocket status */}
-      <div
-        className="flex items-center gap-1 text-xs shrink-0"
-        title={`WebSocket: ${wsStatus}`}
-      >
-        {wsStatus === 'connected' ? (
-          <Wifi className="w-3.5 h-3.5" style={{ color: 'hsl(142,71%,45%)' }} />
-        ) : wsStatus === 'connecting' || wsStatus === 'reconnecting' ? (
-          <WifiOff className="w-3.5 h-3.5 animate-pulse" style={{ color: 'hsl(48,96%,53%)' }} />
-        ) : (
-          <WifiOff className="w-3.5 h-3.5" style={{ color: 'hsl(0,84%,60%)' }} />
-        )}
-        <span style={{ color: wsStatus === 'connected' ? 'hsl(142,71%,45%)' : 'hsl(215,20%,55%)' }}>
-          {wsStatus === 'connected' ? 'LIVE' : wsStatus.toUpperCase()}
+      {/* Brand & Platform Identity */}
+      <div className="flex items-center gap-3 shrink-0">
+        <Link to="/command" className="flex items-center gap-2 group">
+          <div className="w-6 h-6 rounded bg-[#38BDF8]/10 border border-[#38BDF8]/30 flex items-center justify-center text-[#38BDF8] transition-colors group-hover:bg-[#38BDF8]/20">
+            <Radio className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-semibold text-sm tracking-wider text-slate-100 font-sans">SAMANVAYA</span>
+        </Link>
+        <div className="h-3.5 w-px bg-[#1E293B]" />
+        <span className="text-[11px] font-mono text-slate-400 tracking-wider hidden sm:inline">
+          EOC <span className="text-[#38BDF8] font-medium">SECTOR-7</span>
         </span>
       </div>
 
-      {/* Scenario clock */}
-      {systemStatus?.scenarioTime && (
-        <div className="flex items-center gap-1 text-xs mono shrink-0" style={{ color: 'hsl(217,91%,70%)' }}
-          title="Scenario time (not wall clock)">
-          <Clock className="w-3.5 h-3.5" />
-          {systemStatus.scenarioTime.replace('T', ' ').substring(0, 19)}
-        </div>
-      )}
-
-      {/* Spacer — pushes right items to the far right */}
-      <div className="flex-1" />
-
-      {/* ── SLOT FOR PERSON 4's SCENARIO DRAWER ── */}
-      {/* Person 4: insert your <ScenarioDrawer /> or trigger button here */}
-      <div id="p4-scenario-drawer-slot" className="shrink-0" />
-
-      {/* Nav links */}
-      <nav className="flex items-center gap-1 shrink-0">
-        {navLinks.map(({ to, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            style={{
-              background: location.pathname === to ? 'hsl(217,91%,60%,0.12)' : 'transparent',
-              color: location.pathname === to ? 'hsl(217,91%,70%)' : 'hsl(215,20%,55%)',
-              border: location.pathname === to ? '1px solid hsl(217,91%,60%,0.2)' : '1px solid transparent',
-            }}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="w-px h-4 shrink-0" style={{ background: 'hsl(217,33%,22%)' }} />
-
-      {/* User info */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="text-right">
-          <p className="text-xs font-medium text-white leading-none">{displayName}</p>
-          <p className="text-xs mt-0.5 capitalize" style={{ color: 'hsl(215,20%,50%)' }}>
-            {role === 'reviewer' && <span title="Read-only viewer"><AlertTriangle className="w-3 h-3 inline mr-0.5" style={{ color: 'hsl(48,96%,53%)' }} />Reviewer</span>}
-            {role === 'operator' && <span><CheckCircle className="w-3 h-3 inline mr-0.5" style={{ color: 'hsl(142,71%,45%)' }} />Operator</span>}
-          </p>
-        </div>
-        <button
-          onClick={handleLogout}
-          className="p-1.5 rounded-lg transition-colors hover:bg-white/5"
-          title="Log out"
-          style={{ color: 'hsl(215,20%,50%)' }}
+      {/* Center Instrument Telemetry Cluster */}
+      <div className="hidden md:flex items-center gap-2.5">
+        {/* Overall Severity Pill */}
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono font-medium tracking-wide transition-colors"
+          style={{ background: sevCfg.bg, border: `1px solid ${sevCfg.border}`, color: sevCfg.text }}
+          title={`Overall severity: ${sev.toUpperCase()}`}
         >
-          <LogOut className="w-4 h-4" />
-        </button>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: sevCfg.dot }} />
+          <span>{sevCfg.label}</span>
+        </div>
+
+        {/* Scenario Clock */}
+        {systemStatus?.scenarioTime && (
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0F172A] border border-[#1E293B] text-[11px] font-mono text-slate-200"
+            title="Scenario time (not wall clock)"
+          >
+            <Clock className="w-3.5 h-3.5 text-slate-400" />
+            <span className="tabular-nums font-semibold">
+              {systemStatus.scenarioTime.replace('T', ' ').substring(0, 19)}
+            </span>
+          </div>
+        )}
+
+        {/* Rain Atmospheric Badge */}
+        {rain && (
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0F172A] border border-[#1E293B] text-[11px]"
+            title={`Rain: ${rain.intensity} (${rain.mmPerHour}mm/h)`}
+          >
+            <CloudRain className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <span className="text-slate-300 font-medium capitalize">{rain.intensity} ({rain.mmPerHour} mm/h)</span>
+            {freshCfg && (
+              <span className="font-mono text-[10px] font-semibold ml-0.5" style={{ color: freshCfg.color }}>
+                [{freshCfg.label}]
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Comms Network Status */}
+        <div
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#0F172A] border border-[#1E293B] text-[11px]"
+          title={`Communications: ${systemStatus?.commsOverall ?? 'unknown'}`}
+        >
+          <span className="relative flex h-2 w-2">
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${systemStatus?.commsOverall === 'degraded' ? 'bg-amber-400' : 'bg-emerald-400'}`} />
+            <span className={`relative inline-flex rounded-full h-2 w-2 ${systemStatus?.commsOverall === 'degraded' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+          </span>
+          <span className="font-medium text-slate-300">
+            {systemStatus?.commsOverall === 'degraded' ? 'SMS Fallback' : 'Mesh: 14ms'}
+          </span>
+        </div>
+
+        {/* Live WebSocket Status */}
+        <div
+          className="flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded bg-[#0F172A] border border-[#1E293B]"
+          title={`WebSocket: ${wsStatus}`}
+        >
+          {wsStatus === 'connected' ? (
+            <Wifi className="w-3 h-3 text-emerald-400" />
+          ) : (
+            <WifiOff className="w-3 h-3 text-rose-400 animate-pulse" />
+          )}
+          <span style={{ color: wsStatus === 'connected' ? '#34D399' : '#FB7185' }}>
+            {wsStatus === 'connected' ? 'LIVE' : wsStatus.toUpperCase()}
+          </span>
+        </div>
+      </div>
+
+      {/* Trailing Navigation & Controls */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* ── SLOT FOR PERSON 4's SCENARIO DRAWER ── */}
+        <div id="p4-scenario-drawer-slot" className="shrink-0" />
+
+        {/* Nav Links */}
+        <nav className="flex items-center gap-1">
+          {navLinks.map(({ to, label, icon: Icon }) => {
+            const isActive = location.pathname === to;
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#1E293B] text-[#38BDF8] border border-[#334155] shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#1E293B]/50 border border-transparent'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">{label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="h-3.5 w-px bg-[#1E293B] mx-1" />
+
+        {/* User Profile Pill */}
+        <div className="flex items-center gap-2 pl-1">
+          <div className="text-right hidden sm:block">
+            <p className="text-xs font-medium text-slate-200 leading-none">{displayName}</p>
+            <p className="text-[10px] mt-0.5 text-slate-400 capitalize font-mono">
+              {role === 'reviewer' && <span className="text-amber-400">Reviewer (Read-Only)</span>}
+              {role === 'operator' && <span className="text-[#38BDF8]">Lead Ops</span>}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-1.5 rounded hover:bg-[#1E293B] text-slate-400 hover:text-slate-200 transition-colors"
+            title="Log out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </header>
   );

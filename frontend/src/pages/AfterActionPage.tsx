@@ -1,12 +1,6 @@
 /**
  * AfterActionPage — post-incident review, performance baseline, and audit report.
- *
- * Shows:
- * - Executive summary with KPI metrics
- * - Samanvaya vs Baseline comparison (speed, efficiency, lives saved)
- * - LIVE chronological operation audit log (opLog from store — real session events)
- * - Plan change evolutions and triggers
- * - Unresolved incidents requiring follow-up
+ * Obsidian Command design system: clean, minimal, human-crafted operations post-mortem.
  */
 import { useCallback, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
@@ -17,8 +11,6 @@ import {
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
-  TrendingDown,
-  Award,
   Layers,
   Download,
   Radio,
@@ -27,6 +19,8 @@ import {
   Truck,
   ShieldAlert,
   Trash2,
+  Activity,
+  Award,
 } from 'lucide-react';
 import { useAppStore } from '@/store';
 import type { OpLogCategory } from '@/store';
@@ -39,61 +33,54 @@ const MOCK_BASELINE_METRICS = [
   { metric: 'Operator Decision Latency', unit: 'seconds', samanvaya: 45, baseline: 240 },
 ];
 
-const CATEGORY_CONFIG: Record<OpLogCategory, { icon: typeof Radio; color: string; bg: string; label: string }> = {
+const CATEGORY_CONFIG: Record<OpLogCategory, { icon: typeof Radio; badgeClass: string; label: string }> = {
   sos_received: {
     icon: ShieldAlert,
-    color: 'hsl(0,84%,65%)',
-    bg: 'hsl(0,84%,60%,0.1)',
+    badgeClass: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
     label: 'SOS Received',
   },
   operator_dispatched: {
     icon: Radio,
-    color: 'hsl(217,91%,65%)',
-    bg: 'hsl(217,91%,60%,0.1)',
+    badgeClass: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
     label: 'Operator Dispatched',
   },
   crew_en_route: {
     icon: Truck,
-    color: 'hsl(48,96%,53%)',
-    bg: 'hsl(48,96%,53%,0.1)',
+    badgeClass: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
     label: 'Crew En Route',
   },
   crew_arrived: {
     icon: MapPin,
-    color: 'hsl(271,81%,65%)',
-    bg: 'hsl(271,81%,60%,0.1)',
+    badgeClass: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
     label: 'Crew Arrived',
   },
   task_complete: {
     icon: Flag,
-    color: 'hsl(142,71%,45%)',
-    bg: 'hsl(142,71%,45%,0.1)',
+    badgeClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     label: 'Task Complete',
   },
   incident_updated: {
     icon: RefreshCw,
-    color: 'hsl(215,20%,55%)',
-    bg: 'hsl(215,20%,50%,0.07)',
+    badgeClass: 'bg-obsidian-surface text-slate-400 border-obsidian-border',
     label: 'Incident Updated',
   },
   system: {
     icon: Award,
-    color: 'hsl(215,20%,55%)',
-    bg: 'hsl(215,20%,50%,0.07)',
+    badgeClass: 'bg-obsidian-surface text-slate-400 border-obsidian-border',
     label: 'System',
   },
 };
 
 function formatTs(ts: string): string {
   try {
-    return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   } catch {
     return ts;
   }
 }
 
 export function AfterActionPage() {
-  const [activeTab, setActiveTab] = useState<'baseline' | 'timeline' | 'plans' | 'unresolved'>('timeline');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'baseline' | 'plans' | 'unresolved'>('timeline');
   const incidentsById = useAppStore((s) => s.incidentsById);
   const incidents = useMemo(() => Object.values(incidentsById), [incidentsById]);
   const planHistory = useAppStore((s) => s.planHistory);
@@ -117,23 +104,19 @@ export function AfterActionPage() {
     return [];
   }, [planHistory, currentPlan]);
 
-  // Helper to force re-render (opLog is live from store so it auto-updates, but refresh button gives feedback)
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [, setRefreshKey] = useState(0);
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
-  const _ = refreshKey; // suppress unused warning
-
   return (
-    <div className="h-full overflow-y-auto bg-slate-950 text-slate-100">
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+    <div className="h-full overflow-y-auto bg-obsidian-canvas text-slate-100 font-sans">
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Navigation & Actions */}
         <div className="flex items-center justify-between">
           <Link
             to="/command"
-            className="inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-            style={{ color: 'hsl(217,91%,65%)' }}
+            className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 hover:text-sky-400 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Command Center
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Command Center
           </Link>
           <div className="flex items-center gap-2">
             <button
@@ -142,7 +125,7 @@ export function AfterActionPage() {
                   clearOpLog();
                 }
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-rose-800/60 bg-rose-950/40 text-rose-300 hover:bg-rose-900/50 font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded bg-obsidian-surface hover:bg-rose-500/10 text-slate-400 hover:text-rose-400 border border-obsidian-border hover:border-rose-500/30 transition-colors"
               title="Clear all recorded operational events"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -150,95 +133,93 @@ export function AfterActionPage() {
             </button>
             <button
               onClick={handleRefresh}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded bg-obsidian-surface hover:bg-obsidian-well text-slate-300 border border-obsidian-border transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Refresh
             </button>
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-blue-600 hover:bg-blue-500 font-semibold transition"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded bg-sky-600 hover:bg-sky-500 text-white font-medium transition-colors"
             >
               <Download className="w-3.5 h-3.5" />
-              Export / Print
+              Export
             </button>
           </div>
         </div>
 
         {/* Page Header */}
-        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/30 border border-slate-800 shadow-xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="p-2 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  <FileText className="w-5 h-5" />
-                </span>
-                <h1 className="text-2xl font-bold tracking-tight text-white">After-Action Review (AAR)</h1>
+        <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <div className="w-7 h-7 rounded bg-obsidian-surface border border-obsidian-border flex items-center justify-center text-sky-400">
+                <FileText className="w-4 h-4" />
               </div>
-              <p className="text-sm text-slate-400">
-                Official operational analysis, live emergency coordination audit log, and AI optimization benchmarks.
-              </p>
+              <h1 className="text-base font-semibold text-white tracking-tight">After-Action Review (AAR)</h1>
             </div>
-            <div className="flex items-center gap-2 text-xs text-slate-400 px-3 py-2 rounded-lg bg-slate-950/60 border border-slate-800 self-start md:self-auto">
-              <Clock className="w-4 h-4 text-blue-400" />
-              <span>Live session · <strong className="text-slate-200">{opLog.length} events logged</strong></span>
-            </div>
+            <p className="text-xs text-slate-400">
+              Operational audit trail, autonomous dispatch decisions, and benchmark telemetry.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400 px-3 py-1.5 rounded bg-obsidian-surface border border-obsidian-border self-start md:self-auto">
+            <Clock className="w-3.5 h-3.5 text-sky-400" />
+            <span>Session Events: <strong className="text-white">{opLog.length}</strong></span>
           </div>
         </div>
 
         {/* Executive KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">SOS Received</span>
-              <ShieldAlert className="w-4 h-4 text-rose-400" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-4 rounded-lg bg-obsidian-well border border-obsidian-border space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-mono uppercase tracking-wider">SOS Received</span>
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
             </div>
-            <div className="text-2xl font-bold text-white">{totalSosCount || incidents.length || 0}</div>
-            <div className="mt-1 text-xs text-slate-400">from citizens this session</div>
+            <div className="text-xl font-mono font-bold text-white">{totalSosCount || incidents.length || 0}</div>
+            <div className="text-[11px] text-slate-500">Citizen distress signals</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Dispatched</span>
-              <TrendingDown className="w-4 h-4 text-blue-400" />
+          <div className="p-4 rounded-lg bg-obsidian-well border border-obsidian-border space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Dispatched</span>
+              <Activity className="w-3.5 h-3.5 text-sky-400" />
             </div>
-            <div className="text-2xl font-bold text-white">{dispatchedCount}</div>
-            <div className="mt-1 text-xs text-blue-400">operator decisions made</div>
+            <div className="text-xl font-mono font-bold text-white">{dispatchedCount}</div>
+            <div className="text-[11px] text-sky-400 font-mono">Operator decisions logged</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Missions Complete</span>
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+          <div className="p-4 rounded-lg bg-obsidian-well border border-obsidian-border space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Missions Complete</span>
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
             </div>
-            <div className="text-2xl font-bold text-white">{completedCount || resolvedCount}</div>
-            <div className="mt-1 text-xs text-emerald-400">crews reported task done</div>
+            <div className="text-xl font-mono font-bold text-white">{completedCount || resolvedCount}</div>
+            <div className="text-[11px] text-emerald-400 font-mono">Secured & resolved</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Pending Follow-ups</span>
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
+          <div className="p-4 rounded-lg bg-obsidian-well border border-obsidian-border space-y-1">
+            <div className="flex items-center justify-between text-slate-400">
+              <span className="text-[11px] font-mono uppercase tracking-wider">Pending Action</span>
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
             </div>
-            <div className="text-2xl font-bold text-white">{unresolvedList.length}</div>
-            <div className="mt-1 text-xs text-rose-400">active monitoring required</div>
+            <div className="text-xl font-mono font-bold text-white">{unresolvedList.length}</div>
+            <div className="text-[11px] text-amber-400 font-mono">Active monitoring</div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 space-x-2">
+        <div className="flex border-b border-obsidian-border gap-2">
           {[
-            { id: 'timeline', label: `📋 Live Operation Log (${opLog.length})` },
-            { id: 'baseline', label: '📊 Benchmark vs Baseline' },
-            { id: 'plans', label: '🗂 Plan Evolutionary Steps' },
-            { id: 'unresolved', label: `⚠️ Unresolved (${unresolvedList.length})` },
+            { id: 'timeline', label: `Operations Audit Log (${opLog.length})` },
+            { id: 'baseline', label: 'Benchmark vs Baseline' },
+            { id: 'plans', label: 'Plan Evolutionary Steps' },
+            { id: 'unresolved', label: `Unresolved Incidents (${unresolvedList.length})` },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+              className={`px-3.5 py-2 text-xs font-mono transition-colors border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? 'border-blue-500 text-blue-400'
+                  ? 'border-sky-400 text-sky-300 font-semibold'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -249,78 +230,60 @@ export function AfterActionPage() {
 
         {/* ── LIVE OPERATION LOG TAB ── */}
         {activeTab === 'timeline' && (
-          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+          <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-white">Live Operations & Decision Audit Log</h2>
+              <h2 className="text-sm font-semibold text-white">Live Operations & Dispatch Audit Log</h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Real-time record of every event in this session: citizen SOS → operator dispatch → crew actions → task completion.
+                Deterministic chronological record of all SOS transmissions, operator dispatches, and field completions.
               </p>
             </div>
 
             {opLog.length === 0 ? (
-              <div className="text-center py-12 flex flex-col items-center gap-3">
-                <div className="text-5xl">📋</div>
-                <p className="font-semibold text-slate-300">No operations recorded yet in this session</p>
-                <p className="text-xs text-slate-500 max-w-sm text-center">
-                  Submit an SOS at <Link to="/sos" className="text-blue-400 hover:underline">/sos</Link>, then dispatch a unit from Command Center, and have crew complete the mission. All events will appear here.
+              <div className="text-center py-16 flex flex-col items-center gap-2 rounded border border-dashed border-obsidian-border bg-obsidian-canvas/40">
+                <FileText className="w-6 h-6 text-slate-500" />
+                <p className="text-xs font-medium text-slate-300">No operational actions logged in this session yet</p>
+                <p className="text-[11px] text-slate-500 max-w-sm">
+                  Trigger an SOS from <Link to="/sos" className="text-sky-400 underline">/sos</Link>, dispatch a unit from the Command Center, or execute a crew task to record live events.
                 </p>
-                <Link
-                  to="/sos"
-                  className="mt-2 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-xs font-bold text-white transition"
-                >
-                  → Submit Test SOS
-                </Link>
               </div>
             ) : (
-              <div className="relative pl-6 border-l-2 border-slate-800 space-y-4">
+              <div className="relative pl-5 border-l border-obsidian-border space-y-3">
                 {opLog.map((entry) => {
                   const cfg = CATEGORY_CONFIG[entry.category] || CATEGORY_CONFIG.system;
                   const Icon = cfg.icon;
                   return (
-                    <div key={entry.id} className="relative group">
+                    <div key={entry.id} className="relative">
                       {/* Timeline dot */}
-                      <div
-                        className="absolute -left-[31px] top-2 w-4 h-4 rounded-full border-2 border-slate-950 flex items-center justify-center"
-                        style={{ background: cfg.color }}
-                      >
-                        <Icon className="w-2.5 h-2.5 text-white" />
+                      <div className="absolute -left-[27px] top-2.5 w-3 h-3 rounded-full bg-obsidian-canvas border border-obsidian-border flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-sky-400" />
                       </div>
 
-                      <div
-                        className="p-3 rounded-xl border transition-all group-hover:border-opacity-60"
-                        style={{ background: cfg.bg, borderColor: cfg.color + '30' }}
-                      >
-                        {/* Header row */}
-                        <div className="flex items-center justify-between gap-3 mb-1">
+                      <div className="p-3 rounded bg-obsidian-surface/60 border border-obsidian-border/70 space-y-1">
+                        <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
-                            <span
-                              className="text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider"
-                              style={{ background: cfg.color + '20', color: cfg.color }}
-                            >
+                            <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${cfg.badgeClass} flex items-center gap-1`}>
+                              <Icon className="w-2.5 h-2.5" />
                               {cfg.label}
                             </span>
                             {entry.incidentId && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-obsidian-canvas text-sky-400 border border-obsidian-border">
                                 {entry.incidentId}
                               </span>
                             )}
                             {entry.unitId && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-obsidian-canvas text-slate-300 border border-obsidian-border">
                                 {entry.unitId}
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                          <span className="text-[10px] font-mono text-slate-500">
                             {formatTs(entry.ts)}
                           </span>
                         </div>
 
-                        {/* Main text */}
-                        <p className="text-sm font-semibold text-white">{entry.text}</p>
-
-                        {/* Detail */}
+                        <p className="text-xs font-medium text-slate-100">{entry.text}</p>
                         {entry.detail && (
-                          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{entry.detail}</p>
+                          <p className="text-[11px] text-slate-400">{entry.detail}</p>
                         )}
                       </div>
                     </div>
@@ -333,40 +296,40 @@ export function AfterActionPage() {
 
         {/* BASELINE TAB */}
         {activeTab === 'baseline' && (
-          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+          <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-white">System Efficiency vs Traditional Response</h2>
-              <p className="text-xs text-slate-400">
-                Direct benchmark comparing Samanvaya autonomous coordination against legacy standard operating procedures.
+              <h2 className="text-sm font-semibold text-white">System Efficiency vs Traditional Response</h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Benchmark comparison of Samanvaya autonomous coordination against legacy SOPs.
               </p>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm border-collapse">
+              <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400">
-                    <th className="py-3 px-4">Performance Metric</th>
-                    <th className="py-3 px-4">Samanvaya AI</th>
-                    <th className="py-3 px-4">Legacy Baseline</th>
-                    <th className="py-3 px-4">Improvement / Delta</th>
+                  <tr className="border-b border-obsidian-border font-mono text-[11px] uppercase text-slate-500">
+                    <th className="py-2.5 px-3">Performance Metric</th>
+                    <th className="py-2.5 px-3">Samanvaya AI</th>
+                    <th className="py-2.5 px-3">Legacy Baseline</th>
+                    <th className="py-2.5 px-3">Delta</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-obsidian-border/50">
                   {MOCK_BASELINE_METRICS.map((item, idx) => {
                     const isLowerBetter = item.unit === 'minutes' || item.unit === 'seconds';
                     const diff = isLowerBetter
                       ? ((item.baseline - item.samanvaya) / item.baseline) * 100
                       : ((item.samanvaya - item.baseline) / item.baseline) * 100;
                     return (
-                      <tr key={idx} className="hover:bg-slate-800/30 transition">
-                        <td className="py-3 px-4 font-semibold text-slate-200">{item.metric}</td>
-                        <td className="py-3 px-4 font-mono font-bold text-blue-400">
+                      <tr key={idx} className="hover:bg-obsidian-surface/40 transition-colors">
+                        <td className="py-2.5 px-3 font-medium text-slate-200">{item.metric}</td>
+                        <td className="py-2.5 px-3 font-mono font-semibold text-sky-400">
                           {item.samanvaya} {item.unit}
                         </td>
-                        <td className="py-3 px-4 font-mono text-slate-400">
+                        <td className="py-2.5 px-3 font-mono text-slate-400">
                           {item.baseline} {item.unit}
                         </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <td className="py-2.5 px-3">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             +{Math.abs(Math.round(diff))}% {isLowerBetter ? 'faster' : 'higher'}
                           </span>
                         </td>
@@ -381,23 +344,23 @@ export function AfterActionPage() {
 
         {/* PLANS TAB */}
         {activeTab === 'plans' && (
-          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-            <h2 className="text-lg font-bold text-white">Dynamic Plan Transitions</h2>
+          <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border space-y-4">
+            <h2 className="text-sm font-semibold text-white">Dynamic Plan Transitions</h2>
             {planChangesData.length === 0 ? (
-              <p className="text-sm text-slate-400 py-4">No plan reallocations recorded during this session.</p>
+              <p className="text-xs text-slate-400 py-4 font-mono">No plan reallocations recorded during this session.</p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {planChangesData.map((p, idx) => (
-                  <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                    <div className="flex items-center justify-between mb-2">
+                  <div key={idx} className="p-3.5 rounded bg-obsidian-surface/60 border border-obsidian-border space-y-1">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-blue-400" />
-                        <span className="font-bold font-mono text-white">{p.planId}</span>
+                        <Layers className="w-3.5 h-3.5 text-sky-400" />
+                        <span className="font-mono text-xs font-semibold text-white">{p.planId}</span>
                       </div>
-                      <span className="text-xs text-amber-400 font-medium">Trigger: {p.trigger}</span>
+                      <span className="text-[11px] font-mono text-amber-400">Trigger: {p.trigger}</span>
                     </div>
                     <p className="text-xs text-slate-400">
-                      Modifications: {p.changes?.length ?? 0} assignment shifts executed.
+                      Modifications: {p.changes?.length ?? 0} assignment shifts recorded.
                     </p>
                   </div>
                 ))}
@@ -408,24 +371,24 @@ export function AfterActionPage() {
 
         {/* UNRESOLVED TAB */}
         {activeTab === 'unresolved' && (
-          <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
-            <h2 className="text-lg font-bold text-white">Remaining / Unresolved Incidents</h2>
+          <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border space-y-4">
+            <h2 className="text-sm font-semibold text-white">Remaining Unresolved Incidents</h2>
             {unresolvedList.length === 0 ? (
-              <div className="text-center py-8 text-emerald-400 flex flex-col items-center gap-2">
-                <CheckCircle2 className="w-8 h-8" />
-                <p className="font-semibold">All incidents have been successfully resolved!</p>
+              <div className="text-center py-10 text-emerald-400 flex flex-col items-center gap-2">
+                <CheckCircle2 className="w-6 h-6" />
+                <p className="text-xs font-medium">All recorded incidents have been resolved</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {unresolvedList.map((inc) => (
-                  <div key={inc.incidentId} className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-bold text-sm text-white">{inc.incidentId}</span>
-                      <span className="text-xs uppercase font-semibold text-amber-400">{inc.status}</span>
+                  <div key={inc.incidentId} className="p-3 rounded bg-obsidian-surface/60 border border-obsidian-border space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-xs font-semibold text-white">{inc.incidentId}</span>
+                      <span className="text-[10px] font-mono uppercase text-amber-400">{inc.status}</span>
                     </div>
-                    <p className="text-xs text-slate-300 mb-2">{inc.location.label}</p>
-                    <div className="flex items-center gap-3 text-xs text-slate-400">
-                      <span>People affected: {inc.peopleAffected}</span>
+                    <p className="text-xs text-slate-300">{inc.location.label}</p>
+                    <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500">
+                      <span>Affected: {inc.peopleAffected}</span>
                       <span>Type: {inc.type}</span>
                     </div>
                   </div>

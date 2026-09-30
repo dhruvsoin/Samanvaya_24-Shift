@@ -3,11 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, Radio, Users, AlertTriangle, Loader2, LifeBuoy } from 'lucide-react';
+import { Shield, Radio, Users, AlertTriangle, Loader2, LifeBuoy, Activity, Flame, Droplets, ArrowRight } from 'lucide-react';
 import { api } from '@/api/client';
 import { useAuthStore } from '@/store/auth';
 
-// ── Validation schemas (Zod tells us exactly what fields are required) ──
 const operatorSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
@@ -81,58 +80,43 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{ background: 'hsl(222, 47%, 6%)' }}>
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: 'linear-gradient(hsl(217,91%,60%) 1px, transparent 1px), linear-gradient(90deg, hsl(217,91%,60%) 1px, transparent 1px)',
-          backgroundSize: '40px 40px'
-        }} />
-
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full opacity-10"
-        style={{ background: 'hsl(217,91%,60%)', filter: 'blur(80px)' }} />
-
-      <div className="relative z-10 w-full max-w-md px-4">
-        {/* Logo / Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ background: 'hsl(217,91%,60%,0.15)', border: '1px solid hsl(217,91%,60%,0.3)' }}>
-            <Radio className="w-8 h-8" style={{ color: 'hsl(217,91%,60%)' }} />
+    <div className="min-h-screen flex items-center justify-center bg-obsidian-canvas text-slate-100 font-sans px-4 py-8">
+      <div className="w-full max-w-md space-y-5">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-obsidian-well border border-obsidian-border text-sky-400">
+            <Radio className="w-6 h-6" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">SAMANVAYA</h1>
-          <p className="mt-1 text-sm" style={{ color: 'hsl(215,20%,55%)' }}>
-            Flood Emergency Response Operations
+          <h1 className="text-xl font-bold tracking-tight text-white font-mono uppercase">SAMANVAYA</h1>
+          <p className="text-xs text-slate-400">
+            Emergency Response & Autonomous Tactical Coordination
           </p>
         </div>
 
-        {/* SOS Emergency Callout */}
-        <div className="mb-4 p-3.5 rounded-2xl bg-gradient-to-r from-rose-950/90 via-slate-900 to-amber-950/60 border border-rose-500/50 flex items-center justify-between shadow-xl">
+        {/* SOS Citizen Banner */}
+        <div className="p-3.5 rounded bg-obsidian-well border border-rose-500/30 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-rose-600 text-white animate-pulse">
-              <LifeBuoy className="w-5 h-5" />
-            </span>
+            <div className="w-8 h-8 rounded bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <LifeBuoy className="w-4 h-4" />
+            </div>
             <div>
-              <p className="text-xs font-black text-white">Trapped in Floodwaters? Need Help?</p>
-              <p className="text-[11px] text-rose-300">Submit a direct citizen rescue request</p>
+              <p className="text-xs font-semibold text-white">Trapped in Floodwaters?</p>
+              <p className="text-[11px] text-slate-400">Citizen emergency assistance portal</p>
             </div>
           </div>
           <Link
             to="/sos"
-            className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-lg shadow-rose-900/50 transition active:scale-95 shrink-0 flex items-center gap-1"
+            className="px-3 py-1.5 rounded bg-rose-600 hover:bg-rose-500 text-white text-xs font-mono font-medium flex items-center gap-1 transition-colors"
           >
-            <span>SEND SOS →</span>
+            <span>SEND SOS</span>
+            <ArrowRight className="w-3 h-3" />
           </Link>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl p-6"
-          style={{ background: 'hsl(222,47%,9%)', border: '1px solid hsl(217,33%,18%)' }}>
-
+        <div className="rounded-lg p-5 bg-obsidian-well border border-obsidian-border space-y-4">
           {/* Tabs */}
-          <div className="flex rounded-lg p-1 mb-6"
-            style={{ background: 'hsl(222,47%,6%)' }}>
+          <div className="flex rounded p-1 bg-obsidian-canvas border border-obsidian-border/60">
             {([
               { id: 'operator', label: 'EOC Command', icon: Shield },
               { id: 'crew', label: 'Field Crew', icon: Users },
@@ -141,53 +125,47 @@ export function LoginPage() {
               <button
                 key={id}
                 onClick={() => { setTab(id); setError(null); }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-sm font-medium transition-all"
-                style={{
-                  background: tab === id ? 'hsl(222,47%,14%)' : 'transparent',
-                  color: tab === id ? 'white' : 'hsl(215,20%,55%)',
-                  border: tab === id ? '1px solid hsl(217,33%,18%)' : '1px solid transparent',
-                }}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-colors ${
+                  tab === id
+                    ? 'bg-obsidian-surface text-white border border-obsidian-border'
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                {label}
+                <span>{label}</span>
               </button>
             ))}
           </div>
 
           {/* Error message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-lg mb-4 text-sm"
-              style={{ background: 'hsl(0,84%,60%,0.1)', border: '1px solid hsl(0,84%,60%,0.2)', color: 'hsl(0,84%,70%)' }}>
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {error}
+            <div className="flex items-center gap-2 p-2.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs">
+              <AlertTriangle className="w-4 h-4 shrink-0 text-rose-400" />
+              <span>{error}</span>
             </div>
           )}
 
-          {/* ── OPERATOR TAB ── */}
+          {/* OPERATOR TAB */}
           {tab === 'operator' && (
-            <form onSubmit={opForm.handleSubmit(handleOperatorLogin)} className="space-y-4">
+            <form onSubmit={opForm.handleSubmit(handleOperatorLogin)} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'hsl(215,20%,55%)' }}>
+                <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
                   Username
                 </label>
                 <input
                   {...opForm.register('username')}
                   placeholder="operator"
                   autoComplete="username"
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none transition-all"
-                  style={{
-                    background: 'hsl(222,47%,12%)',
-                    border: `1px solid ${opForm.formState.errors.username ? 'hsl(0,84%,60%)' : 'hsl(217,33%,18%)'}`,
-                  }}
+                  className="w-full px-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
                 />
                 {opForm.formState.errors.username && (
-                  <p className="mt-1 text-xs" style={{ color: 'hsl(0,84%,60%)' }}>
+                  <p className="mt-1 text-[11px] text-rose-400">
                     {opForm.formState.errors.username.message}
                   </p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'hsl(215,20%,55%)' }}>
+                <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
                   Password
                 </label>
                 <input
@@ -195,14 +173,10 @@ export function LoginPage() {
                   type="password"
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none"
-                  style={{
-                    background: 'hsl(222,47%,12%)',
-                    border: `1px solid ${opForm.formState.errors.password ? 'hsl(0,84%,60%)' : 'hsl(217,33%,18%)'}`,
-                  }}
+                  className="w-full px-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400"
                 />
                 {opForm.formState.errors.password && (
-                  <p className="mt-1 text-xs" style={{ color: 'hsl(0,84%,60%)' }}>
+                  <p className="mt-1 text-[11px] text-rose-400">
                     {opForm.formState.errors.password.message}
                   </p>
                 )}
@@ -210,134 +184,120 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-opacity disabled:opacity-50"
-                style={{ background: 'hsl(217,91%,60%)', color: 'hsl(222,47%,6%)' }}
+                className="w-full py-2.5 rounded font-mono text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
               >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Sign in as Operator
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Sign In as Operator
               </button>
-              <p className="text-center text-xs" style={{ color: 'hsl(215,20%,40%)' }}>
-                Demo: username <span className="text-white font-mono">operator</span> / password <span className="text-white font-mono">demo1234</span>
+              <p className="text-center text-[11px] font-mono text-slate-500">
+                Default: <span className="text-slate-300">operator</span> / <span className="text-slate-300">demo1234</span>
               </p>
             </form>
           )}
 
-          {/* ── CREW TAB ── */}
+          {/* CREW TAB */}
           {tab === 'crew' && (
-            <form onSubmit={crewForm.handleSubmit(handleCrewLogin)} className="space-y-4">
-              {/* Quick Presets */}
+            <form onSubmit={crewForm.handleSubmit(handleCrewLogin)} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'hsl(215,20%,55%)' }}>
-                  One-Tap Quick Login Presets:
+                <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1.5">
+                  Select Unit Profile:
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { code: 'AMB-01', label: '🚑 AMB-01 (Ambulance 1)' },
-                    { code: 'BOAT-01', label: '⛵ BOAT-01 (Rescue Boat)' },
-                    { code: 'RES-01', label: '🚒 RES-01 (Rescue Squad)' },
-                    { code: 'PUMP-01', label: '💧 PUMP-01 (Water Pump)' },
-                  ].map((preset) => (
-                    <button
-                      key={preset.code}
-                      type="button"
-                      onClick={() => {
-                        crewForm.setValue('unitCode', preset.code);
-                        crewForm.setValue('pin', '1111');
-                        handleCrewLogin({ unitCode: preset.code, pin: '1111' });
-                      }}
-                      className="px-2.5 py-2 rounded-lg text-xs font-semibold text-left border transition-all hover:border-emerald-500/50 hover:bg-emerald-500/10 active:scale-95"
-                      style={{
-                        background: 'hsl(222,47%,11%)',
-                        borderColor: crewForm.watch('unitCode') === preset.code ? 'hsl(142,71%,45%)' : 'hsl(217,33%,20%)',
-                        color: crewForm.watch('unitCode') === preset.code ? 'hsl(142,71%,55%)' : 'hsl(210,40%,90%)',
-                      }}
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
+                    { code: 'AMB-01', label: 'AMB-01 (Ambulance)', icon: Activity },
+                    { code: 'BOAT-01', label: 'BOAT-01 (Rescue Boat)', icon: LifeBuoy },
+                    { code: 'RES-01', label: 'RES-01 (Squad 1)', icon: Flame },
+                    { code: 'PUMP-01', label: 'PUMP-01 (Water Pump)', icon: Droplets },
+                  ].map((preset) => {
+                    const Icon = preset.icon;
+                    const isSelected = crewForm.watch('unitCode') === preset.code;
+                    return (
+                      <button
+                        key={preset.code}
+                        type="button"
+                        onClick={() => {
+                          crewForm.setValue('unitCode', preset.code);
+                          crewForm.setValue('pin', '1111');
+                          handleCrewLogin({ unitCode: preset.code, pin: '1111' });
+                        }}
+                        className={`p-2 rounded text-left border transition-colors flex items-center gap-2 text-xs font-mono ${
+                          isSelected
+                            ? 'bg-sky-500/10 border-sky-400 text-sky-300'
+                            : 'bg-obsidian-surface border-obsidian-border text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{preset.code}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'hsl(215,20%,55%)' }}>
+                <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
                   Unit Code
                 </label>
                 <input
                   {...crewForm.register('unitCode')}
                   placeholder="e.g. AMB-01, BOAT-01"
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none font-mono uppercase"
-                  style={{
-                    background: 'hsl(222,47%,12%)',
-                    border: `1px solid ${crewForm.formState.errors.unitCode ? 'hsl(0,84%,60%)' : 'hsl(217,33%,18%)'}`,
-                  }}
+                  className="w-full px-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono uppercase"
                 />
                 {crewForm.formState.errors.unitCode && (
-                  <p className="mt-1 text-xs" style={{ color: 'hsl(0,84%,60%)' }}>
+                  <p className="mt-1 text-[11px] text-rose-400">
                     {crewForm.formState.errors.unitCode.message}
                   </p>
                 )}
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1.5" style={{ color: 'hsl(215,20%,55%)' }}>
-                  PIN
+                <label className="block text-[11px] font-mono uppercase text-slate-400 mb-1">
+                  Terminal PIN
                 </label>
                 <input
                   {...crewForm.register('pin')}
                   type="password"
                   maxLength={4}
                   placeholder="1111"
-                  className="w-full px-3 py-2.5 rounded-lg text-sm text-white outline-none font-mono tracking-widest"
-                  style={{
-                    background: 'hsl(222,47%,12%)',
-                    border: `1px solid ${crewForm.formState.errors.pin ? 'hsl(0,84%,60%)' : 'hsl(217,33%,18%)'}`,
-                  }}
+                  className="w-full px-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono tracking-widest"
                 />
-                {crewForm.formState.errors.pin && (
-                  <p className="mt-1 text-xs" style={{ color: 'hsl(0,84%,60%)' }}>
-                    {crewForm.formState.errors.pin.message}
-                  </p>
-                )}
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-opacity disabled:opacity-50"
-                style={{ background: 'hsl(142,71%,45%)', color: 'hsl(222,47%,6%)' }}
+                className="w-full py-2.5 rounded font-mono text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
               >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Access Crew Dashboard
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Access Crew Terminal
               </button>
-              <p className="text-center text-xs" style={{ color: 'hsl(215,20%,40%)' }}>
-                PIN for all units: <span className="text-white font-mono">1111</span> (pre-filled by default)
+              <p className="text-center text-[11px] font-mono text-slate-500">
+                PIN: <span className="text-slate-300">1111</span> (auto-filled)
               </p>
             </form>
           )}
 
-          {/* ── OBSERVER / REVIEWER TAB ── */}
+          {/* OBSERVER TAB */}
           {tab === 'guest' && (
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg text-sm" style={{ background: 'hsl(217,91%,60%,0.08)', border: '1px solid hsl(217,91%,60%,0.15)' }}>
-                <p className="font-medium text-white mb-2">🔭 Observer / Reviewer Console</p>
-                <p style={{ color: 'hsl(215,20%,65%)' }}>
-                  Log in as a <strong className="text-white">read-only Observer</strong>.
-                  Inspect the live Command Center, active maps, resource allocations, and after-action logs without administrative credentials.
+            <div className="space-y-3.5">
+              <div className="p-3 rounded bg-obsidian-surface/60 border border-obsidian-border text-xs space-y-1">
+                <p className="font-semibold text-white">Observer Mode</p>
+                <p className="text-slate-400 text-[11px] leading-relaxed">
+                  Enter the operations room in read-only mode to monitor incident telemetry, real-time map feeds, and plan audits.
                 </p>
               </div>
               <button
                 onClick={handleDemoLogin}
                 disabled={loading}
-                className="w-full py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-opacity disabled:opacity-50"
-                style={{ background: 'hsl(217,91%,60%)', color: 'hsl(222,47%,6%)' }}
+                className="w-full py-2.5 rounded font-mono text-xs font-semibold bg-obsidian-surface hover:bg-obsidian-border text-slate-200 border border-obsidian-border flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
               >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 Enter Observer Console
               </button>
             </div>
           )}
         </div>
 
-        <p className="text-center mt-6 text-xs" style={{ color: 'hsl(215,20%,35%)' }}>
-          Samanvaya · Flood Emergency Response System · Autonomous Coordination
+        <p className="text-center text-[11px] font-mono text-slate-600">
+          Samanvaya Autonomous Emergency Mesh
         </p>
       </div>
     </div>

@@ -47,103 +47,92 @@ const TILE_PROVIDERS = {
   },
 };
 
-// Tactical High-Contrast Markers
+// Tactical High-Precision Obsidian Markers
 function createIncidentIcon(severity: string | null, peopleAffected: number = 1): L.DivIcon {
   const isCritical = severity === 'critical';
   const colors: Record<string, { main: string; bg: string; border: string }> = {
-    critical: { main: '#f43f5e', bg: '#881337', border: '#fda4af' },
-    high:     { main: '#fb923c', bg: '#7c2d12', border: '#fdba74' },
-    medium:   { main: '#facc15', bg: '#713f12', border: '#fef08a' },
-    low:      { main: '#34d399', bg: '#064e3b', border: '#a7f3d0' },
+    critical: { main: '#F43F5E', bg: '#0F172A', border: '#FB7185' },
+    high:     { main: '#F59E0B', bg: '#0F172A', border: '#FBBF24' },
+    medium:   { main: '#38BDF8', bg: '#0F172A', border: '#7DD3FC' },
+    low:      { main: '#10B981', bg: '#0F172A', border: '#34D399' },
   };
-  const colorCfg = severity && colors[severity] ? colors[severity] : { main: '#94a3b8', bg: '#1e293b', border: '#cbd5e1' };
-  const iconSymbol = severity && SEVERITY_CONFIG[severity as keyof typeof SEVERITY_CONFIG]?.icon || '⚠️';
+  const colorCfg = severity && colors[severity] ? colors[severity] : { main: '#94A3B8', bg: '#0F172A', border: '#CBD5E1' };
 
   return L.divIcon({
     className: '',
     html: `
-      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:40px;height:40px;">
-        ${isCritical ? '<div class="marker-pulse-critical" style="position:absolute;inset:-4px;border-radius:50%;"></div>' : ''}
+      <div style="position:relative;display:flex;align-items:center;justify-content:center;width:34px;height:34px;cursor:pointer;">
+        ${isCritical ? '<div style="position:absolute;inset:-3px;border-radius:50%;border:1.5px solid #F43F5E;animation:ping 2s cubic-bezier(0,0,0.2,1) infinite;opacity:0.6;"></div>' : ''}
         <div style="
-          width:36px;height:36px;border-radius:50%;
-          background:${colorCfg.bg};border:2.5px solid ${colorCfg.border};
+          width:28px;height:28px;border-radius:50%;
+          background:${colorCfg.bg};border:1.5px solid ${colorCfg.border};
           display:flex;align-items:center;justify-content:center;
-          font-size:16px;cursor:pointer;
-          box-shadow:0 0 14px ${colorCfg.main}aa, 0 4px 10px rgba(0,0,0,0.8);
+          box-shadow:0 4px 12px rgba(0,0,0,0.65);
           position:relative;z-index:2;
         ">
-          ${iconSymbol}
+          <div style="width:8px;height:8px;border-radius:50%;background:${colorCfg.border};"></div>
           <div style="
-            position:absolute;bottom:-4px;right:-4px;
-            background:#0f172a;border:1px solid ${colorCfg.border};
-            color:#fff;border-radius:8px;font-size:9px;font-weight:800;
-            padding:0.5px 3.5px;font-family:monospace;box-shadow:0 1px 3px rgba(0,0,0,0.7);
-          ">👥${peopleAffected}</div>
+            position:absolute;bottom:-3px;right:-3px;
+            background:#0B0F17;border:1px solid ${colorCfg.border};
+            color:#F8FAFC;border-radius:6px;font-size:8px;font-weight:700;
+            padding:0px 3px;font-family:'JetBrains Mono',monospace;
+          ">${peopleAffected}</div>
         </div>
       </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
   });
 }
 
 function createUnitIcon(unit: Unit): L.DivIcon {
-  const emoji = UNIT_TYPE_ICONS[unit.type] ?? '🚗';
-  const statusColors: Record<string, { border: string; glow: string }> = {
-    available:   { border: '#34d399', glow: '#10b981' },
-    en_route:    { border: '#60a5fa', glow: '#3b82f6' },
-    on_scene:    { border: '#fbbf24', glow: '#f59e0b' },
-    unreachable: { border: '#f87171', glow: '#ef4444' },
-    offline:     { border: '#64748b', glow: '#475569' },
-    assigned:    { border: '#a78bfa', glow: '#8b5cf6' },
+  const statusColors: Record<string, { dot: string; border: string }> = {
+    available:   { dot: '#34D399', border: 'rgba(52,211,153,0.4)' },
+    en_route:    { dot: '#38BDF8', border: 'rgba(56,189,248,0.4)' },
+    on_scene:    { dot: '#FBBF24', border: 'rgba(251,191,36,0.4)' },
+    unreachable: { dot: '#FB7185', border: 'rgba(251,113,133,0.4)' },
+    offline:     { dot: '#64748B', border: 'rgba(100,116,139,0.3)' },
+    assigned:    { dot: '#818CF8', border: 'rgba(129,140,248,0.4)' },
   };
-  const color = statusColors[unit.status] ?? { border: '#94a3b8', glow: '#64748b' };
+  const color = statusColors[unit.status] ?? { dot: '#94A3B8', border: 'rgba(148,163,184,0.3)' };
 
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        position:relative;display:flex;flex-direction:column;align-items:center;
-        cursor:pointer;
+        display:inline-flex;align-items:center;gap:4px;
+        background:#0B0F17;border:1px solid ${color.border};
+        padding:2px 5px;border-radius:4px;cursor:pointer;
+        box-shadow:0 3px 8px rgba(0,0,0,0.6);white-space:nowrap;
       ">
-        <div style="
-          width:34px;height:34px;border-radius:8px;
-          background:#0f172a;border:2.5px solid ${color.border};
-          display:flex;align-items:center;justify-content:center;
-          font-size:16px;box-shadow:0 0 12px ${color.glow}88, 0 4px 8px rgba(0,0,0,0.8);
-        ">
-          ${emoji}
-        </div>
-        <div style="
-          margin-top:2px;background:#020617;border:1px solid ${color.border};
-          color:#f1f5f9;font-size:9px;font-weight:800;font-family:monospace;
-          padding:0px 4px;border-radius:4px;white-space:nowrap;
-          box-shadow:0 2px 4px rgba(0,0,0,0.8);
-        ">
-          ${unit.unitId}
-        </div>
+        <span style="width:6px;height:6px;border-radius:50%;background:${color.dot};display:inline-block;flex-shrink:0;"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:#F8FAFC;">${unit.unitId}</span>
       </div>
     `,
-    iconSize: [36, 48],
-    iconAnchor: [18, 24],
+    iconSize: [60, 20],
+    iconAnchor: [30, 10],
   });
 }
 
 function createFacilityIcon(type: string): L.DivIcon {
-  const icons: Record<string, string> = { shelter: '🏫', hospital: '🏥', depot: '🏭' };
-  const icon = icons[type] ?? '🏢';
+  const labels: Record<string, string> = { shelter: 'SHELTER', hospital: 'MED-FAC', depot: 'DEPOT' };
+  const label = labels[type] ?? 'FAC';
   return L.divIcon({
     className: '',
     html: `
       <div style="
-        width:30px;height:30px;border-radius:6px;
-        background:#090d16;border:2px solid #38bdf8;
-        display:flex;align-items:center;justify-content:center;
-        font-size:14px;box-shadow:0 0 10px rgba(56,189,248,0.5);
-      ">${icon}</div>
+        display:inline-flex;align-items:center;gap:3px;
+        background:#0F172A;border:1px solid rgba(56,189,248,0.35);
+        padding:1.5px 4.5px;border-radius:3px;
+        color:#38BDF8;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;
+        box-shadow:0 2px 6px rgba(0,0,0,0.6);
+      ">
+        <span style="width:4px;height:4px;border-radius:50%;background:#38BDF8;"></span>
+        <span>${label}</span>
+      </div>
     `,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
+    iconSize: [50, 18],
+    iconAnchor: [25, 9],
   });
 }
 
@@ -553,122 +542,111 @@ export function EmergencyMap({ onSelectIncident }: Props) {
             </>
           ) : (
             <>
-              <Moon className="w-3.5 h-3.5 text-blue-400" />
-              <span>Dark Tactical</span>
+              <Moon className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <span>Dark Matter</span>
             </>
           )}
         </button>
 
         {/* Layer Visibility Toggles */}
         <div
-          className="flex items-center gap-1 p-1 rounded-xl shadow-lg backdrop-blur-md"
-          style={{
-            background: 'hsl(222,47%,10%,0.92)',
-            border: '1px solid hsl(217,33%,22%)',
-          }}
+          className="flex items-center gap-1 p-1 rounded-lg shadow-lg backdrop-blur-md bg-[#0B0F17]/90 border border-[#1E293B]"
         >
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, incidents: !p.incidents }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded text-[11px] font-mono font-medium transition flex items-center gap-1.5 ${
               visibleLayers.incidents
-                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30'
                 : 'text-slate-500 hover:text-slate-300'
             }`}
             title="Toggle Incidents"
           >
-            <Flame className="w-3 h-3 text-rose-400" />
-            <span>{activeIncidentsCount}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+            <span>Incidents ({activeIncidentsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, units: !p.units }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded text-[11px] font-mono font-medium transition flex items-center gap-1.5 ${
               visibleLayers.units
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                ? 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30'
                 : 'text-slate-500 hover:text-slate-300'
             }`}
             title="Toggle Units"
           >
-            <Car className="w-3 h-3 text-blue-400" />
-            <span>{activeUnitsCount}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#38BDF8]" />
+            <span>Fleet ({activeUnitsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, roads: !p.roads }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded text-[11px] font-mono font-medium transition flex items-center gap-1.5 ${
               visibleLayers.roads
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30'
                 : 'text-slate-500 hover:text-slate-300'
             }`}
             title="Toggle Road Network"
           >
-            <span>🛣️</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span>Roads</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, zones: !p.zones }))}
-            className={`px-2 py-1 rounded-lg text-[11px] font-bold transition flex items-center gap-1 ${
+            className={`px-2 py-1 rounded text-[11px] font-mono font-medium transition flex items-center gap-1.5 ${
               visibleLayers.zones
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
                 : 'text-slate-500 hover:text-slate-300'
             }`}
             title="Toggle Hazard Zones"
           >
-            <AlertTriangle className="w-3 h-3 text-amber-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span>Zones</span>
           </button>
         </div>
       </div>
 
       {/* ── High-Contrast Legend (Bottom-Left) ── */}
       <div
-        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-2xl text-xs shadow-2xl backdrop-blur-md transition-all"
-        style={{
-          background: 'hsl(222,47%,8%,0.94)',
-          border: '1px solid hsl(217,33%,22%)',
-          maxWidth: '220px',
-        }}
+        className="absolute bottom-4 left-4 z-[1000] p-2.5 rounded-lg text-xs shadow-2xl backdrop-blur-md transition-all bg-[#0B0F17]/95 border border-[#1E293B]"
+        style={{ maxWidth: '210px' }}
       >
-        <p className="font-extrabold text-white text-[11px] uppercase tracking-wider mb-2 flex items-center justify-between">
-          <span>TACTICAL MAP INTEL</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-mono text-[10px] font-semibold text-slate-300 uppercase tracking-wider">Map Telemetry</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        </div>
 
-        <div className="space-y-1.5 text-[11px]">
+        <div className="space-y-1.5 text-[10px] font-sans">
           <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-rose-600 border border-rose-300 shadow-[0_0_8px_#f43f5e] shrink-0" />
-            <span className="text-slate-200 font-semibold">Critical SOS Emergency</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-full bg-amber-500 border border-amber-300 shrink-0" />
-            <span className="text-slate-300">High / Medium Incident</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-rose-300 shrink-0" />
+            <span className="text-slate-200">Critical / SOS Emergency</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-base leading-none">🚑⛵</span>
-            <span className="text-slate-300">Rescue Units (Ambulance / Boat)</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-300 shrink-0" />
+            <span className="text-slate-300">High / Advisory Incident</span>
           </div>
 
-          <div className="pt-1 border-t border-slate-800 space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 rounded bg-emerald-500 shadow-[0_0_6px_#10b981]" />
-              <span className="text-emerald-400 font-bold text-[10px]">ROAD OPEN (SAFE)</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1 rounded bg-amber-500" />
-              <span className="text-amber-400 font-bold text-[10px]">ROAD SLOW / WATERLOGGED</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-1.5 rounded bg-rose-600 shadow-[0_0_8px_#ef4444]" style={{ border: '1px dashed #fff' }} />
-              <span className="text-rose-400 font-bold text-[10px]">ROAD CLOSED (SUBMERGED)</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="px-1 py-0.2 rounded bg-slate-800 border border-slate-700 text-slate-300 font-mono text-[9px]">UNIT</span>
+            <span className="text-slate-300">Active Field Responder</span>
           </div>
 
-          <div className="pt-1 border-t border-slate-800 flex items-center gap-2">
-            <div className="w-4 h-3 rounded bg-amber-500/20 border border-dashed border-amber-400" />
-            <span className="text-amber-300 font-medium text-[10px]">Comms Degraded Sector</span>
+          <div className="pt-1 border-t border-[#1E293B] space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 rounded bg-emerald-500" />
+              <span className="text-emerald-400 font-mono font-medium">Road Open</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 rounded bg-amber-500" />
+              <span className="text-amber-400 font-mono font-medium">Road Constrained</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 rounded bg-rose-500" style={{ borderBottom: '1px dashed #fff' }} />
+              <span className="text-rose-400 font-mono font-medium">Road Submerged</span>
+            </div>
           </div>
         </div>
       </div>
