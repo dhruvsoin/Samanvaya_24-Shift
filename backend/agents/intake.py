@@ -1,24 +1,22 @@
 """
-agents — AI agents for Samanvaya flood response.
+Compatibility re-export for agents.intake.
 """
-from .base import Agent, AgentRunner
-from .intake import (
+from app.agents.intake import (  # noqa: F401
     BaseLLM,
     ExtractedIncident,
     IntakeAgent,
     OllamaLLM,
     RuleBasedLLM,
     get_llm,
+    haversine_distance_m,
 )
 
 __all__ = [
-    "Agent",
-    "AgentRunner",
     "BaseLLM",
     "ExtractedIncident",
     "IntakeAgent",
     "OllamaLLM",
     "RuleBasedLLM",
     "get_llm",
+    "haversine_distance_m",
 ]
-
