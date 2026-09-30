@@ -14,11 +14,12 @@ Per contracts/endpoints.md:
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
 
 from ..auth import require_crew
 from ..bus import bus
 from ..clock import clock
-from ..models import CrewProblemRequest, CrewRespondRequest, CrewStatusRequest
+from ..models import CrewProblemRequest, CrewRespondRequest, CrewStatusRequest, Assignment, Unit
 from ..state import state
 
 router = APIRouter(prefix="/crew", tags=["Crew"])
@@ -35,8 +36,8 @@ def _cache(client_request_id: str, response: dict) -> None:
     _idempotency_cache[client_request_id] = response
 
 
-@router.get("/assignment")
-def get_assignment(claims=Depends(require_crew)) -> dict | None:
+@router.get("/assignment", response_model=Optional[Assignment], response_model_by_alias=True)
+def get_assignment(claims=Depends(require_crew)):
     """Returns the active (sent/accepted) assignment for this crew's unit."""
     unit_id = claims.get("unit_id")
     assignments = state.get_assignments_for_unit(unit_id)
@@ -47,12 +48,12 @@ def get_assignment(claims=Depends(require_crew)) -> dict | None:
     return active
 
 
-@router.post("/assignment/{assignment_id}/respond")
+@router.post("/assignment/{assignment_id}/respond", response_model=Assignment, response_model_by_alias=True)
 def respond_to_assignment(
     assignment_id: str,
     body: CrewRespondRequest,
     claims=Depends(require_crew),
-) -> dict:
+):
     """
     Crew accepts or declines an assignment.
     Emits: assignment.accepted or assignment.declined.
@@ -86,8 +87,8 @@ def respond_to_assignment(
     return assignment
 
 
-@router.post("/status")
-def crew_status(body: CrewStatusRequest, claims=Depends(require_crew)) -> dict:
+@router.post("/status", response_model=Unit, response_model_by_alias=True)
+def crew_status(body: CrewStatusRequest, claims=Depends(require_crew)):
     """
     Crew reports their own status transition (en_route / arrived / task_complete).
     Emits: unit.status_changed.
@@ -123,8 +124,8 @@ def crew_status(body: CrewStatusRequest, claims=Depends(require_crew)) -> dict:
     return unit
 
 
-@router.post("/problem")
-def crew_problem(body: CrewProblemRequest, claims=Depends(require_crew)) -> dict:
+@router.post("/problem", response_model=dict, response_model_by_alias=True)
+def crew_problem(body: CrewProblemRequest, claims=Depends(require_crew)):
     """
     Crew reports a field problem (road blocked, vehicle stuck, other).
     Emits: agent.activity so the operator sees it.

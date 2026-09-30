@@ -651,8 +651,14 @@ class ApprovalDecisionRequest(_Base):
     note: Optional[str] = None             # optional
 
 
+class PhoneInLocation(_Base):
+    lat: float
+    lng: float
+    label: str
+
+
 class PhoneInRequest(_Base):
-    location: dict                         # {lat, lng, label}
+    location: PhoneInLocation              # {lat, lng, label}
     type: IncidentType
     people_affected: int
     language: Language
@@ -735,9 +741,9 @@ class DecisionLogEntry(_Base):
     agent: Union[AgentName, Literal["operator"]]
     decision: str
     reason: str
-    incident_id: Optional[str] = None
-    plan_id: Optional[str] = None
-    approval_id: Optional[str] = None
+    incident_id: Optional[str]
+    plan_id: Optional[str]
+    approval_id: Optional[str]
 
 
 class CommsLogRecipient(_Base):
@@ -753,4 +759,4 @@ class CommsLogEntry(_Base):
     recipient: CommsLogRecipient
     text: str
     delivery: Literal["sent", "delivered", "failed"]
-    zone_id: Optional[str] = None
+    zone_id: Optional[str]

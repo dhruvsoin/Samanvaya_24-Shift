@@ -11,19 +11,19 @@ Per contracts/endpoints.md:
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, Form, File, HTTPException, UploadFile, status
 
 from ..auth import create_reporter_session, require_reporter
 from ..bus import bus
 from ..clock import clock
-from ..models import ReporterMessageRequest, ReporterSessionRequest
+from ..models import ReporterMessageRequest, ReporterSessionRequest, ReporterSession, ReporterMessageResponse
 from ..state import state
 
 router = APIRouter(prefix="/reporter", tags=["Reporter"])
 
 
-@router.post("/session")
-def create_session(body: ReporterSessionRequest) -> dict:
+@router.post("/session", response_model=ReporterSession, response_model_by_alias=True)
+def create_session(body: ReporterSessionRequest):
     """
     Creates an anonymous reporter session.
     Returns: ReporterSession { sessionId, token, language }
@@ -31,9 +31,9 @@ def create_session(body: ReporterSessionRequest) -> dict:
     return create_reporter_session(body.language or "en")
 
 
-@router.post("/message")
+@router.post("/message", response_model=ReporterMessageResponse, response_model_by_alias=True)
 def send_message(body: ReporterMessageRequest,
-                 claims=Depends(require_reporter)) -> dict:
+                 claims=Depends(require_reporter)):
     """
     Reporter sends a text message.
     Returns: { messageId }  (reply arrives on WS channel).
@@ -73,12 +73,12 @@ def send_message(body: ReporterMessageRequest,
     return {"messageId": message_id}
 
 
-@router.post("/voice")
+@router.post("/voice", response_model=ReporterMessageResponse, response_model_by_alias=True)
 async def send_voice(
     sessionId: str = Form(...),
-    audio: UploadFile | None = None,
+    audio: UploadFile = File(...),
     claims=Depends(require_reporter),
-) -> dict:
+):
     """
     Reporter sends a voice note (multipart: sessionId + audio file).
     Returns: { messageId }  (transcribed reply arrives on WS channel).

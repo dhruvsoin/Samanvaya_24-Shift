@@ -11,21 +11,22 @@ Per contracts/endpoints.md:
 """
 import asyncio
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import List
 
 from ..auth import require_operator
 from ..clock import clock
-from ..models import ApprovalDecisionRequest
+from ..models import ApprovalDecisionRequest, Approval
 from ..state import state
 
 router = APIRouter(prefix="/approvals", tags=["Approvals"])
 
 
-@router.get("")
+@router.get("", response_model=list[Approval], response_model_by_alias=True)
 def get_approvals(
     approval_status: str | None = Query(None, alias="status"),
     status_param: str | None = Query(None, alias="approval_status"),
     _=Depends(require_operator),
-) -> list[dict]:
+):
     """
     Returns approvals, optionally filtered by status.
     Query param: ?status=pending (or ?approval_status=pending)
@@ -34,12 +35,12 @@ def get_approvals(
     return state.get_approvals(st)
 
 
-@router.post("/{approval_id}/decision")
+@router.post("/{approval_id}/decision", response_model=Approval, response_model_by_alias=True)
 async def post_decision(
     approval_id: str,
     body: ApprovalDecisionRequest,
     claims=Depends(require_operator),
-) -> dict:
+):
     """
     Operator decides on an approval (approve, reject, or choose_other with optionId).
     Records decidedBy from token and decidedAt from scenario clock.

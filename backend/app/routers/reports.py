@@ -16,6 +16,7 @@ from ..auth import require_operator_or_reviewer
 from ..bus import bus
 from ..clock import clock
 from ..state import state
+from ..models import AfterActionReport, CommsLogEntry, DecisionLogEntry
 
 router = APIRouter(tags=["Reports"])
 
@@ -233,8 +234,8 @@ def compute_baseline_comparison(
     ]
 
 
-@router.get("/reports/after-action")
-def after_action_report(_=Depends(require_operator_or_reviewer)) -> dict:
+@router.get("/reports/after-action", response_model=AfterActionReport, response_model_by_alias=True)
+def after_action_report(_=Depends(require_operator_or_reviewer)):
     """
     After-action report. Shape: AfterActionReport from contracts/types.ts.
     Includes:
@@ -352,13 +353,13 @@ def after_action_report(_=Depends(require_operator_or_reviewer)) -> dict:
     }
 
 
-@router.get("/comms/log")
-def comms_log(_=Depends(require_operator_or_reviewer)) -> list[dict]:
+@router.get("/comms/log", response_model=list[CommsLogEntry], response_model_by_alias=True)
+def comms_log(_=Depends(require_operator_or_reviewer)):
     """Comms log. Returns all sent, delivered, and channel-switched communications."""
     return state.get_comms_log()
 
 
-@router.get("/decisions")
-def decisions(_=Depends(require_operator_or_reviewer)) -> list[dict]:
+@router.get("/decisions", response_model=list[DecisionLogEntry], response_model_by_alias=True)
+def decisions(_=Depends(require_operator_or_reviewer)):
     """Decision log. Returns recorded operational decisions with agent and rationale."""
     return state.get_decision_log()
