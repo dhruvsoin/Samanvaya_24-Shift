@@ -65,21 +65,21 @@ function UnitRow({ unit }: { unit: Unit }) {
 
   return (
     <div
-      className="p-2 rounded bg-white border border-slate-200 flex items-center gap-2.5 hover:border-slate-300 transition-colors shadow-none"
+      className="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center gap-2.5 hover:border-slate-300 hover:shadow-xs transition-all shadow-none"
       id={`unit-row-${unit.unitId}`}
     >
-      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+      <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
         {iconText}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-semibold text-slate-900">{unit.unitId}</p>
+          <p className="text-xs font-bold text-slate-900">{unit.unitId}</p>
           <UnitStatusBadge status={unit.status} />
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-600 mt-0.5">
-          <span className="truncate">{unit.name}</span>
+        <div className="flex items-center justify-between text-[11px] text-slate-500 mt-0.5">
+          <span className="truncate font-medium">{unit.name}</span>
           {assignment && (
-            <span className="font-mono text-blue-600 ml-1 shrink-0 font-medium">
+            <span className="font-mono text-blue-600 ml-1 shrink-0 font-bold bg-blue-50 px-1 rounded">
               → {assignment.incidentId}
             </span>
           )}

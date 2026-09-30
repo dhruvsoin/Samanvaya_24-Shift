@@ -1,6 +1,7 @@
 /**
  * IncidentQueue — Clean Enterprise Light left panel (Stripe/Gov-Tech style).
  */
+import { useState } from 'react';
 import { Phone, MapPin, Users } from 'lucide-react';
 import { useAppStore } from '@/store';
 import { SeverityBadge, INCIDENT_TYPE_LABELS } from '@/components/common/StatusBadges';
@@ -25,53 +26,80 @@ interface Props {
 
 export function IncidentQueue({ isReadOnly, selectedId, onSelectIncident, onPhoneIn }: Props) {
   const incidentsById = useAppStore((s) => s.incidentsById);
-  const activeIncidents = sortBySeverity(
+  const [filter, setFilter] = useState<'all' | 'critical' | 'rescue' | 'medical'>('all');
+
+  const allActive = sortBySeverity(
     Object.values(incidentsById).filter((i) => i.status !== 'closed' && i.status !== 'resolved')
   );
+
+  const activeIncidents = allActive.filter((i) => {
+    if (filter === 'critical') return i.severity === 'critical';
+    if (filter === 'rescue') return i.type === 'trapped_person' || i.type === 'flooded_home';
+    if (filter === 'medical') return i.type === 'medical';
+    return true;
+  });
+
   const closedCount = Object.values(incidentsById).filter(
     (i) => i.status === 'closed' || i.status === 'resolved'
   ).length;
 
   return (
-    <div className="flex flex-col h-full bg-slate-50 border-r border-slate-200 select-none">
+    <div className="flex flex-col h-full bg-slate-50/60 border-r border-slate-200 select-none">
       {/* Panel header */}
-      <div className="px-3.5 py-2.5 flex items-center justify-between shrink-0 border-b border-slate-200 bg-white">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-700">Incident Queue</h2>
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-              {activeIncidents.length} Active
-            </span>
+      <div className="p-3 shrink-0 border-b border-slate-200 bg-white space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800">Incident Queue</h2>
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                {allActive.length} Active
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              {closedCount} resolved mission{closedCount === 1 ? '' : 's'}
+            </p>
           </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">
-            {closedCount} resolved mission{closedCount === 1 ? '' : 's'}
-          </p>
+          {!isReadOnly && (
+            <button
+              onClick={onPhoneIn}
+              id="btn-phone-in"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all hover:shadow-sm cursor-pointer"
+              title="Log a phone-in incident"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>Phone-In</span>
+            </button>
+          )}
         </div>
-        {!isReadOnly && (
-          <button
-            onClick={onPhoneIn}
-            id="btn-phone-in"
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors"
-            title="Log a phone-in incident"
-          >
-            <Phone className="w-3.5 h-3.5" />
-            <span>Phone-In</span>
-          </button>
-        )}
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-1">
+          {(['all', 'critical', 'rescue', 'medical'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-all cursor-pointer ${
+                filter === f
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Incident list */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+      <div className="flex-1 overflow-y-auto p-2 space-y-2">
         {activeIncidents.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-2 px-4 py-8 text-center">
-            <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 font-semibold text-xs">
+            <div className="w-9 h-9 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 font-bold text-sm">
               ✓
             </div>
-            <p className="text-xs font-semibold text-slate-800">All Sectors Operational</p>
+            <p className="text-xs font-bold text-slate-800">No Incidents in Filter</p>
             <p className="text-[11px] text-slate-500">
-              {import.meta.env.VITE_USE_MOCKS === 'true'
-                ? 'Start the timeline scrubber to stream incoming incidents'
-                : 'Awaiting dispatch events…'}
+              {filter !== 'all' ? 'Try selecting "All" to view all active emergency cases' : 'Awaiting dispatch events…'}
             </p>
           </div>
         ) : (
@@ -102,10 +130,10 @@ function IncidentCard({ incident, isSelected, onClick }: {
     <button
       onClick={onClick}
       id={`incident-card-${incident.incidentId}`}
-      className={`w-full text-left p-2.5 rounded border transition-all relative overflow-hidden group shadow-xs ${
+      className={`w-full text-left p-3 rounded-xl border transition-all relative overflow-hidden group shadow-xs cursor-pointer ${
         isSelected
-          ? 'bg-blue-50/70 border-blue-500 ring-1 ring-blue-500'
-          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/60'
+          ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-500/20 shadow-sm'
+          : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
       }`}
     >
       {/* Accent left indicator */}
@@ -121,39 +149,44 @@ function IncidentCard({ incident, isSelected, onClick }: {
         }`}
       />
 
-      <div className="pl-1">
+      <div className="pl-1.5 space-y-1.5">
         {/* Header row: Type + Severity Badge */}
-        <div className="flex items-center justify-between gap-1 mb-1">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-medium">
-            {typeLabel}
-          </span>
+        <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {isCritical && <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse shrink-0" />}
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 font-semibold truncate">
+              {typeLabel}
+            </span>
+          </div>
           <SeverityBadge severity={incident.severity} />
         </div>
 
         {/* Location Title */}
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
-          <p className="text-xs font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+        <div className="flex items-center gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 group-hover:text-blue-600 transition-colors" />
+          <p className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
             {incident.location.label}
           </p>
         </div>
 
         {/* Telemetry Row: ID, Affected, Units */}
         <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px] text-slate-500">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-slate-600">{incident.incidentId}</span>
-            <span className="flex items-center gap-1">
+          <div className="flex items-center gap-2 font-mono text-[10px]">
+            <span className="text-slate-600 font-semibold">{incident.incidentId}</span>
+            <span className="flex items-center gap-1 text-slate-600">
               <Users className="w-3 h-3 text-slate-400" />
               <span>{incident.peopleAffected}</span>
             </span>
           </div>
 
           {incident.assignedUnitIds.length > 0 ? (
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
               {incident.assignedUnitIds.join(', ')}
             </span>
           ) : (
-            <span className="text-[10px] font-mono text-amber-700 font-medium">Pending</span>
+            <span className="text-[10px] font-mono text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+              Pending Dispatch
+            </span>
           )}
         </div>
       </div>

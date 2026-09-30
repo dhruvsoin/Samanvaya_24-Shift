@@ -509,12 +509,26 @@ export function EmergencyMap({ onSelectIncident }: Props) {
       {/* Map DOM Canvas */}
       <div ref={containerRef} className="absolute inset-0" />
 
+      {/* ── Top-Left Sector HUD Badge ── */}
+      <div className="absolute top-3 left-12 z-[1000] hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl glass-panel text-slate-800 text-xs shadow-md">
+        <div className="flex items-center gap-1.5 font-semibold text-slate-900">
+          <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+          <span>Sector 4</span>
+        </div>
+        <div className="h-3.5 w-px bg-slate-300" />
+        <span className="text-[11px] text-slate-500 font-medium">Adyar River Estuary</span>
+        <div className="h-3.5 w-px bg-slate-300" />
+        <div className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+          <span>Surge: +1.4m</span>
+        </div>
+      </div>
+
       {/* ── Top Floating Toolbar ── */}
       <div className="absolute top-3 right-3 z-[1000] flex items-center gap-2">
         {/* Recenter View Button */}
         <button
           onClick={handleRecenter}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 glass-panel hover:bg-white transition shadow-sm cursor-pointer"
           title="Auto-fit all active emergency incidents and responder units"
         >
           <Crosshair className="w-3.5 h-3.5 text-blue-600" />
@@ -524,7 +538,7 @@ export function EmergencyMap({ onSelectIncident }: Props) {
         {/* Map Mode Toggle */}
         <button
           onClick={() => setMapMode(mapMode === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 glass-panel hover:bg-white transition shadow-sm cursor-pointer"
           title={mapMode === 'light' ? 'Switch to Dark Mode map' : 'Switch to Light Mode map'}
         >
           {mapMode === 'light' ? (
@@ -541,56 +555,56 @@ export function EmergencyMap({ onSelectIncident }: Props) {
         </button>
 
         {/* Layer Visibility Toggles */}
-        <div className="flex items-center gap-1 p-1 rounded-lg shadow-sm bg-white border border-slate-200">
+        <div className="flex items-center gap-1 p-1 rounded-xl shadow-sm glass-panel">
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, incidents: !p.incidents }))}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.incidents
-                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-rose-500 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Incidents"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.incidents ? 'bg-white' : 'bg-rose-600'}`} />
             <span>Incidents ({activeIncidentsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, units: !p.units }))}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.units
-                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Units"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.units ? 'bg-white' : 'bg-blue-600'}`} />
             <span>Fleet ({activeUnitsCount})</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, roads: !p.roads }))}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.roads
-                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Road Network"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.roads ? 'bg-white' : 'bg-emerald-600'}`} />
             <span>Roads</span>
           </button>
 
           <button
             onClick={() => setVisibleLayers((p) => ({ ...p, zones: !p.zones }))}
-            className={`px-2 py-1 rounded text-[11px] font-medium transition flex items-center gap-1.5 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer ${
               visibleLayers.zones
-                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
             title="Toggle Hazard Zones"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+            <span className={`w-1.5 h-1.5 rounded-full ${visibleLayers.zones ? 'bg-white' : 'bg-amber-600'}`} />
             <span>Zones</span>
           </button>
         </div>
@@ -598,44 +612,44 @@ export function EmergencyMap({ onSelectIncident }: Props) {
 
       {/* ── Legend (Bottom-Left) ── */}
       <div
-        className="absolute bottom-4 left-4 z-[1000] p-2.5 rounded-lg text-xs shadow-sm bg-white border border-slate-200"
-        style={{ maxWidth: '210px' }}
+        className="absolute bottom-4 left-4 z-[1000] p-3 rounded-xl text-xs shadow-md glass-panel"
+        style={{ maxWidth: '220px' }}
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-semibold text-slate-700 uppercase tracking-wider">Map Legend</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Tactical Legend</span>
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         </div>
 
         <div className="space-y-1.5 text-[10px] font-sans">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 border border-rose-300 shrink-0" />
-            <span className="text-slate-700">Critical / SOS Emergency</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 border border-rose-300 shrink-0 shadow-xs" />
+            <span className="text-slate-700 font-medium">Critical / SOS Emergency</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-300 shrink-0" />
-            <span className="text-slate-700">High / Advisory Incident</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 border border-amber-300 shrink-0 shadow-xs" />
+            <span className="text-slate-700 font-medium">High / Advisory Incident</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-1 py-0.2 rounded bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[9px] font-semibold">UNIT</span>
-            <span className="text-slate-700">Field Responder</span>
+            <span className="px-1.5 py-0.5 rounded bg-blue-100 border border-blue-200 text-blue-800 font-mono text-[9px] font-bold">UNIT</span>
+            <span className="text-slate-700 font-medium">Field Responder</span>
           </div>
 
-          <div className="pt-1.5 border-t border-slate-100 space-y-1">
+          <div className="pt-2 border-t border-slate-200/80 space-y-1">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 rounded bg-emerald-600" />
-              <span className="text-emerald-700 font-medium">Road Open</span>
+              <div className="w-4 h-1 rounded-full bg-emerald-500" />
+              <span className="text-emerald-700 font-semibold">Road Open</span>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 rounded bg-amber-600" />
-              <span className="text-amber-700 font-medium">Road Slow</span>
+              <div className="w-4 h-1 rounded-full bg-amber-500" />
+              <span className="text-amber-700 font-semibold">Road Slow (Flooded)</span>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 rounded bg-rose-600" style={{ borderBottom: '1px dashed #BE123C' }} />
-              <span className="text-rose-700 font-medium">Road Closed</span>
+              <div className="w-4 h-1 rounded-full bg-rose-600" />
+              <span className="text-rose-700 font-semibold">Road Impassable</span>
             </div>
           </div>
         </div>

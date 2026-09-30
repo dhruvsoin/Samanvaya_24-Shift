@@ -64,6 +64,49 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* ─── Rich Atmospheric & Background Utilities ─── */
+.bg-grid-dots {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-grid-lines {
+  background-size: 32px 32px;
+  background-image: linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.02);
+}
+
+.glass-dock {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.glass-subtle {
+  background: rgba(248, 250, 252, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
 /* ─── Leaflet Clean Light Theme Overrides ─── */
 .leaflet-container {
   background: #F1F5F9 !important;
@@ -74,9 +117,9 @@ body {
   background: #FFFFFF !important;
   color: #0F172A !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 6px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-  padding: 2px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
 }
 
 .leaflet-popup-tip {
@@ -88,6 +131,7 @@ body {
   background-color: #FFFFFF !important;
   color: #334155 !important;
   border-bottom: 1px solid #E2E8F0 !important;
+  transition: all 0.15s ease !important;
 }
 
 .leaflet-bar a:hover {

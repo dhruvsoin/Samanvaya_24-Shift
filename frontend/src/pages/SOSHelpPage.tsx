@@ -531,12 +531,12 @@ export function SOSHelpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans bg-grid-dots relative">
       {/* ── Top Emergency Header ── */}
-      <header className="px-4 py-2.5 bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+      <header className="px-4 py-2.5 bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0 shadow-xs">
               <ShieldAlert className="w-4 h-4" />
             </span>
             <div className="min-w-0">
@@ -573,6 +573,28 @@ export function SOSHelpPage() {
 
       {/* ── Main Container ── */}
       <main className="flex-1 p-4 max-w-2xl w-full mx-auto flex flex-col gap-4">
+        {/* Cinematic Flood Rescue Hero Banner */}
+        <div className="relative rounded-2xl overflow-hidden shadow-lg border border-slate-200/90">
+          <div 
+            className="h-44 sm:h-52 w-full bg-cover bg-center bg-no-repeat relative"
+            style={{ backgroundImage: "url('/assets/flood_rescue_hero.jpg')" }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4 text-white">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-600/90 text-[10px] font-bold uppercase tracking-wider mb-1.5 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                Live Rescue Dispatch
+              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-white leading-tight">
+                Emergency Flood Rescue & Public Evacuation
+              </h2>
+              <p className="text-xs text-slate-200 mt-1 max-w-md line-clamp-2">
+                Real-time geo-located rescue boats and medical teams deployed across Chennai sector zones.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Language Selector Bar */}
         <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs shadow-xs">
           <div className="flex items-center gap-2 text-slate-700 font-medium">

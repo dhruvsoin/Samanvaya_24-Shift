@@ -43,26 +43,26 @@ export function AgentStream() {
             return (
               <div
                 key={item.id}
-                className="p-2 rounded bg-white border border-slate-200 text-xs transition-colors hover:border-slate-300 shadow-none"
+                className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs transition-all hover:border-slate-300 hover:shadow-xs shadow-none space-y-1"
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between">
                   <span
-                    className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider"
                     style={{ color: theme.text, background: theme.bg, border: `1px solid ${theme.border}` }}
                   >
                     {item.agent}
                   </span>
-                  <span className="font-mono text-[10px] text-slate-400">
+                  <span className="font-mono text-[10px] text-slate-400 font-medium">
                     {timeStr}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-800 leading-relaxed font-sans font-normal">
+                <p className="text-[11px] text-slate-700 leading-relaxed font-sans font-medium">
                   {item.message}
                 </p>
                 {(item.incidentId || item.planId) && (
-                  <div className="mt-1 pt-1 border-t border-slate-100 flex items-center gap-1.5 font-mono text-[10px] text-blue-600">
+                  <div className="pt-1 border-t border-slate-100 flex items-center gap-1.5 font-mono text-[10px] text-blue-600">
                     <span className="text-slate-400 font-medium">REF:</span>
-                    <span className="font-medium">{[item.incidentId, item.planId].filter(Boolean).join(' · ')}</span>
+                    <span className="font-bold">{[item.incidentId, item.planId].filter(Boolean).join(' · ')}</span>
                   </div>
                 )}
               </div>

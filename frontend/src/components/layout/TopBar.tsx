@@ -61,18 +61,21 @@ export function TopBar({ wsStatus }: Props) {
   ];
 
   return (
-    <header className="flex items-center justify-between px-4 h-12 shrink-0 z-50 bg-white border-b border-slate-200 select-none shadow-xs">
+    <header className="flex items-center justify-between px-4 h-12 shrink-0 z-50 glass-panel sticky top-0 select-none shadow-xs">
       {/* Brand & Platform Identity */}
       <div className="flex items-center gap-3 shrink-0">
         <Link to="/command" className="flex items-center gap-2 group">
-          <div className="w-6 h-6 rounded bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 transition-colors group-hover:bg-blue-100">
-            <Radio className="w-3.5 h-3.5" />
+          <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+            <Radio className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-sm tracking-tight text-slate-900 font-sans">SAMANVAYA</span>
+          <div>
+            <span className="font-extrabold text-sm tracking-tight text-slate-900 font-sans">SAMANVAYA</span>
+            <span className="text-[10px] font-mono text-blue-600 font-semibold ml-1.5 px-1.5 py-0.5 rounded bg-blue-50 border border-blue-200">EOC</span>
+          </div>
         </Link>
-        <div className="h-4 w-px bg-slate-200" />
+        <div className="h-4 w-px bg-slate-200 hidden sm:block" />
         <span className="text-xs text-slate-500 font-medium hidden sm:inline">
-          Operations Center <span className="text-blue-600 font-semibold">· Sector 7</span>
+          National Coordination <span className="text-slate-800 font-semibold">· Sector 4 (Live)</span>
         </span>
       </div>
 

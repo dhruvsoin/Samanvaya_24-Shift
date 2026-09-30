@@ -3,7 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Shield, Radio, Users, AlertTriangle, Loader2, LifeBuoy, Activity, Flame, Droplets, ArrowRight } from 'lucide-react';
+import { 
+  Shield, Radio, Users, AlertTriangle, Loader2, LifeBuoy, 
+  Activity, Flame, Droplets, ArrowRight, Lock, User, 
+  MapPin, CheckCircle2, Waves, Zap, Compass 
+} from 'lucide-react';
 import { api } from '@/api/client';
 import { useAuthStore } from '@/store/auth';
 
@@ -19,7 +23,6 @@ const crewSchema = z.object({
 
 type OperatorForm = z.infer<typeof operatorSchema>;
 type CrewForm = z.infer<typeof crewSchema>;
-
 type Tab = 'operator' | 'crew' | 'guest';
 
 export function LoginPage() {
@@ -80,225 +83,326 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900 font-sans px-4 py-12">
-      <div className="w-full max-w-md space-y-4">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 shadow-xs">
-            <Shield className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Samanvaya EOC</h1>
-          <p className="text-xs text-slate-500">
-            Emergency Operations & Autonomous Coordination Platform
-          </p>
-        </div>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-10 font-sans overflow-x-hidden bg-slate-900">
+      {/* Background Image with layered atmospheric overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-luminosity scale-105 transition-transform duration-1000"
+        style={{ backgroundImage: "url('/assets/command_center_bg.jpg')" }}
+      />
+      
+      {/* Ambient gradient lighting and subtle dot grid */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900/90 to-blue-950/80 pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-dots opacity-20 pointer-events-none" />
+      
+      {/* Ambient glowing orbs */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* SOS Citizen Banner */}
-        <div className="p-3.5 rounded-xl bg-red-50/80 border border-red-200 flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-red-100 border border-red-200 flex items-center justify-center text-red-600 shrink-0">
-              <LifeBuoy className="w-5 h-5" />
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-red-950">Citizen in Distress?</p>
-              <p className="text-[11px] text-red-700">Immediate public safety & flood rescue</p>
-            </div>
-          </div>
-          <Link
-            to="/sos"
-            className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors shrink-0"
-          >
-            <span>SEND SOS</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        {/* Card */}
-        <div className="rounded-xl p-6 bg-white border border-slate-200 shadow-xs space-y-5">
-          {/* Tabs */}
-          <div className="flex rounded-lg p-1 bg-slate-100 border border-slate-200">
-            {([
-              { id: 'operator', label: 'EOC Command', icon: Shield },
-              { id: 'crew', label: 'Field Crew', icon: Users },
-              { id: 'guest', label: 'Observer', icon: Radio },
-            ] as { id: Tab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => { setTab(id); setError(null); }}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  tab === id
-                    ? 'bg-white text-slate-900 font-semibold shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{label}</span>
-              </button>
-            ))}
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        {/* Left Hero Column */}
+        <div className="lg:col-span-6 space-y-6 text-white text-center lg:text-left">
+          {/* Official badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 backdrop-blur-md text-blue-300 text-xs font-medium">
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
+            <Compass className="w-3.5 h-3.5 text-blue-400" />
+            <span>National Emergency Management System · NDMA Level 3</span>
           </div>
 
-          {/* Error message */}
-          {error && (
-            <div className="flex items-center gap-2.5 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
-              <span>{error}</span>
-            </div>
-          )}
+          <div className="space-y-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              SAMANVAYA <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">EOC</span>
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 max-w-lg font-normal leading-relaxed">
+              AI-assisted flood-response coordination, autonomous multi-agency resource allocation, and real-time citizen rescue operations.
+            </p>
+          </div>
 
-          {/* OPERATOR TAB */}
-          {tab === 'operator' && (
-            <form onSubmit={opForm.handleSubmit(handleOperatorLogin)} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Operator Username
-                </label>
-                <input
-                  {...opForm.register('username')}
-                  placeholder="operator"
-                  autoComplete="username"
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors"
-                />
-                {opForm.formState.errors.username && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {opForm.formState.errors.username.message}
-                  </p>
-                )}
+          {/* Feature Highlights Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-left">
+            <div className="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60 backdrop-blur-md space-y-1">
+              <div className="flex items-center gap-2 text-cyan-400">
+                <Zap className="w-4 h-4" />
+                <span className="text-xs font-semibold text-white">Sub-Second Dispatch</span>
+              </div>
+              <p className="text-[11px] text-slate-400">Autonomous route recalculation avoiding flooded road sectors.</p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-slate-800/40 border border-slate-700/60 backdrop-blur-md space-y-1">
+              <div className="flex items-center gap-2 text-blue-400">
+                <Waves className="w-4 h-4" />
+                <span className="text-xs font-semibold text-white">Hydrological Sensors</span>
+              </div>
+              <p className="text-[11px] text-slate-400">Live Adyar & Cooum floodwater depth predictive modeling.</p>
+            </div>
+          </div>
+
+          {/* Citizen Rescue Preview Tile */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-rose-950/40 to-slate-900/60 border border-rose-500/30 backdrop-blur-md flex items-center justify-between shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 shrink-0">
+                <LifeBuoy className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Password
-                </label>
-                <input
-                  {...opForm.register('password')}
-                  type="password"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-colors"
-                />
-                {opForm.formState.errors.password && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {opForm.formState.errors.password.message}
-                  </p>
-                )}
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Citizen Distress Portal</h4>
+                <p className="text-[11px] text-rose-300">Trapped in floodwaters or requiring medical evacuation?</p>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 shadow-xs transition-colors disabled:opacity-50"
-              >
-                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Sign In to Command Center
-              </button>
-              <p className="text-center text-xs text-slate-500">
-                Demo access: <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">operator</code> / <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">demo1234</code>
+            </div>
+            <Link
+              to="/sos"
+              className="px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-900/30 transition-all hover:scale-105 shrink-0"
+            >
+              <span>SEND SOS</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Operational live badge */}
+          <div className="flex items-center justify-center lg:justify-start gap-4 text-xs text-slate-400 pt-1">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Gateway: Online</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-blue-400" />
+              <span>Zone 4 (Chennai Central)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Glass Card (Login Terminal) */}
+        <div className="lg:col-span-6 w-full max-w-md mx-auto">
+          <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+            {/* Subtle top accent bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600" />
+
+            {/* Portal Header */}
+            <div className="text-center space-y-1">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 shadow-sm mb-2">
+                <Shield className="w-6 h-6" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900">Operations Sign In</h2>
+              <p className="text-xs text-slate-500">
+                Authenticate with authorized tactical credentials
               </p>
-            </form>
-          )}
+            </div>
 
-          {/* CREW TAB */}
-          {tab === 'crew' && (
-            <form onSubmit={crewForm.handleSubmit(handleCrewLogin)} className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-2">
-                  Select Unit Profile
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { code: 'AMB-01', label: 'Ambulance 01', icon: Activity },
-                    { code: 'BOAT-01', label: 'Rescue Boat 01', icon: LifeBuoy },
-                    { code: 'RES-01', label: 'Rescue Squad 01', icon: Flame },
-                    { code: 'PUMP-01', label: 'High-Vol Pump', icon: Droplets },
-                  ].map((preset) => {
-                    const Icon = preset.icon;
-                    const isSelected = crewForm.watch('unitCode') === preset.code;
-                    return (
-                      <button
-                        key={preset.code}
-                        type="button"
-                        onClick={() => {
-                          crewForm.setValue('unitCode', preset.code);
-                          crewForm.setValue('pin', '1111');
-                          handleCrewLogin({ unitCode: preset.code, pin: '1111' });
-                        }}
-                        className={`p-2.5 rounded-lg text-left border transition-all flex items-center gap-2 text-xs font-medium ${
-                          isSelected
-                            ? 'bg-blue-50 border-blue-500 text-blue-700 font-semibold shadow-xs'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 shrink-0 text-blue-600" />
-                        <span className="truncate">{preset.label}</span>
-                      </button>
-                    );
-                  })}
+            {/* Segmented Tab Controls */}
+            <div className="flex rounded-xl p-1 bg-slate-100 border border-slate-200">
+              {([
+                { id: 'operator', label: 'EOC Command', icon: Shield },
+                { id: 'crew', label: 'Field Crew', icon: Users },
+                { id: 'guest', label: 'Observer', icon: Radio },
+              ] as { id: Tab; label: string; icon: React.ElementType }[]).map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => { setTab(id); setError(null); }}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
+                    tab === id
+                      ? 'bg-white text-blue-700 shadow-sm border border-slate-200/80'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Error Banner */}
+            {error && (
+              <div className="flex items-center gap-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* OPERATOR TAB */}
+            {tab === 'operator' && (
+              <form onSubmit={opForm.handleSubmit(handleOperatorLogin)} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Operator Call Sign / Username
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input
+                      {...opForm.register('username')}
+                      placeholder="operator"
+                      autoComplete="username"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-xs transition-all"
+                    />
+                  </div>
+                  {opForm.formState.errors.username && (
+                    <p className="mt-1 text-xs text-rose-600 font-medium">
+                      {opForm.formState.errors.username.message}
+                    </p>
+                  )}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Unit Call Sign
-                </label>
-                <input
-                  {...crewForm.register('unitCode')}
-                  placeholder="e.g. AMB-01, BOAT-01"
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 uppercase font-mono transition-colors"
-                />
-                {crewForm.formState.errors.unitCode && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {crewForm.formState.errors.unitCode.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Terminal Security PIN
-                </label>
-                <input
-                  {...crewForm.register('pin')}
-                  type="password"
-                  maxLength={4}
-                  placeholder="1111"
-                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono tracking-widest transition-colors"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 shadow-xs transition-colors disabled:opacity-50"
-              >
-                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                Connect Field Terminal
-              </button>
-              <p className="text-center text-xs text-slate-500">
-                Default PIN: <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">1111</code>
-              </p>
-            </form>
-          )}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Security Passkey
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                    <input
+                      {...opForm.register('password')}
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 shadow-xs transition-all"
+                    />
+                  </div>
+                  {opForm.formState.errors.password && (
+                    <p className="mt-1 text-xs text-rose-600 font-medium">
+                      {opForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
 
-          {/* OBSERVER TAB */}
-          {tab === 'guest' && (
-            <div className="space-y-4">
-              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5 text-slate-600">
-                <p className="font-semibold text-slate-900">Read-Only Observer Access</p>
-                <p className="text-xs leading-relaxed text-slate-600">
-                  Access live incident map telemetry, dispatch event streams, and after-action review summaries in observer mode without operational write permissions.
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 transition-all hover:shadow-lg disabled:opacity-50 cursor-pointer"
+                >
+                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>Sign In as EOC Commander</span>
+                </button>
+
+                {/* 1-Click Quick Demo Pill */}
+                <div className="pt-1 flex items-center justify-between text-xs text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                  <span>Demo: <code className="font-semibold text-slate-800">operator</code> / <code className="font-semibold text-slate-800">demo1234</code></span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      opForm.setValue('username', 'operator');
+                      opForm.setValue('password', 'demo1234');
+                      handleOperatorLogin({ username: 'operator', password: 'demo1234' });
+                    }}
+                    className="text-blue-600 font-semibold hover:text-blue-800 text-xs underline cursor-pointer"
+                  >
+                    Quick Sign-In →
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* CREW TAB */}
+            {tab === 'crew' && (
+              <form onSubmit={crewForm.handleSubmit(handleCrewLogin)} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-2">
+                    Quick Unit Select:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { code: 'AMB-01', label: 'Ambulance 01', icon: Activity },
+                      { code: 'BOAT-01', label: 'Rescue Boat 01', icon: LifeBuoy },
+                      { code: 'RES-01', label: 'Rescue Squad 01', icon: Flame },
+                      { code: 'PUMP-01', label: 'High-Vol Pump', icon: Droplets },
+                    ].map((preset) => {
+                      const Icon = preset.icon;
+                      const isSelected = crewForm.watch('unitCode') === preset.code;
+                      return (
+                        <button
+                          key={preset.code}
+                          type="button"
+                          onClick={() => {
+                            crewForm.setValue('unitCode', preset.code);
+                            crewForm.setValue('pin', '1111');
+                            handleCrewLogin({ unitCode: preset.code, pin: '1111' });
+                          }}
+                          className={`p-2.5 rounded-xl text-left border transition-all flex items-center gap-2 text-xs font-medium cursor-pointer ${
+                            isSelected
+                              ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold shadow-xs'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <Icon className="w-4 h-4 shrink-0 text-blue-600" />
+                          <span className="truncate">{preset.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Unit Call Sign
+                  </label>
+                  <input
+                    {...crewForm.register('unitCode')}
+                    placeholder="e.g. AMB-01, BOAT-01"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono uppercase shadow-xs transition-all"
+                  />
+                  {crewForm.formState.errors.unitCode && (
+                    <p className="mt-1 text-xs text-rose-600 font-medium">
+                      {crewForm.formState.errors.unitCode.message}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Terminal PIN
+                  </label>
+                  <input
+                    {...crewForm.register('pin')}
+                    type="password"
+                    maxLength={4}
+                    placeholder="1111"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 font-mono tracking-widest shadow-xs transition-all"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>Access Field Terminal</span>
+                </button>
+                <p className="text-center text-xs text-slate-500">
+                  Default PIN: <code className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">1111</code>
                 </p>
+              </form>
+            )}
+
+            {/* OBSERVER TAB */}
+            {tab === 'guest' && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-2 text-slate-600">
+                  <p className="font-bold text-slate-900 flex items-center gap-2">
+                    <Radio className="w-4 h-4 text-blue-600" />
+                    Read-Only Telemetry Console
+                  </p>
+                  <p className="text-xs leading-relaxed text-slate-600">
+                    Observe active disaster dispatches, vehicle GPS tracks, live flood boundary maps, and plan decision audits in real time.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleDemoLogin}
+                  disabled={loading}
+                  className="w-full py-2.5 rounded-xl text-sm font-semibold bg-slate-900 hover:bg-slate-800 text-white flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                  <span>Enter Observer Console</span>
+                </button>
               </div>
-              <button
-                onClick={handleDemoLogin}
-                disabled={loading}
-                className="w-full py-2.5 rounded-lg text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-              >
-                {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Enter Observer Console
-              </button>
+            )}
+
+            {/* Security Notice Footer */}
+            <div className="text-center text-[11px] text-slate-400 flex items-center justify-center gap-1.5 pt-2 border-t border-slate-100">
+              <Shield className="w-3 h-3 text-slate-400" />
+              <span>TLS 1.3 Encrypted Session · National Disaster Mesh</span>
             </div>
-          )}
+          </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400">
-          Official Disaster Management Operations Network
-        </p>
       </div>
     </div>
   );
