@@ -41,7 +41,11 @@ class RouteAgent(Agent):
         """Returns the current cached ETAs."""
         return dict(self._cached_etas)
 
-    async def handle(self, event: dict) -> None:
+    def handle_sync(self, event: dict) -> dict[str, dict[str, Any]]:
+        """
+        Synchronous handling of route-affecting events.
+        Recomputes ETAs, caches them, and logs an agent.activity line.
+        """
         event_type = event.get("type")
         payload = event.get("payload", {})
 
@@ -78,7 +82,6 @@ class RouteAgent(Agent):
             rain_intensity=rain_intensity,
         )
 
-        old_etas = self._cached_etas
         self._cached_etas = new_etas
 
         # 3. Formulate one-sentence activity explanation
@@ -96,8 +99,12 @@ class RouteAgent(Agent):
 
         plan_id = payload.get("planId") or (state.get_current_plan() or {}).get("planId")
         self.log_activity(msg, plan_id=plan_id)
+        return new_etas
 
-        # 4. Notify listeners if ETAs changed or callback provided
+    async def handle(self, event: dict) -> None:
+        new_etas = self.handle_sync(event)
+
+        # Notify listeners if ETAs changed or callback provided
         if self.on_etas_updated:
             try:
                 res = self.on_etas_updated(new_etas)

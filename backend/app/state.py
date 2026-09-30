@@ -189,6 +189,9 @@ class AppState:
         with self._lock:
             return copy.deepcopy(self.plans)
 
+    def get_plans(self) -> list[dict]:
+        return self.get_plan_history()
+
     def get_plan_by_id(self, plan_id: str) -> dict | None:
         with self._lock:
             return copy.deepcopy(next((p for p in self.plans if p["planId"] == plan_id), None))

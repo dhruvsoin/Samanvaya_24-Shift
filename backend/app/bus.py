@@ -258,6 +258,12 @@ class EventBus:
             return []
         return self.get_events_since(last_id)
 
+    def clear_log(self) -> None:
+        """Clear the in-memory event log and reset sequence counter."""
+        with self._lock:
+            self._log.clear()
+            self._seq = 0
+
     def reset(self) -> None:
         """Reset the event bus state (for testing)."""
         with self._lock:
