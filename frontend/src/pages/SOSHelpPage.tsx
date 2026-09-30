@@ -429,7 +429,7 @@ export function SOSHelpPage() {
 
   const setIncident = useAppStore((s) => s.setIncident);
   const pushOpLog = useAppStore((s) => s.pushOpLog);
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isLoggedIn, logout } = useAuthStore();
 
   const t = I18N[language] || I18N.en;
 
@@ -563,7 +563,7 @@ export function SOSHelpPage() {
               <Phone className="w-3.5 h-3.5" />
               <span>{t.header.call112}</span>
             </a>
-            {isAuthenticated ? (
+            {isLoggedIn ? (
               <div className="flex items-center gap-2">
                 <Link
                   to="/command"
