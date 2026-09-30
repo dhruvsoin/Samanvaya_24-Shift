@@ -13,23 +13,40 @@ import json
 from pathlib import Path
 import pytest
 
-from backend.engine.graph import build_graph
-from backend.engine.rain import apply_rain
-from backend.engine.eta import compute_etas
-from backend.engine.allocate import solve
-from backend.engine.diff import diff_plans
+try:
+    from engine.graph import build_graph
+    from engine.rain import apply_rain
+    from engine.eta import compute_etas
+    from engine.allocate import solve
+    from engine.diff import diff_plans
+except ModuleNotFoundError:
+    from backend.engine.graph import build_graph
+    from backend.engine.rain import apply_rain
+    from backend.engine.eta import compute_etas
+    from backend.engine.allocate import solve
+    from backend.engine.diff import diff_plans
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
+SEED_DIR = Path(__file__).resolve().parent.parent.parent / "contracts" / "seed"
 
 
 @pytest.fixture
 def seed_data():
-    with open(ROOT_DIR / "seed" / "roads.json", "r", encoding="utf-8") as f:
+    with open(SEED_DIR / "roads.json", "r", encoding="utf-8") as f:
         roads = json.load(f)
-    with open(ROOT_DIR / "seed" / "units.json", "r", encoding="utf-8") as f:
+    with open(SEED_DIR / "units.json", "r", encoding="utf-8") as f:
         units = json.load(f)
-    with open(ROOT_DIR / "seed" / "incidents.json", "r", encoding="utf-8") as f:
-        incidents = json.load(f)
+    with open(SEED_DIR / "events.json", "r", encoding="utf-8") as f:
+        events = json.load(f)
+
+    incidents_map = {}
+    for evt in events:
+        if evt.get("type") in ("incident.assessed", "incident.reported"):
+            inc = evt.get("payload", {}).get("incident")
+            if inc and inc.get("incidentId") in ("INC-01", "INC-02", "INC-03"):
+                inc_id = inc["incidentId"]
+                if inc_id not in incidents_map or evt.get("type") == "incident.assessed":
+                    incidents_map[inc_id] = inc
+    incidents = [incidents_map[k] for k in sorted(incidents_map.keys())]
     return roads, units, incidents
 
 
