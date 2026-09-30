@@ -32,6 +32,8 @@ git+https://github.com/AI4Bharat/IndicTrans2.git
 # Utilities & Networking
 qrcode[pil]>=7.4.2
 requests>=2.32.0
+twilio>=9.0.0
+python-dotenv>=1.0.0
 
 # Testing
 pytest>=8.2.0

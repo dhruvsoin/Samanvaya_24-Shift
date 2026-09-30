@@ -24,6 +24,7 @@ MODULES_TO_VERIFY = [
     ("ollama", "Ollama Python Client"),
     ("faster_whisper", "Faster Whisper Audio Transcription"),
     ("qrcode", "QR Code Generation"),
+    ("twilio", "Twilio SMS Client"),
 ]
 
 
