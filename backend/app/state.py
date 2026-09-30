@@ -350,6 +350,32 @@ class AppState:
             })
         return incident_copy
 
+    def assess_incident(
+        self,
+        incident_id: str,
+        severity: str,
+        severity_score: int,
+        time_window_minutes: int,
+        publish: bool = True,
+    ) -> dict | None:
+        """
+        Marks an incident as assessed with severity, severityScore, and timeWindowMinutes,
+        and emits incident.assessed.
+        """
+        with self._lock:
+            incident = self.incidents.get(incident_id)
+            if incident is None:
+                return None
+            incident["status"] = "assessed"
+            incident["severity"] = severity
+            incident["severityScore"] = severity_score
+            incident["timeWindowMinutes"] = time_window_minutes
+            incident_copy = copy.deepcopy(incident)
+
+        if publish:
+            bus.publish("incident.assessed", {"incident": incident_copy})
+        return incident_copy
+
     def close_incident(
         self,
         incident_id: str,

@@ -1,0 +1,62 @@
+{
+  "type_base": {
+    "medical": 55,
+    "trapped_person": 55,
+    "flooded_home": 44,
+    "stranded_vehicle": 50,
+    "road_blocked": 25,
+    "other": 20
+  },
+  "people_multiplier": 3,
+  "people_max_bonus": 18,
+  "vulnerable_bonus": 10,
+  "vulnerable_keywords": [
+    "elderly",
+    "child",
+    "children",
+    "pregnant",
+    "disabled",
+    "senior",
+    "infant",
+    "baby"
+  ],
+  "rain_bonus": {
+    "light": 0,
+    "moderate": 5,
+    "heavy": 10,
+    "extreme": 15
+  },
+  "water_level_bonus": 6,
+  "water_level_keywords": [
+    "rising water",
+    "water rising",
+    "submerged",
+    "chest deep",
+    "waist deep",
+    "deep water",
+    "rapidly rising"
+  ],
+  "critical_condition_bonus": 20,
+  "critical_condition_keywords": [
+    "breathing difficulty",
+    "cannot breathe",
+    "cardiac",
+    "heart attack",
+    "unconscious",
+    "oxygen",
+    "severe bleeding",
+    "critical condition"
+  ],
+  "severity_thresholds": {
+    "critical": 80,
+    "high": 60,
+    "medium": 40
+  },
+  "time_window_minutes": {
+    "critical": 10,
+    "high_default": 20,
+    "high_stranded_vehicle": 25,
+    "medium": 40,
+    "low": 60
+  }
+}
