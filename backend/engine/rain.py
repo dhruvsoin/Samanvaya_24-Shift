@@ -2,7 +2,6 @@
 Samanvaya Engine - Rain Impact Assessment
 Applies meteorological precipitation intensity rules to the road network graph.
 """
-
 from typing import Any
 import json
 from pathlib import Path
@@ -23,7 +22,7 @@ def load_rain_rules() -> list[dict[str, Any]]:
 def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
     """
     Applies rain rules based on rain intensity ('none', 'light', 'moderate', 'heavy', 'extreme').
-    Modifies graph edge statuses and returns a list of RoadChange objects.
+    Modifies graph edge statuses and returns a list of RoadChange objects matching contracts/types.ts.
     """
     intensity = intensity.lower()
     rules = load_rain_rules()
@@ -32,13 +31,13 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
     # Map of road ID to edge endpoints
     road_map: dict[str, tuple[str, str, str, dict[str, Any]]] = {}
     for u, v, key, data in graph.edges(keys=True, data=True):
-        road_id = data.get("id", key)
+        road_id = data.get("roadId") or data.get("id") or key
         road_map[road_id] = (u, v, key, data)
 
     for rule in rules:
         target_conditions = [c.lower() for c in rule.get("condition", [])]
         target_road_id = rule.get("roadId")
-        new_status = rule.get("newStatus")
+        new_status = rule.get("newStatus") or rule.get("status")
         reason = rule.get("reason", f"Rain impact: {intensity}")
 
         if target_road_id in road_map:
@@ -50,20 +49,24 @@ def apply_rain(graph: nx.MultiGraph, intensity: str) -> list[dict[str, Any]]:
                     edge_data["status"] = new_status
                     changes.append({
                         "roadId": target_road_id,
+                        "status": new_status,
+                        "previousStatus": current_status,
+                        "reason": reason,
+                        # Aliases for backward compatibility
                         "oldStatus": current_status,
                         "newStatus": new_status,
-                        "reason": reason,
                     })
             else:
-                # If rain subsided and rule condition no longer met, restore to open if previously changed
                 default_status = rule.get("defaultStatus", "open")
                 if current_status != default_status:
                     edge_data["status"] = default_status
                     changes.append({
                         "roadId": target_road_id,
+                        "status": default_status,
+                        "previousStatus": current_status,
+                        "reason": f"Rain cleared: restored to {default_status}",
                         "oldStatus": current_status,
                         "newStatus": default_status,
-                        "reason": f"Conditions cleared; rain reduced to {intensity}",
                     })
 
     return changes

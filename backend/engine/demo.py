@@ -61,16 +61,26 @@ def print_plan(title: str, plan_result: dict, diffs: list[dict], rain_level: str
 
 def main():
     root = Path(__file__).resolve().parent.parent.parent
-    roads_path = root / "seed" / "roads.json"
-    units_path = root / "seed" / "units.json"
-    incidents_path = root / "seed" / "incidents.json"
+    roads_path = root / "contracts" / "seed" / "roads.json"
+    units_path = root / "contracts" / "seed" / "units.json"
+    events_path = root / "contracts" / "seed" / "events.json"
 
     with open(roads_path, "r", encoding="utf-8") as f:
         network = json.load(f)
     with open(units_path, "r", encoding="utf-8") as f:
         units = json.load(f)
-    with open(incidents_path, "r", encoding="utf-8") as f:
-        incidents = json.load(f)
+    with open(events_path, "r", encoding="utf-8") as f:
+        events = json.load(f)
+
+    incidents_map = {}
+    for evt in events:
+        if evt.get("type") in ("incident.assessed", "incident.reported"):
+            inc = evt.get("payload", {}).get("incident")
+            if inc and inc.get("incidentId") in ("INC-01", "INC-02", "INC-03"):
+                inc_id = inc["incidentId"]
+                if inc_id not in incidents_map or evt.get("type") == "incident.assessed":
+                    incidents_map[inc_id] = inc
+    incidents = [incidents_map[k] for k in sorted(incidents_map.keys())]
 
     # -------------------------------------------------------------
     # PHASE 1: Initial Dry Conditions -> Generate PLAN-001

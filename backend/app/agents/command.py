@@ -65,6 +65,16 @@ class CommandAgent(Agent):
         """
         previous_plan = state.get_current_plan()
 
+        # If previous plan exists and candidate plan has no real changes, do not publish
+        if previous_plan:
+            changes = candidate_plan.get("changes", [])
+            has_real_changes = any(
+                c.get("change") in ("added", "changed", "removed")
+                for c in changes
+            )
+            if not has_real_changes:
+                return None
+
         # 1. Evaluate approval rules
         needs_approval, reason, approval_data = evaluate_plan_approval(
             candidate_plan=candidate_plan,

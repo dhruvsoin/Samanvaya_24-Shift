@@ -53,13 +53,15 @@ from app.state import state
 
 # ── Fixtures ──────────────────────────────────────────────────────────
 
-@pytest.fixture(autouse=True)
-def clean_env():
-    """Full reset of bus, state, clock before and after each test."""
+@pytest.fixture(params=["stub", "real"], autouse=True)
+def clean_env(request, monkeypatch):
+    """Runs tests under both ENGINE_MODE=stub and ENGINE_MODE=real with full environment resets."""
+    monkeypatch.setenv("ENGINE_MODE", request.param)
+    monkeypatch.setenv("LLM_MODE", "scripted")
     bus.reset()
     state.reset()
     clock.reset()
-    yield
+    yield request.param
     bus.reset()
     state.reset()
     clock.reset()
