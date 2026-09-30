@@ -1,0 +1,35 @@
+[
+  {
+    "id": "INC-01",
+    "type": "flooded_home",
+    "severity": "critical",
+    "status": "reported",
+    "location": { "lat": 10.015, "lon": 76.320 },
+    "nearestNode": "N3",
+    "peopleCount": 4,
+    "reportedAt": "2026-09-30T09:01:14Z",
+    "timeWindowMinutes": 15
+  },
+  {
+    "id": "INC-02",
+    "type": "trapped",
+    "severity": "high",
+    "status": "reported",
+    "location": { "lat": 10.005, "lon": 76.305 },
+    "nearestNode": "N5",
+    "peopleCount": 2,
+    "reportedAt": "2026-09-30T09:01:45Z",
+    "timeWindowMinutes": 20
+  },
+  {
+    "id": "INC-03",
+    "type": "medical",
+    "severity": "high",
+    "status": "reported",
+    "location": { "lat": 10.000, "lon": 76.325 },
+    "nearestNode": "N6",
+    "peopleCount": 1,
+    "reportedAt": "2026-09-30T09:02:50Z",
+    "timeWindowMinutes": 20
+  }
+]
