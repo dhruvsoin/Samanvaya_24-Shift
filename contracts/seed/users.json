@@ -1,0 +1,22 @@
+{
+  "note": "DEMO ONLY. Seeded accounts. No signup, no reset.",
+  "operators": [
+    {
+      "username": "operator",
+      "password": "demo1234",
+      "displayName": "Duty Operator"
+    }
+  ],
+  "crewPin": "1111",
+  "crewCodes": [
+    "AMB-01",
+    "AMB-02",
+    "BOAT-01",
+    "BOAT-02",
+    "RES-01",
+    "RES-02",
+    "PUMP-01",
+    "PUMP-02"
+  ],
+  "reviewer": "Use POST /auth/demo (no credentials)"
+}
