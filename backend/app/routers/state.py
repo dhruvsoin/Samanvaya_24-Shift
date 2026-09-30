@@ -51,20 +51,16 @@ def get_status(_=Depends(require_operator_or_reviewer)) -> dict:
 
 
 @router.post("/units/{unit_id}/status")
-def update_unit_status(unit_id: str, body: UnitStatusRequest,
-                       claims=Depends(require_operator)) -> dict:
+def update_unit_status(
+    unit_id: str,
+    body: UnitStatusRequest,
+    claims=Depends(require_operator),
+) -> dict:
     """Operator manually overrides a unit's status."""
-    unit = state.get_unit(unit_id)
+    unit = state.set_unit_status(unit_id, body.status)
     if unit is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Unit {unit_id} not found")
-    previous = unit["status"]
-    unit["status"] = body.status
-    state.upsert_unit(unit)
-    bus.publish("unit.status_changed", {
-        "unitId": unit_id,
-        "status": body.status,
-        "previousStatus": previous,
-        "location": None,
-    })
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Unit {unit_id} not found",
+        )
     return unit

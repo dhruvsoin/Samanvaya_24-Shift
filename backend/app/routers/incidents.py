@@ -32,41 +32,12 @@ def get_incidents(_=Depends(require_operator_or_reviewer)) -> list[dict]:
 def phone_in(body: PhoneInRequest, claims=Depends(require_operator)) -> dict:
     """
     Operator enters a phone-in call as an incident.
-    Emits: incident.reported, agent.activity
+    Publishes incident.reported. Intake is skipped because the structure is already provided.
     """
-    incident_id = state.next_id("INC")
-    ts = clock.now()
-    incident: dict = {
-        "incidentId": incident_id,
-        "type": body.type,
-        "status": "reported",
-        "severity": None,
-        "severityScore": None,
-        "timeWindowMinutes": None,
-        "location": {
-            "lat": body.location["lat"],
-            "lng": body.location["lng"],
-            "label": body.location.get("label", ""),
-            "zoneId": body.location.get("zoneId", ""),
-        },
-        "peopleAffected": body.people_affected,
-        "language": body.language,
-        "source": "phone_in",
-        "summary": body.note or "Phone-in incident",
-        "confidence": 0.95,
-        "reportedAt": ts,
-        "assignedUnitIds": [],
-        "reporterSessionId": None,
-    }
-    state.upsert_incident(incident)
-    bus.publish("incident.reported", {"incident": incident})
-    bus.publish("agent.activity", {
-        "agent": "intake",
-        "message": (
-            f"Phone-in entered by operator: {body.type} "
-            f"at {incident['location']['label']}."
-        ),
-        "incidentId": incident_id,
-        "planId": None,
-    })
-    return incident
+    return state.create_phone_in_incident(
+        location=body.location,
+        incident_type=body.type,
+        people_affected=body.people_affected,
+        language=body.language,
+        note=body.note,
+    )

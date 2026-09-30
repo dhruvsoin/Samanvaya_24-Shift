@@ -1,7 +1,10 @@
-"""
-tests/test_state.py — Unit tests for app.state.AppState.
-"""
-from app.state import AppState
+from fastapi.testclient import TestClient
+
+from app.bus import bus
+from app.main import app
+from app.state import AppState, state
+
+client = TestClient(app)
 
 
 def make_state() -> AppState:
@@ -169,3 +172,111 @@ def test_update_zone_comms():
     s = make_state()
     zone = s.update_zone_comms("ZONE-B", "degraded")
     assert zone["commsStatus"] == "degraded"
+
+
+# ── Integration: Endpoint Mutation & Event Emission ───────────────────
+
+def test_change_unit_status_endpoint_updates_get_and_emits_event():
+    """
+    POST /units/{id}/status changes the unit's status, updates GET /units,
+    and publishes unit.status_changed on the event bus.
+    """
+    bus.reset()
+    state.reset()
+
+    # 1. Capture events from bus
+    events = []
+    unsub = bus.subscribe("unit.status_changed", lambda evt: events.append(evt))
+
+    # 2. Login as operator
+    login_resp = client.post("/auth/login", json={"username": "operator", "password": "demo1234"}).json()
+    tok = login_resp["token"]
+    headers = {"Authorization": f"Bearer {tok}"}
+
+    # 3. Verify initial status via GET /units
+    r_get_init = client.get("/units", headers=headers)
+    assert r_get_init.status_code == 200
+    amb_init = next(u for u in r_get_init.json() if u["unitId"] == "AMB-01")
+    assert amb_init["status"] == "available"
+
+    # 4. Change unit status via endpoint
+    r_post = client.post(
+        "/units/AMB-01/status",
+        headers=headers,
+        json={"status": "on_scene", "note": "At waterlogged junction"},
+    )
+    assert r_post.status_code == 200
+    updated = r_post.json()
+    assert updated["unitId"] == "AMB-01"
+    assert updated["status"] == "on_scene"
+
+    # 5. Confirm GET /units reflects the new status
+    r_get_after = client.get("/units", headers=headers)
+    assert r_get_after.status_code == 200
+    amb_after = next(u for u in r_get_after.json() if u["unitId"] == "AMB-01")
+    assert amb_after["status"] == "on_scene"
+
+    # 6. Confirm unit.status_changed event was published on the bus
+    assert len(events) == 1
+    evt = events[0]
+    assert evt["type"] == "unit.status_changed"
+    assert evt["payload"]["unitId"] == "AMB-01"
+    assert evt["payload"]["status"] == "on_scene"
+    assert evt["payload"]["previousStatus"] == "available"
+
+    unsub()
+
+
+def test_phone_in_incident_endpoint_updates_get_and_emits_event():
+    """
+    POST /incidents/phone-in creates the incident, updates GET /incidents,
+    and publishes incident.reported on the event bus.
+    """
+    bus.reset()
+    state.reset()
+
+    events = []
+    unsub = bus.subscribe("incident.reported", lambda evt: events.append(evt))
+
+    login_resp = client.post("/auth/login", json={"username": "operator", "password": "demo1234"}).json()
+    tok = login_resp["token"]
+    headers = {"Authorization": f"Bearer {tok}"}
+
+    # Confirm initially GET /incidents is empty
+    r_get_init = client.get("/incidents", headers=headers)
+    assert r_get_init.status_code == 200
+    assert r_get_init.json() == []
+
+    # POST phone-in
+    r_post = client.post(
+        "/incidents/phone-in",
+        headers=headers,
+        json={
+            "location": {"lat": 12.929, "lng": 77.612, "label": "Silk Board Junction", "zoneId": "ZONE-A"},
+            "type": "trapped_person",
+            "peopleAffected": 3,
+            "language": "en",
+            "note": "Water rising above vehicle",
+        },
+    )
+    assert r_post.status_code == 200
+    inc = r_post.json()
+    assert inc["incidentId"].startswith("INC-")
+    assert inc["type"] == "trapped_person"
+    assert inc["status"] == "reported"
+    assert inc["source"] == "phone_in"
+
+    # Confirm GET /incidents returns the new incident
+    r_get_after = client.get("/incidents", headers=headers)
+    assert r_get_after.status_code == 200
+    assert len(r_get_after.json()) == 1
+    assert r_get_after.json()[0]["incidentId"] == inc["incidentId"]
+
+    # Confirm incident.reported event was published on bus
+    assert len(events) == 1
+    evt = events[0]
+    assert evt["type"] == "incident.reported"
+    assert evt["payload"]["incident"]["incidentId"] == inc["incidentId"]
+
+    unsub()
+
