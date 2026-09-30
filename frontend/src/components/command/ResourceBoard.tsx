@@ -25,27 +25,27 @@ export function ResourceBoard() {
   const deployed = units.filter((u) => ['en_route', 'on_scene', 'assigned'].includes(u.status)).length;
 
   return (
-    <div className="flex flex-col shrink-0 bg-[#0B0F17] select-none" style={{ maxHeight: '55%' }}>
+    <div className="flex flex-col shrink-0 bg-white select-none border-b border-slate-200" style={{ maxHeight: '55%' }}>
       {/* Header */}
-      <div className="px-3.5 py-3 flex items-center justify-between shrink-0 border-b border-[#1E293B] bg-[#0F172A]/70">
+      <div className="px-3.5 py-2.5 flex items-center justify-between shrink-0 border-b border-slate-200 bg-slate-50/80">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-200">Resources</h2>
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              {available} Avail
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-700">Resources</h2>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              {available} Available
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
-            {deployed} unit{deployed === 1 ? '' : 's'} in field
+          <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+            {deployed} unit{deployed === 1 ? '' : 's'} currently deployed
           </p>
         </div>
       </div>
 
       {/* Unit list */}
-      <div className="overflow-y-auto flex-1 p-2 space-y-1">
+      <div className="overflow-y-auto flex-1 p-2 space-y-1.5 bg-slate-50/40">
         {units.length === 0 ? (
-          <p className="text-[11px] font-mono px-3 py-4 text-center text-slate-500">
-            Awaiting fleet telemetry…
+          <p className="text-[11px] font-medium px-3 py-6 text-center text-slate-400">
+            Awaiting fleet status…
           </p>
         ) : (
           units.map((unit) => <UnitRow key={unit.unitId} unit={unit} />)
@@ -65,21 +65,21 @@ function UnitRow({ unit }: { unit: Unit }) {
 
   return (
     <div
-      className="p-2 rounded-lg bg-[#0F172A]/60 border border-[#1E293B] flex items-center gap-2.5 hover:border-[#334155] transition-all"
+      className="p-2 rounded bg-white border border-slate-200 flex items-center gap-2.5 hover:border-slate-300 transition-colors shadow-none"
       id={`unit-row-${unit.unitId}`}
     >
-      <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-[#1E293B] text-slate-300 border border-[#334155] shrink-0">
+      <span className="text-[10px] font-mono font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
         {iconText}
       </span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-xs font-mono font-semibold text-slate-100">{unit.unitId}</p>
+          <p className="text-xs font-semibold text-slate-900">{unit.unitId}</p>
           <UnitStatusBadge status={unit.status} />
         </div>
-        <div className="flex items-center justify-between text-[11px] text-slate-400 mt-0.5">
+        <div className="flex items-center justify-between text-[11px] text-slate-600 mt-0.5">
           <span className="truncate">{unit.name}</span>
           {assignment && (
-            <span className="font-mono text-[#38BDF8] ml-1 shrink-0 font-medium">
+            <span className="font-mono text-blue-600 ml-1 shrink-0 font-medium">
               → {assignment.incidentId}
             </span>
           )}

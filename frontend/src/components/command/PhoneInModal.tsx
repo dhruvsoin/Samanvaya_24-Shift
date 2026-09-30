@@ -62,48 +62,50 @@ export function PhoneInModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} aria-label="Close" />
-      <div className="relative w-full max-w-lg rounded-2xl"
-        style={{ background: 'hsl(222,47%,8%)', border: '1px solid hsl(217,33%,18%)' }}>
+      <button className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={onClose} aria-label="Close" />
+      <div className="relative w-full max-w-lg rounded-xl bg-white border border-slate-200 shadow-2xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'hsl(217,33%,18%)' }}>
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4" style={{ color: 'hsl(217,91%,60%)' }} />
-            <h2 className="font-semibold text-white">Log Phone-In Incident</h2>
+            <Phone className="w-4 h-4 text-blue-600" />
+            <h2 className="font-semibold text-slate-900 text-sm">Log Emergency Incident</h2>
           </div>
-          <button onClick={onClose} style={{ color: 'hsl(215,20%,50%)' }}>
+          <button onClick={onClose} className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {success ? (
           <div className="p-8 text-center">
-            <div className="text-4xl mb-3">✅</div>
-            <p className="font-semibold text-white">Incident logged successfully</p>
+            <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-lg font-bold">
+              ✓
+            </div>
+            <p className="font-semibold text-slate-900">Incident logged successfully</p>
+            <p className="text-xs text-slate-500 mt-1">Dispatched to emergency response queue</p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="p-5 space-y-4">
             {/* Location */}
             <div className="grid grid-cols-2 gap-3">
               <Field label="Latitude" error={errors.lat?.message}>
                 <input {...register('lat', { valueAsNumber: true })} type="number" step="0.001"
-                  className="input-dark" />
+                  className="gov-input" />
               </Field>
               <Field label="Longitude" error={errors.lng?.message}>
                 <input {...register('lng', { valueAsNumber: true })} type="number" step="0.001"
-                  className="input-dark" />
+                  className="gov-input" />
               </Field>
             </div>
 
             <Field label="Location Description" error={errors.label?.message}>
               <input {...register('label')} placeholder="e.g. Lakeside colony, 2nd cross"
-                className="input-dark w-full" />
+                className="gov-input w-full" />
             </Field>
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Incident Type" error={errors.type?.message}>
-                <select {...register('type')} className="input-dark w-full">
+                <select {...register('type')} className="gov-input w-full">
                   <option value="flooded_home">Flooded Home</option>
                   <option value="stranded_vehicle">Stranded Vehicle</option>
                   <option value="medical">Medical Emergency</option>
@@ -114,7 +116,7 @@ export function PhoneInModal({ onClose }: Props) {
               </Field>
 
               <Field label="Language" error={errors.language?.message}>
-                <select {...register('language')} className="input-dark w-full">
+                <select {...register('language')} className="gov-input w-full">
                   <option value="en">English</option>
                   <option value="kn">Kannada</option>
                   <option value="hi">Hindi</option>
@@ -124,23 +126,21 @@ export function PhoneInModal({ onClose }: Props) {
 
             <Field label="People Affected" error={errors.peopleAffected?.message}>
               <input {...register('peopleAffected', { valueAsNumber: true })}
-                type="number" min={1} className="input-dark w-full" />
+                type="number" min={1} className="gov-input w-full" />
             </Field>
 
             <Field label="Notes (optional)" error={errors.note?.message}>
               <textarea {...register('note')} rows={2} placeholder="Caller's description…"
-                className="input-dark w-full resize-none" />
+                className="gov-input w-full resize-none" />
             </Field>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex gap-2 justify-end pt-2 border-t border-slate-100">
               <button type="button" onClick={onClose}
-                className="px-4 py-2 rounded-lg text-sm"
-                style={{ background: 'hsl(222,47%,12%)', color: 'hsl(215,20%,60%)', border: '1px solid hsl(217,33%,18%)' }}>
+                className="px-4 py-2 rounded-lg text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
                 Cancel
               </button>
               <button type="submit" disabled={loading}
-                className="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
-                style={{ background: 'hsl(217,91%,60%)', color: 'hsl(222,47%,6%)' }}>
+                className="px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors disabled:opacity-50">
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Log Incident
               </button>
@@ -149,19 +149,20 @@ export function PhoneInModal({ onClose }: Props) {
         )}
       </div>
 
-      {/* Inline style for form inputs */}
       <style>{`
-        .input-dark {
-          background: hsl(222,47%,12%);
-          border: 1px solid hsl(217,33%,22%);
-          border-radius: 8px;
-          color: white;
-          padding: 8px 12px;
+        .gov-input {
+          background: #FFFFFF;
+          border: 1px solid #CBD5E1;
+          border-radius: 6px;
+          color: #0F172A;
+          padding: 7px 10px;
           font-size: 13px;
           outline: none;
+          transition: border-color 0.15s ease;
         }
-        .input-dark:focus {
-          border-color: hsl(217,91%,60%,0.6);
+        .gov-input:focus {
+          border-color: #2563EB;
+          box-shadow: 0 0 0 1px #2563EB;
         }
       `}</style>
     </div>
@@ -171,9 +172,9 @@ export function PhoneInModal({ onClose }: Props) {
 function Field({ label, error, children }: { label: string; error?: string; children: ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium mb-1" style={{ color: 'hsl(215,20%,55%)' }}>{label}</label>
+      <label className="block text-xs font-medium mb-1 text-slate-700">{label}</label>
       {children}
-      {error && <p className="mt-1 text-xs" style={{ color: 'hsl(0,84%,60%)' }}>{error}</p>}
+      {error && <p className="mt-1 text-xs text-rose-600 font-medium">{error}</p>}
     </div>
   );
 }

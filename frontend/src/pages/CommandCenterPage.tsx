@@ -40,17 +40,17 @@ export function CommandCenterPage() {
   );
 
   return (
-    <div className="flex flex-col h-full bg-[#0B0F17] select-none">
+    <div className="flex flex-col h-full bg-[#F8FAFC] select-none">
       {/* Pending approval banner */}
       {pendingApprovals > 0 && !isReadOnly && (
         <div
-          className="flex items-center justify-between px-4 py-2 text-xs font-mono font-medium animate-fade-in shrink-0 bg-amber-500/10 border-b border-amber-500/25 text-amber-300"
+          className="flex items-center justify-between px-4 py-2 text-xs font-medium shrink-0 bg-amber-50 border-b border-amber-200 text-amber-800"
         >
           <span className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>ACTION REQUIRED: {pendingApprovals} operational decision{pendingApprovals > 1 ? 's' : ''} awaiting operator sign-off</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span>Action Required: {pendingApprovals} operational decision{pendingApprovals > 1 ? 's' : ''} awaiting operator sign-off</span>
           </span>
-          <a href="/command/approvals" className="font-semibold text-amber-200 underline hover:text-white transition-colors">
+          <a href="/command/approvals" className="font-semibold text-amber-900 underline hover:text-amber-950 transition-colors">
             Review Decisions →
           </a>
         </div>
@@ -59,19 +59,19 @@ export function CommandCenterPage() {
       {/* Plan trigger notification */}
       {currentPlan?.trigger && (
         <div
-          className="px-4 py-1.5 text-xs font-mono shrink-0 bg-[#38BDF8]/5 border-b border-[#38BDF8]/15 text-[#38BDF8] flex items-center justify-between"
+          className="px-4 py-1.5 text-xs shrink-0 bg-blue-50 border-b border-blue-200 text-blue-800 flex items-center justify-between"
         >
           <span>
-            <span className="font-semibold text-white">[{currentPlan.planId}]</span> {currentPlan.trigger}
+            <span className="font-semibold text-blue-950">[{currentPlan.planId}]</span> {currentPlan.trigger}
           </span>
-          <span className="text-[10px] text-slate-400 uppercase tracking-wider">Solver Active</span>
+          <span className="text-[10px] font-medium text-blue-600 uppercase tracking-wider">Solver Active</span>
         </div>
       )}
 
       {/* Main three-column layout */}
-      <div className="flex flex-1 overflow-hidden divide-x divide-[#1E293B]">
+      <div className="flex flex-1 overflow-hidden divide-x divide-slate-200">
         {/* LEFT: Incident Queue (320px) */}
-        <div className="w-80 shrink-0 flex flex-col overflow-hidden bg-[#0B0F17]">
+        <div className="w-80 shrink-0 flex flex-col overflow-hidden bg-white">
           <IncidentQueue
             isReadOnly={isReadOnly}
             onSelectIncident={setSelectedIncidentId}
@@ -80,14 +80,14 @@ export function CommandCenterPage() {
           />
         </div>
 
-        {/* CENTER: Tactical Cartography */}
-        <div className="flex-1 overflow-hidden min-w-0 bg-[#0B0F17] relative">
+        {/* CENTER: Cartography */}
+        <div className="flex-1 overflow-hidden min-w-0 bg-slate-100 relative">
           <EmergencyMap onSelectIncident={setSelectedIncidentId} />
         </div>
 
         {/* RIGHT: Drawer (when incident selected) OR Resource board + Agent stream */}
         <div
-          className="shrink-0 flex flex-col overflow-hidden transition-all duration-300 bg-[#0B0F17]"
+          className="shrink-0 flex flex-col overflow-hidden transition-all duration-300 bg-white"
           style={{
             width: selectedIncidentId ? '26rem' : '20rem',
           }}
@@ -101,7 +101,7 @@ export function CommandCenterPage() {
           ) : (
             <>
               <ResourceBoard />
-              <div className="flex-1 overflow-hidden border-t border-[#1E293B]">
+              <div className="flex-1 overflow-hidden border-t border-slate-200">
                 <AgentStream />
               </div>
             </>
@@ -111,7 +111,7 @@ export function CommandCenterPage() {
 
       {/* BOTTOM: Replay controls (mock mode only) */}
       {import.meta.env.VITE_USE_MOCKS === 'true' && (
-        <div className="shrink-0 border-t border-[#1E293B] bg-[#0F172A]">
+        <div className="shrink-0 border-t border-slate-200 bg-white">
           <ReplayControls />
         </div>
       )}

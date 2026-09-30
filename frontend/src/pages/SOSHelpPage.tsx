@@ -531,24 +531,24 @@ export function SOSHelpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-obsidian-canvas text-slate-100 flex flex-col font-sans selection:bg-rose-500/30">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
       {/* ── Top Emergency Header ── */}
-      <header className="px-4 py-2.5 bg-obsidian-well border-b border-obsidian-border sticky top-0 z-40">
+      <header className="px-4 py-2.5 bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="w-8 h-8 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
               <ShieldAlert className="w-4 h-4" />
             </span>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono font-semibold tracking-wider text-rose-300 uppercase truncate">
+                <span className="text-[10px] font-mono font-semibold tracking-wider text-rose-700 uppercase truncate">
                   {t.header.brand}
                 </span>
-                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-obsidian-surface border border-obsidian-border text-slate-400 shrink-0">
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-100 border border-slate-200 text-slate-600 shrink-0 font-medium">
                   {t.header.eocBadge}
                 </span>
               </div>
-              <h1 className="text-xs font-semibold text-white truncate">{t.header.title}</h1>
+              <h1 className="text-xs font-bold text-slate-900 truncate">{t.header.title}</h1>
             </div>
           </div>
 
@@ -556,14 +556,14 @@ export function SOSHelpPage() {
           <div className="flex items-center gap-2 shrink-0">
             <a
               href="tel:112"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded font-mono text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white transition-colors shadow-sm"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>{t.header.call112}</span>
             </a>
             <Link
               to="/login"
-              className="text-xs font-mono text-slate-400 hover:text-slate-200 px-2 py-1 rounded"
+              className="text-xs text-slate-500 hover:text-slate-900 px-2 py-1 rounded font-medium"
             >
               {t.header.staffLogin}
             </Link>
@@ -574,9 +574,9 @@ export function SOSHelpPage() {
       {/* ── Main Container ── */}
       <main className="flex-1 p-4 max-w-2xl w-full mx-auto flex flex-col gap-4">
         {/* Language Selector Bar */}
-        <div className="flex items-center justify-between p-2.5 rounded bg-obsidian-well border border-obsidian-border text-xs">
-          <div className="flex items-center gap-2 text-slate-300 font-medium">
-            <Languages className="w-3.5 h-3.5 text-rose-400" />
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs shadow-xs">
+          <div className="flex items-center gap-2 text-slate-700 font-medium">
+            <Languages className="w-3.5 h-3.5 text-blue-600" />
             <span className="text-xs">{t.langSelectorLabel}</span>
           </div>
           <div className="flex gap-1.5">
@@ -585,10 +585,10 @@ export function SOSHelpPage() {
                 key={lang.code}
                 type="button"
                 onClick={() => setLanguage(lang.code)}
-                className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+                className={`px-2.5 py-1 rounded-lg text-xs transition-colors ${
                   language === lang.code
-                    ? 'bg-rose-500/15 text-rose-300 border border-rose-500/40 font-semibold'
-                    : 'bg-obsidian-surface text-slate-400 hover:text-slate-200 border border-obsidian-border'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold'
+                    : 'bg-slate-50 text-slate-600 hover:text-slate-900 border border-slate-200'
                 }`}
               >
                 {lang.label}
@@ -601,27 +601,27 @@ export function SOSHelpPage() {
         {submittedTicket ? (
           <div className="space-y-4">
             {/* Live Ticket Card */}
-            <div className="p-5 rounded-lg bg-obsidian-well border border-obsidian-border space-y-4">
+            <div className="p-5 rounded-xl bg-white border border-slate-200 space-y-4 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
                     <ShieldAlert className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
+                    <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
                       {t.ticket.transmittedPrefix} · {submittedTicket.id}
                     </span>
-                    <h2 className="text-sm font-semibold text-white mt-0.5">{t.ticket.registeredTitle}</h2>
+                    <h2 className="text-sm font-bold text-slate-900 mt-0.5">{t.ticket.registeredTitle}</h2>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                <span className="px-2.5 py-1 rounded text-[11px] font-mono font-semibold bg-amber-50 text-amber-700 border border-amber-200">
                   {t.ticket.awaitingBadge}
                 </span>
               </div>
 
               {/* Progress Stepper */}
-              <div className="p-3.5 rounded bg-obsidian-surface/60 border border-obsidian-border space-y-2">
-                <p className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">{t.ticket.workflowTitle}</p>
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                <p className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider">{t.ticket.workflowTitle}</p>
                 <div className="grid grid-cols-4 gap-2 text-center">
                   {t.ticket.steps.map((label, idx) => {
                     const isDone = idx === 0;
@@ -629,13 +629,13 @@ export function SOSHelpPage() {
                     return (
                       <div key={idx} className="flex flex-col items-center gap-1">
                         <div
-                          className={`h-1 w-full rounded-full ${
-                            isDone ? 'bg-emerald-500' : isCurrent ? 'bg-amber-400' : 'bg-obsidian-border'
+                          className={`h-1.5 w-full rounded-full ${
+                            isDone ? 'bg-emerald-500' : isCurrent ? 'bg-amber-500' : 'bg-slate-200'
                           }`}
                         />
                         <span
-                          className={`text-[10px] font-mono uppercase ${
-                            isDone ? 'text-emerald-400 font-semibold' : isCurrent ? 'text-amber-300 font-semibold' : 'text-slate-500'
+                          className={`text-[10px] uppercase font-semibold ${
+                            isDone ? 'text-emerald-700' : isCurrent ? 'text-amber-700' : 'text-slate-400'
                           }`}
                         >
                           {label}
@@ -647,20 +647,20 @@ export function SOSHelpPage() {
               </div>
 
               {/* ETA & EOC Operator Decision Action Box */}
-              <div className="p-3.5 rounded bg-sky-950/20 border border-sky-500/25 space-y-2.5">
+              <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold text-sky-400 flex items-center gap-1.5 uppercase tracking-wider">
-                    <Radio className="w-3.5 h-3.5" /> {t.ticket.nextStepTitle}
+                  <span className="text-xs font-semibold text-blue-900 flex items-center gap-1.5 uppercase tracking-wider">
+                    <Radio className="w-3.5 h-3.5 text-blue-600" /> {t.ticket.nextStepTitle}
                   </span>
-                  <span className="text-[10px] font-mono text-slate-400">{t.ticket.statusReported}</span>
+                  <span className="text-[10px] font-mono text-slate-500">{t.ticket.statusReported}</span>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-700 leading-relaxed">
                   {t.ticket.nextStepDesc}
                 </p>
                 <div className="pt-1">
                   <Link
                     to="/command"
-                    className="w-full py-2.5 px-4 rounded font-mono text-xs font-semibold bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center gap-2 transition-colors"
+                    className="w-full py-2.5 px-4 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-colors shadow-sm"
                   >
                     <span>{t.ticket.commandButton}</span>
                   </Link>
@@ -668,11 +668,11 @@ export function SOSHelpPage() {
               </div>
 
               {/* Immediate Survival Instructions */}
-              <div className="p-3.5 rounded bg-obsidian-surface/60 border border-obsidian-border space-y-2">
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-amber-400 uppercase tracking-wider">
-                  <AlertCircle className="w-3.5 h-3.5" /> {t.ticket.safetyTitle}
+              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-semibold text-amber-800 uppercase tracking-wider">
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" /> {t.ticket.safetyTitle}
                 </div>
-                <ul className="text-xs text-slate-300 space-y-1 pl-4 list-disc">
+                <ul className="text-xs text-slate-600 space-y-1 pl-4 list-disc">
                   {t.ticket.safetyBullets.map((bullet, idx) => (
                     <li key={idx}>{bullet}</li>
                   ))}
@@ -684,13 +684,13 @@ export function SOSHelpPage() {
                 <button
                   type="button"
                   onClick={() => setSubmittedTicket(null)}
-                  className="px-3.5 py-1.5 rounded bg-obsidian-surface hover:bg-obsidian-well border border-obsidian-border text-xs font-mono text-slate-300 transition-colors"
+                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 transition-colors shadow-xs"
                 >
                   {t.ticket.submitAnother}
                 </button>
                 <Link
                   to="/crew"
-                  className="px-3.5 py-1.5 rounded bg-obsidian-surface hover:bg-obsidian-well border border-obsidian-border text-xs font-mono text-slate-300 transition-colors flex items-center gap-1"
+                  className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-xs font-medium text-slate-700 transition-colors flex items-center gap-1 shadow-xs"
                 >
                   <span>{t.ticket.checkCrew}</span>
                   <ArrowRight className="w-3 h-3" />
@@ -702,13 +702,13 @@ export function SOSHelpPage() {
           /* ── SUBMISSION FORM: SEND FOR HELP ── */
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Urgent Banner */}
-            <div className="p-4 rounded bg-obsidian-well border border-obsidian-border flex items-start gap-3">
-              <span className="w-8 h-8 rounded bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center shrink-0">
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 shadow-xs">
+              <span className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                 <LifeBuoy className="w-4 h-4" />
               </span>
               <div>
-                <h2 className="text-sm font-semibold text-white">{t.banner.title}</h2>
-                <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                <h2 className="text-sm font-bold text-rose-900">{t.banner.title}</h2>
+                <p className="text-xs text-rose-800 mt-0.5 leading-relaxed">
                   {t.banner.desc}
                 </p>
               </div>
@@ -716,7 +716,7 @@ export function SOSHelpPage() {
 
             {/* Step 1: Emergency Category */}
             <div className="space-y-2">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700">
                 {t.emergencyTypesTitle}
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -729,27 +729,27 @@ export function SOSHelpPage() {
                       key={typeKey}
                       type="button"
                       onClick={() => setSelectedType(typeKey)}
-                      className={`p-3 rounded text-left border transition-colors flex items-start gap-2.5 ${
+                      className={`p-3 rounded-xl text-left border transition-colors flex items-start gap-2.5 ${
                         isSelected
-                          ? 'bg-rose-500/10 border-rose-500/40 text-white'
-                          : 'bg-obsidian-well border-obsidian-border hover:border-slate-700 text-slate-300'
+                          ? 'bg-rose-50/80 border-rose-300 text-slate-900 shadow-xs'
+                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700 shadow-xs'
                       }`}
                     >
-                      <span className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${
-                        isSelected ? 'bg-rose-500/20 text-rose-300' : 'bg-obsidian-surface text-slate-400'
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                        isSelected ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-500'
                       }`}>
                         <Icon className="w-4 h-4" />
                       </span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
                           <p className="text-xs font-semibold truncate">{item.label}</p>
-                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border ${
-                            isSelected ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-obsidian-surface text-slate-500 border-obsidian-border'
+                          <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded border font-semibold ${
+                            isSelected ? 'bg-rose-100 text-rose-700 border-rose-200' : 'bg-slate-100 text-slate-600 border-slate-200'
                           }`}>
                             {item.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{item.desc}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{item.desc}</p>
                       </div>
                     </button>
                   );
@@ -760,14 +760,14 @@ export function SOSHelpPage() {
             {/* Step 2: Location & GPS */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700">
                   {t.location.title}
                 </label>
                 <button
                   type="button"
                   onClick={handleDetectGps}
                   disabled={detectingGps}
-                  className="px-2.5 py-1 rounded bg-obsidian-surface hover:bg-obsidian-well text-sky-400 border border-obsidian-border text-xs font-mono flex items-center gap-1.5 transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-50 text-blue-600 border border-slate-200 text-xs font-medium flex items-center gap-1.5 transition-colors shadow-xs"
                 >
                   {detectingGps ? (
                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -779,14 +779,14 @@ export function SOSHelpPage() {
               </div>
 
               <div className="relative">
-                <MapPin className="w-3.5 h-3.5 text-rose-400 absolute left-3 top-3" />
+                <MapPin className="w-3.5 h-3.5 text-rose-600 absolute left-3 top-3" />
                 <input
                   type="text"
                   required
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder={t.location.placeholder}
-                  className="w-full pl-9 pr-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-400"
+                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-600 focus:ring-1 focus:ring-rose-600"
                 />
               </div>
               <p className="text-[10px] text-slate-500 pl-0.5 font-mono">
@@ -796,25 +796,25 @@ export function SOSHelpPage() {
 
             {/* Step 3: People Trapped Counter */}
             <div className="space-y-1.5">
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700">
                 {t.people.title}
               </label>
               <div className="flex items-center gap-3">
-                <div className="flex items-center bg-obsidian-surface border border-obsidian-border rounded p-0.5">
+                <div className="flex items-center bg-white border border-slate-300 rounded-lg p-0.5 shadow-xs">
                   <button
                     type="button"
                     onClick={() => setPeopleCount(Math.max(1, peopleCount - 1))}
-                    className="w-7 h-7 rounded bg-obsidian-well hover:bg-obsidian-border font-mono text-sm text-white flex items-center justify-center transition-colors"
+                    className="w-7 h-7 rounded bg-slate-100 hover:bg-slate-200 font-mono text-sm text-slate-700 flex items-center justify-center transition-colors"
                   >
                     -
                   </button>
-                  <span className="w-10 text-center text-sm font-semibold text-white font-mono">
+                  <span className="w-10 text-center text-sm font-bold text-slate-900 font-mono">
                     {peopleCount}
                   </span>
                   <button
                     type="button"
                     onClick={() => setPeopleCount(peopleCount + 1)}
-                    className="w-7 h-7 rounded bg-obsidian-well hover:bg-obsidian-border font-mono text-sm text-white flex items-center justify-center transition-colors"
+                    className="w-7 h-7 rounded bg-slate-100 hover:bg-slate-200 font-mono text-sm text-slate-700 flex items-center justify-center transition-colors"
                   >
                     +
                   </button>
@@ -825,10 +825,10 @@ export function SOSHelpPage() {
                       key={num}
                       type="button"
                       onClick={() => setPeopleCount(num)}
-                      className={`px-2.5 py-1 rounded text-xs font-mono transition-colors ${
+                      className={`px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
                         peopleCount === num
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 font-semibold'
-                          : 'bg-obsidian-surface border border-obsidian-border text-slate-400 hover:text-white'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-300 font-bold'
+                          : 'bg-white border border-slate-200 text-slate-600 hover:text-slate-900 shadow-xs'
                       }`}
                     >
                       {num === 10 ? t.people.tenPlus : `${num} ${num === 1 ? t.people.person : t.people.people}`}
@@ -841,23 +841,23 @@ export function SOSHelpPage() {
             {/* Step 4: Contact Number & Details */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
                   {t.contact.phoneLabel}
                 </label>
                 <div className="relative">
-                  <Phone className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3" />
+                  <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
                   <input
                     type="tel"
                     value={contactNumber}
                     onChange={(e) => setContactNumber(e.target.value)}
                     placeholder={t.contact.phonePlaceholder}
-                    className="w-full pl-9 pr-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-400 font-mono"
+                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-600 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-700 mb-1">
                   {t.contact.notesLabel}
                 </label>
                 <input
@@ -865,7 +865,7 @@ export function SOSHelpPage() {
                   value={details}
                   onChange={(e) => setDetails(e.target.value)}
                   placeholder={t.contact.notesPlaceholder}
-                  className="w-full px-3 py-2 rounded bg-obsidian-surface border border-obsidian-border text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-400"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-rose-600"
                 />
               </div>
             </div>
@@ -875,21 +875,21 @@ export function SOSHelpPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 rounded font-mono text-xs font-semibold uppercase tracking-wider bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+                className="w-full py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center gap-2 transition-colors disabled:opacity-50 shadow-md"
               >
                 {submitting ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     <span>{t.submit.buttonSubmitting}</span>
                   </>
                 ) : (
                   <>
-                    <ShieldAlert className="w-3.5 h-3.5" />
+                    <ShieldAlert className="w-4 h-4" />
                     <span>{t.submit.buttonNormal}</span>
                   </>
                 )}
               </button>
-              <p className="text-center text-[10px] font-mono text-slate-500 mt-2">
+              <p className="text-center text-[10px] font-medium text-slate-500 mt-2">
                 {t.submit.disclaimer}
               </p>
             </div>
