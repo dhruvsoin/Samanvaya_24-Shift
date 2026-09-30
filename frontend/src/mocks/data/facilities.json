@@ -1,0 +1,38 @@
+[
+  {
+    "facilityId": "FAC-01",
+    "name": "Govt School Relief Shelter",
+    "type": "shelter",
+    "location": {
+      "lat": 12.93,
+      "lng": 77.61,
+      "label": "School Rd, north",
+      "zoneId": "ZONE-A"
+    },
+    "capacity": 200
+  },
+  {
+    "facilityId": "FAC-02",
+    "name": "City General Hospital",
+    "type": "hospital",
+    "location": {
+      "lat": 12.915,
+      "lng": 77.64,
+      "label": "Ring Rd East",
+      "zoneId": "ZONE-B"
+    },
+    "capacity": null
+  },
+  {
+    "facilityId": "FAC-03",
+    "name": "Fire and Rescue Depot",
+    "type": "depot",
+    "location": {
+      "lat": 12.9,
+      "lng": 77.625,
+      "label": "Station Rd, south",
+      "zoneId": "ZONE-C"
+    },
+    "capacity": null
+  }
+]

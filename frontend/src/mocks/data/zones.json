@@ -1,0 +1,71 @@
+[
+  {
+    "zoneId": "ZONE-A",
+    "name": "Zone A: Lakeside and Market",
+    "polygon": [
+      [
+        12.9225,
+        77.605
+      ],
+      [
+        12.935,
+        77.605
+      ],
+      [
+        12.935,
+        77.645
+      ],
+      [
+        12.9225,
+        77.645
+      ]
+    ],
+    "commsStatus": "ok"
+  },
+  {
+    "zoneId": "ZONE-B",
+    "name": "Zone B: Hosur Rd corridor",
+    "polygon": [
+      [
+        12.9075,
+        77.605
+      ],
+      [
+        12.9225,
+        77.605
+      ],
+      [
+        12.9225,
+        77.645
+      ],
+      [
+        12.9075,
+        77.645
+      ]
+    ],
+    "commsStatus": "ok"
+  },
+  {
+    "zoneId": "ZONE-C",
+    "name": "Zone C: Station and South",
+    "polygon": [
+      [
+        12.895,
+        77.605
+      ],
+      [
+        12.9075,
+        77.605
+      ],
+      [
+        12.9075,
+        77.645
+      ],
+      [
+        12.895,
+        77.645
+      ]
+    ],
+    "commsStatus": "ok"
+  }
+]

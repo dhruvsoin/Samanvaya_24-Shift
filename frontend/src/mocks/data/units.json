@@ -1,0 +1,114 @@
+[
+  {
+    "unitId": "AMB-01",
+    "type": "ambulance",
+    "name": "Ambulance 1",
+    "status": "available",
+    "location": {
+      "lat": 12.915,
+      "lng": 77.64,
+      "label": "City General Hospital",
+      "zoneId": "ZONE-B"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "AMB-02",
+    "type": "ambulance",
+    "name": "Ambulance 2",
+    "status": "available",
+    "location": {
+      "lat": 12.915,
+      "lng": 77.61,
+      "label": "Ring Rd West",
+      "zoneId": "ZONE-B"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "BOAT-01",
+    "type": "boat",
+    "name": "Boat 1",
+    "status": "available",
+    "location": {
+      "lat": 12.93,
+      "lng": 77.61,
+      "label": "Lakeside launch point",
+      "zoneId": "ZONE-A"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "BOAT-02",
+    "type": "boat",
+    "name": "Boat 2",
+    "status": "available",
+    "location": {
+      "lat": 12.93,
+      "lng": 77.64,
+      "label": "Canal launch point",
+      "zoneId": "ZONE-A"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "RES-01",
+    "type": "rescue_team",
+    "name": "Rescue Team 1",
+    "status": "available",
+    "location": {
+      "lat": 12.9,
+      "lng": 77.625,
+      "label": "Fire and Rescue Depot",
+      "zoneId": "ZONE-C"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "RES-02",
+    "type": "rescue_team",
+    "name": "Rescue Team 2",
+    "status": "available",
+    "location": {
+      "lat": 12.93,
+      "lng": 77.625,
+      "label": "Lakeside Rd staging",
+      "zoneId": "ZONE-A"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "PUMP-01",
+    "type": "pump",
+    "name": "Pump Unit 1",
+    "status": "available",
+    "location": {
+      "lat": 12.9,
+      "lng": 77.64,
+      "label": "South Link",
+      "zoneId": "ZONE-C"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  },
+  {
+    "unitId": "PUMP-02",
+    "type": "pump",
+    "name": "Pump Unit 2",
+    "status": "available",
+    "location": {
+      "lat": 12.915,
+      "lng": 77.625,
+      "label": "Hosur Rd junction",
+      "zoneId": "ZONE-B"
+    },
+    "assignedIncidentId": null,
+    "lastHeartbeatAt": "2026-10-10T09:00:00"
+  }
+]
