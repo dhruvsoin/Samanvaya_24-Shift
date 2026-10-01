@@ -73,7 +73,21 @@ class RouteAgent(Agent):
             ]
 
         units = state.get_units()
-        roads_data = state.get_roads()
+        import copy
+        roads_data = copy.deepcopy(state.get_roads())
+        if event_type == "road.status_changed":
+            r_id = payload.get("roadId")
+            r_status = payload.get("status")
+            if r_id and r_status:
+                if isinstance(roads_data, dict) and "roads" in roads_data:
+                    for r in roads_data["roads"]:
+                        if r.get("roadId") == r_id or r.get("id") == r_id:
+                            r["status"] = r_status
+                elif isinstance(roads_data, list):
+                    for r in roads_data:
+                        if r.get("roadId") == r_id or r.get("id") == r_id:
+                            r["status"] = r_status
+
         sys_status = state.get_system_status()
         rain_intensity = sys_status.get("rain", {}).get("intensity", "light")
 

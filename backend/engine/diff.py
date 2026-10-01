@@ -156,10 +156,11 @@ def diff_plans(
             elif prev_unit != new_unit:
                 if inc_id == "INC-02":
                     reason = "Hosur Rd underpass (ROAD-04 closed), RES-02 cut off. RES-01 is now the fastest (approved by operator)."
-                elif "ROAD-04" in closed_roads:
-                    reason = f"ROAD-04 closed cutting off {prev_unit}. Reassigned to {new_unit}."
+                elif closed_roads:
+                    road_str = ", ".join(sorted(closed_roads))
+                    reason = f"Route via {road_str} closed, unit {prev_unit} cut off. {new_unit} is now fastest."
                 else:
-                    reason = f"Reassigned to {new_unit} for emergency response."
+                    reason = f"Reassigned to {new_unit} for faster emergency response."
 
                 changes.append({
                     "incidentId": inc_id,
@@ -180,6 +181,10 @@ def diff_plans(
                 diff_m = new_eta - prev_eta
                 if inc_id == "INC-03":
                     reason = f"Same unit. Canal Rd slowed by rain, ETA up {diff_m} min."
+                elif slowed_roads:
+                    road_str = ", ".join(sorted(slowed_roads))
+                    direction = "up" if diff_m > 0 else "down"
+                    reason = f"Same unit. Route via {road_str} slowed by rain, ETA {direction} {abs(diff_m)} min."
                 elif diff_m > 0:
                     reason = f"Same unit. Route slowed by weather conditions, ETA increased by {diff_m} min."
                 else:

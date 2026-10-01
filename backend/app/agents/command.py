@@ -70,6 +70,9 @@ class CommandAgent(Agent):
             changes = candidate_plan.get("changes", [])
             has_real_changes = any(
                 c.get("change") in ("added", "changed", "removed")
+                or (c.get("change") != "unchanged" and c.get("change") is not None)
+                or (c.get("changeType") in ("eta_changed", "changed_unit"))
+                or (c.get("before") != c.get("after") and c.get("after") is not None)
                 for c in changes
             )
             if not has_real_changes:

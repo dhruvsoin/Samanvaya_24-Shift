@@ -77,8 +77,8 @@ class AllocationAgent(Agent):
         units = state.get_units()
         previous_plan = state.get_current_plan()
 
-        if etas is None:
-            if self.route_agent and hasattr(self.route_agent, "get_cached_etas"):
+        if not etas:
+            if self.route_agent and hasattr(self.route_agent, "get_cached_etas") and self.route_agent.get_cached_etas():
                 etas = self.route_agent.get_cached_etas()
             else:
                 roads = state.get_roads()

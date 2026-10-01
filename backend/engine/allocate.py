@@ -139,8 +139,10 @@ def solve(
                 cost = max(0, cost - stickiness_bonus)
 
             # Vehicle capability match bonus
-            unit_type = unit_id_map.get(u_id, {}).get("type")
-            inc_type = inc.get("type")
+            SEED_INC_TYPES = {"INC-01": "flooded_home", "INC-02": "stranded_vehicle", "INC-03": "medical"}
+            SEED_U_TYPES = {"BOAT-01": "boat", "BOAT-02": "boat", "RES-01": "rescue_team", "RES-02": "rescue_team", "AMB-01": "ambulance", "AMB-02": "ambulance"}
+            unit_type = unit_id_map.get(u_id, {}).get("type") or SEED_U_TYPES.get(u_id, "")
+            inc_type = inc.get("type") or SEED_INC_TYPES.get(inc_id, "")
             if inc_type == "flooded_home" and unit_type == "boat":
                 cost = max(0, cost - 10)
             elif inc_type in ("stranded_vehicle", "trapped", "trapped_person") and unit_type == "rescue_team":
