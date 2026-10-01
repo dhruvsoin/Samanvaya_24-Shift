@@ -36,6 +36,7 @@ def get_approvals(
 
 
 @router.post("/{approval_id}/decision", response_model=Approval, response_model_by_alias=True)
+@router.post("/{approval_id}/decide", response_model=Approval, response_model_by_alias=True, include_in_schema=False)
 async def post_decision(
     approval_id: str,
     body: ApprovalDecisionRequest,

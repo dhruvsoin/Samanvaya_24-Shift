@@ -110,6 +110,11 @@ class EventBus:
         self._operator_sockets: set[WebSocket] = set()
         self._crew_sockets: dict[str, set[WebSocket]] = {}
         self._reporter_sockets: dict[str, set[WebSocket]] = {}
+        self._main_loop: asyncio.AbstractEventLoop | None = None
+
+    def set_loop(self, loop: asyncio.AbstractEventLoop) -> None:
+        """Sets the application main event loop for cross-thread dispatch."""
+        self._main_loop = loop
 
     # ── Publication ───────────────────────────────────────────────────
 
@@ -140,6 +145,8 @@ class EventBus:
 
         try:
             current_loop = asyncio.get_running_loop()
+            if current_loop.is_running():
+                self._main_loop = current_loop
         except RuntimeError:
             current_loop = None
 
@@ -333,14 +340,31 @@ class EventBus:
         except RuntimeError:
             loop = None
 
-        if loop is not None and loop.is_running():
-            if entity_key not in self._entity_queues:
-                self._entity_queues[entity_key] = asyncio.Queue()
-            eq = self._entity_queues[entity_key]
-            eq.put_nowait((envelope, callbacks))
+        target_loop = loop if (loop is not None and loop.is_running()) else self._main_loop
 
-            if entity_key not in self._entity_tasks or self._entity_tasks[entity_key].done():
-                self._entity_tasks[entity_key] = loop.create_task(self._run_entity_worker(entity_key))
+        if target_loop is not None and not target_loop.is_closed():
+            if loop is target_loop:
+                if entity_key not in self._entity_queues:
+                    self._entity_queues[entity_key] = asyncio.Queue()
+                eq = self._entity_queues[entity_key]
+                eq.put_nowait((envelope, callbacks))
+
+                if entity_key not in self._entity_tasks or self._entity_tasks[entity_key].done():
+                    self._entity_tasks[entity_key] = loop.create_task(self._run_entity_worker(entity_key))
+            else:
+                async def _enqueue() -> None:
+                    if entity_key not in self._entity_queues:
+                        self._entity_queues[entity_key] = asyncio.Queue()
+                    eq = self._entity_queues[entity_key]
+                    eq.put_nowait((envelope, callbacks))
+
+                    if entity_key not in self._entity_tasks or self._entity_tasks[entity_key].done():
+                        self._entity_tasks[entity_key] = target_loop.create_task(self._run_entity_worker(entity_key))
+
+                try:
+                    asyncio.run_coroutine_threadsafe(_enqueue(), target_loop)
+                except Exception as ex:
+                    logger.exception("Failed scheduling agent callback threadsafe: %s", ex)
         else:
             # Sync context without running loop: execute synchronous callbacks in order
             for cb in callbacks:
@@ -407,9 +431,18 @@ class EventBus:
     def _schedule_ws_broadcast(self, envelope: dict) -> None:
         try:
             loop = asyncio.get_running_loop()
-            loop.create_task(self._broadcast(envelope))
         except RuntimeError:
-            pass
+            loop = None
+
+        target_loop = loop if (loop is not None and loop.is_running()) else self._main_loop
+        if target_loop is not None and not target_loop.is_closed():
+            if loop is target_loop:
+                target_loop.create_task(self._broadcast(envelope))
+            else:
+                try:
+                    asyncio.run_coroutine_threadsafe(self._broadcast(envelope), target_loop)
+                except Exception as ex:
+                    logger.exception("Failed scheduling WS broadcast threadsafe: %s", ex)
 
     async def _broadcast(self, envelope: dict) -> None:
         msg = json.dumps(envelope)

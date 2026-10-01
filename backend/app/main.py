@@ -16,9 +16,29 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from contextlib import asynccontextmanager
 from .auth import _decode
 from .config import settings
 from .routers import approvals, auth, crew, incidents, plan, reporter, reports, scenario, sms, state, ws
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    from .bus import bus
+    import asyncio
+    bus.set_loop(asyncio.get_running_loop())
+    from .agents import AgentRunner, AssessmentAgent, RouteAgent, AllocationAgent, CommandAgent
+    assessment = AssessmentAgent()
+    route = RouteAgent()
+    allocation = AllocationAgent(route_agent=route)
+    command = CommandAgent(allocation_agent=allocation)
+    allocation.command_agent = command
+    runner = AgentRunner([assessment, route, allocation, command])
+    runner.start()
+    app.state.runner = runner
+    yield
+    runner.stop()
+
 
 app = FastAPI(
     title=settings.app_title,
@@ -28,6 +48,7 @@ app = FastAPI(
         "All shapes match contracts/types.ts exactly. "
         "Fetch /openapi.json to generate TypeScript types."
     ),
+    lifespan=lifespan,
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────
@@ -123,11 +144,44 @@ def health() -> dict:
     }
 
 
-@app.get("/", include_in_schema=False)
-def root() -> dict:
-    return {
-        "service": settings.app_title,
-        "docs": "/docs",
-        "openapi": "/openapi.json",
-        "health": "/health",
-    }
+@app.post("/dev/replay", tags=["Dev"])
+def dev_replay() -> dict:
+    """Replays seed events into the bus and state store."""
+    from .replay import replay_demo_events
+    replayed = replay_demo_events()
+    return {"status": "ok", "eventsReplayed": len(replayed)}
+
+
+# ── Single-Origin Frontend Serving & SPA Fallback ─────────────────────
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if frontend_dist.exists() and (frontend_dist / "index.html").exists():
+    assets_dir = frontend_dist / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(request: Request, full_path: str):
+        if full_path == "" and "text/html" not in request.headers.get("accept", ""):
+            return {
+                "service": settings.app_title,
+                "docs": "/docs",
+                "openapi": "/openapi.json",
+                "health": "/health",
+            }
+        file_path = frontend_dist / full_path
+        if full_path and file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(frontend_dist / "index.html")
+else:
+    @app.get("/", include_in_schema=False)
+    def root() -> dict:
+        return {
+            "service": settings.app_title,
+            "docs": "/docs",
+            "openapi": "/openapi.json",
+            "health": "/health",
+        }
