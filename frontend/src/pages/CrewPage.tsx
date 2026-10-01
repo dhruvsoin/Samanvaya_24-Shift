@@ -87,10 +87,9 @@ function TacticalRouteMap({
     });
     mapInstanceRef.current = map;
 
-    // CartoDB Positron Light tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    // OpenStreetMap Standard tiles
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
-      subdomains: 'abcd',
     }).addTo(map);
 
     // Unit Marker (Clean enterprise pill)
