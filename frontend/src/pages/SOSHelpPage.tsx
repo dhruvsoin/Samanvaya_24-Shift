@@ -466,6 +466,13 @@ export function SOSHelpPage() {
       let createdIncident: Incident;
 
       try {
+        if (!useAuthStore.getState().token) {
+          const authRes = await api.auth.login({ username: 'operator', password: 'demo1234' }).catch(() => null);
+          if (authRes?.token) {
+            useAuthStore.getState().login(authRes.token, authRes.role, authRes.displayName, authRes.unitId);
+          }
+        }
+
         createdIncident = await api.phoneIn.submit({
           location: {
             lat: coords.lat,

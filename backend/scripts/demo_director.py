@@ -189,28 +189,37 @@ def main():
 
             print("\n>>> DEMO COMPLETE! Stop your recording.")
         else:
+            print("\n>>> PRE-ROLL COUNTDOWN (10 seconds to switch to http://localhost:8000/login & start OBS)")
+            for i in range(10, 0, -1):
+                print(f"    Starting in {i} seconds... (Switch to browser now!)")
+                time.sleep(1)
+            print(">>> [0:00] RECORDING STARTED! Resetting scenario...")
             reset_scenario(client, headers)
-            print("[0:00 - 0:20] The Problem: Speak intro (phone calls, radio, whiteboards, plans going stale)...")
-            time.sleep(20)
+            print("    [0:00 - 0:05] Show Login page. Click 'Sign in as Duty Operator' to enter Command Center.")
+            time.sleep(5)
+            print("    [0:05 - 0:20] Explain the Problem: Flood response today is fragmented (calls, radio, plans going stale).")
+            time.sleep(15)
 
             step_1_incidents(client, headers)
-            print("[0:20 - 0:50] Incidents arriving. Queue & map filling. Showing Kannada message...")
+            print("    [0:20 - 0:50] Incidents arriving! Point to Queue & Map filling. Highlight Kannada dispatch & Intake/Assessment scoring.")
             time.sleep(30)
 
             step_2_plan1(client, headers)
-            print("[0:50 - 1:20] Showing PLAN-001 ETAs and routes...")
+            print("    [0:50 - 1:20] Point to PLAN-001 published! Show vehicle routes on Map, ETAs, and assignment badges.")
             time.sleep(30)
 
             step_3_rain_surge_and_approval(client, headers)
-            print("[1:20 - 2:00] Showing Rain surge, approving APR-001, and inspecting PLAN-002 diff reasons...")
+            print("    [1:20 - 2:00] Rain surge applied! ROAD-04 closed. Show APR-001 in Approvals, click Approve, explain PLAN-002 diff.")
             time.sleep(40)
 
             step_4_zone_b_outage(client, headers)
-            print("[2:00 - 2:30] Showing Zone B comms degraded, SMS fallback in comms log, APR-002...")
+            print("    [2:00 - 2:30] Zone B outage! Point to Comms Degraded banner, SMS fallback in Comms Log, and resilient reroute.")
             time.sleep(30)
 
             step_5_close_and_report(client, headers)
-            print("[2:30 - 3:00] Showing After-Action report benchmarks, citizen /sos page, closing statement.")
+            print("    [2:30 - 3:00] Switch to After-Action Report (/after-action)! Show audit log, benchmarks, and citizen /sos page.")
+            time.sleep(15)
+            print("\n>>> [3:00] DEMO COMPLETE! You can stop your OBS recording now!")
 
 
 if __name__ == "__main__":
