@@ -43,6 +43,9 @@ class Settings:
     # ── Database (not used in stub — here for P1 to wire up later) ───
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./samanvaya.db")
 
+    # ── Dev mode ──────────────────────────────────────────────────────
+    dev_mode: bool = os.getenv("DEV_MODE", "false").lower() in ("true", "1", "yes")
+
     def __init__(self) -> None:
         # Allow overriding cors_origins via CORS_ORIGINS env var
         env_origins = os.getenv("CORS_ORIGINS", "")

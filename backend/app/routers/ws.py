@@ -24,6 +24,7 @@ from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
 from ..auth import _decode
 from ..bus import bus
+from ..config import settings
 from ..state import state
 
 logger = logging.getLogger(__name__)
@@ -140,6 +141,8 @@ async def ws_operator(
     since: str | None = Query(default=None),
 ) -> None:
     claims = _ws_auth(token)
+    if claims is None and settings.dev_mode:
+        claims = {"role": "operator", "sub": "operator"}
     if claims is None or claims.get("role") not in ("operator", "reviewer"):
         await ws.close(code=4001, reason="Unauthorized")
         return
@@ -156,6 +159,8 @@ async def ws_crew(
     since: str | None = Query(default=None),
 ) -> None:
     claims = _ws_auth(token)
+    if claims is None and settings.dev_mode:
+        claims = {"role": "crew", "sub": unit_id, "unitId": unit_id}
     if claims is None or claims.get("role") != "crew":
         await ws.close(code=4001, reason="Unauthorized")
         return

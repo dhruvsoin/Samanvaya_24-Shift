@@ -21,20 +21,36 @@ AI-assisted flood-response coordination for a 24-hour hackathon.
 | `p4-comms` | Person 4 (Comms / Reporter) |
 | `main` | Protected — merge via PR every ~2 hours |
 
-## Quick start
+## Quick Start (Single-Origin Production)
+
+Build the frontend once and let FastAPI serve both the REST API, WebSockets, and SPA on a single port (`8000`):
 
 ```bash
-# Backend
-cd backend
-cp ../.env.example .env   # fill in values
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-# Frontend
+# 1. Build Frontend
 cd frontend
 npm install
-npm run dev
+npm run build
+
+# 2. Start Backend (Single Origin on port 8000)
+cd ../backend
+pip install -r requirements.txt
+# Set environment and start uvicorn
+# PowerShell:
+$env:ENGINE_MODE="real"; $env:LLM_MODE="scripted"; $env:DEV_MODE="true"; .venv\Scripts\uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Bash:
+export ENGINE_MODE="real" LLM_MODE="scripted" DEV_MODE="true" && uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+Open `http://localhost:8000/` in your browser.
+Log in with username `operator` and password `demo1234`.
+
+### Public Deployment (Cloudflare Tunnel)
+
+To share the live deployment with remote judges over HTTPS with auto-WSS:
+```bash
+cloudflared tunnel --url http://localhost:8000
+```
+Detailed instructions and runbooks are available in [docs/deploy.md](file:///c:/Projects/Samanvaya_24%C2%B0Shift/docs/deploy.md).
 
 ## Rules
 

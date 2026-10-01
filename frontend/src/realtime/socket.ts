@@ -37,6 +37,8 @@ let pingTimer: ReturnType<typeof setInterval> | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let _role: 'operator' | 'crew' | null = null;
 let _unitId: string | null = null;
+import { useAuthStore } from '@/store/auth';
+
 let _onStatusChange: ((s: ConnectionStatus) => void) | null = null;
 
 function clearTimers() {
@@ -49,17 +51,23 @@ function clearTimers() {
 async function refetchState() {
   // After reconnect, reload REST state to catch anything we missed
   try {
-    const [incidents, units, zones] = await Promise.all([
-      api.incidents.list(),
-      api.units.list(),
-      api.zones.list(),
+    const [incidents, units, zones, approvals, status] = await Promise.all([
+      api.incidents.list().catch(() => []),
+      api.units.list().catch(() => []),
+      api.zones.list().catch(() => []),
+      api.approvals.list().catch(() => []),
+      api.status.get().catch(() => null),
     ]);
-    useAppStore.getState().setUnits(units);
-    useAppStore.getState().setZones(zones);
+    if (units.length) useAppStore.getState().setUnits(units);
+    if (zones.length) useAppStore.getState().setZones(zones);
     for (const inc of incidents) {
       useAppStore.getState().setIncident(inc);
     }
-    const plan = await api.plan.current();
+    for (const appr of approvals) {
+      useAppStore.getState().setApproval(appr);
+    }
+    if (status) useAppStore.getState().setSystemStatus(status);
+    const plan = await api.plan.current().catch(() => null);
     if (plan) useAppStore.getState().publishPlan(plan);
   } catch {
     // Best effort — don't crash on refetch failure
@@ -67,13 +75,16 @@ async function refetchState() {
 }
 
 function connect() {
+  const token = useAuthStore.getState().token;
   const path =
     _role === 'crew' && _unitId
       ? `/ws/crew/${_unitId}`
       : '/ws/operator';
 
+  const tokenParam = token ? `?token=${encodeURIComponent(token)}` : '';
+
   try {
-    ws = new WebSocket(`${WS_BASE}${path}`);
+    ws = new WebSocket(`${WS_BASE}${path}${tokenParam}`);
   } catch {
     scheduleReconnect();
     return;
