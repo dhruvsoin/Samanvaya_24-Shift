@@ -16,7 +16,17 @@ import { api } from '@/api/client';
 import { useAppStore } from '@/store';
 import type { ContractEvent } from '@contracts/types';
 
-const WS_BASE = import.meta.env.VITE_WS_BASE ?? 'ws://localhost:8000';
+function getWsBase(): string {
+  if (import.meta.env.VITE_WS_BASE) {
+    return import.meta.env.VITE_WS_BASE;
+  }
+  if (typeof window !== 'undefined') {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${proto}//${window.location.host}`;
+  }
+  return 'ws://localhost:8000';
+}
+const WS_BASE = getWsBase();
 const PING_INTERVAL_MS = 20_000;
 const RECONNECT_DELAY_MS = 3_000;
 
