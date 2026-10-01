@@ -1,9 +1,7 @@
-/**
- * AfterActionPage — post-incident review, performance baseline, and audit report.
- * Obsidian Command design system: clean, minimal, human-crafted operations post-mortem.
- */
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '@/api/client';
+import type { AfterActionReport } from '@contracts/types';
 import {
   FileText,
   Clock,
@@ -81,20 +79,100 @@ function formatTs(ts: string): string {
 
 export function AfterActionPage() {
   const [activeTab, setActiveTab] = useState<'timeline' | 'baseline' | 'plans' | 'unresolved'>('timeline');
+  const [report, setReport] = useState<AfterActionReport | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const incidentsById = useAppStore((s) => s.incidentsById);
   const incidents = useMemo(() => Object.values(incidentsById), [incidentsById]);
   const planHistory = useAppStore((s) => s.planHistory);
   const currentPlan = useAppStore((s) => s.currentPlan);
+  const agentStream = useAppStore((s) => s.agentStream);
   const opLog = useAppStore((s) => s.opLog);
   const clearOpLog = useAppStore((s) => s.clearOpLog);
 
+  // Load real backend report
+  useEffect(() => {
+    let active = true;
+    api.reports.afterAction()
+      .then((data) => {
+        if (active) setReport(data);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [refreshKey]);
+
+  const unifiedTimeline = useMemo(() => {
+    const list: Array<{
+      id: string;
+      ts: string;
+      category: OpLogCategory;
+      text: string;
+      detail?: string;
+      incidentId?: string | null;
+      unitId?: string | null;
+    }> = [];
+
+    // 1. From real backend afterAction report timeline
+    if (report?.timeline && report.timeline.length > 0) {
+      report.timeline.forEach((item, idx) => {
+        let cat: OpLogCategory = 'system';
+        const txt = item.text.toLowerCase();
+        if (txt.includes('reported')) cat = 'sos_received';
+        else if (txt.includes('dispatched') || txt.includes('published') || txt.includes('plan')) cat = 'operator_dispatched';
+        else if (txt.includes('en route') || txt.includes('accepted')) cat = 'crew_en_route';
+        else if (txt.includes('arrived')) cat = 'crew_arrived';
+        else if (txt.includes('resolved') || txt.includes('complete') || txt.includes('closed')) cat = 'task_complete';
+        else if (txt.includes('assessed') || txt.includes('updated')) cat = 'incident_updated';
+
+        list.push({
+          id: `rpt-${idx}-${item.ts}`,
+          ts: item.ts,
+          category: cat,
+          text: item.text,
+          incidentId: item.incidentId || null,
+        });
+      });
+    }
+
+    // 2. From real agentStream
+    agentStream.forEach((ag) => {
+      list.push({
+        id: `ag-${ag.id}`,
+        ts: ag.ts,
+        category: 'system',
+        text: `[${ag.agent.toUpperCase()} AGENT] ${ag.message}`,
+        incidentId: ag.incidentId,
+      });
+    });
+
+    // 3. From opLog
+    opLog.forEach((op) => {
+      list.push({
+        id: op.id,
+        ts: op.ts,
+        category: op.category,
+        text: op.text,
+        detail: op.detail,
+        incidentId: op.incidentId,
+        unitId: op.unitId,
+      });
+    });
+
+    return list;
+  }, [report, agentStream, opLog]);
+
   const unresolvedList = useMemo(() => incidents.filter((i) => i.status !== 'resolved' && i.status !== 'closed'), [incidents]);
   const resolvedCount = useMemo(() => incidents.filter((i) => i.status === 'resolved' || i.status === 'closed').length, [incidents]);
-  const totalSosCount = useMemo(() => opLog.filter((e) => e.category === 'sos_received').length, [opLog]);
-  const completedCount = useMemo(() => opLog.filter((e) => e.category === 'task_complete').length, [opLog]);
-  const dispatchedCount = useMemo(() => opLog.filter((e) => e.category === 'operator_dispatched').length, [opLog]);
+  const totalSosCount = useMemo(() => {
+    return unifiedTimeline.filter((e) => e.category === 'sos_received').length || incidents.length || 0;
+  }, [unifiedTimeline, incidents]);
+  const completedCount = useMemo(() => unifiedTimeline.filter((e) => e.category === 'task_complete').length || resolvedCount, [unifiedTimeline, resolvedCount]);
+  const dispatchedCount = useMemo(() => unifiedTimeline.filter((e) => e.category === 'operator_dispatched').length || (currentPlan ? 1 : 0), [unifiedTimeline, currentPlan]);
 
   const planChangesData = useMemo(() => {
+    if (report?.planChanges && report.planChanges.length > 0) {
+      return report.planChanges;
+    }
     if (planHistory.length > 0) {
       return planHistory.map((p) => ({ planId: p.planId, trigger: p.trigger, changes: p.changes }));
     }
@@ -102,9 +180,8 @@ export function AfterActionPage() {
       return [{ planId: currentPlan.planId, trigger: currentPlan.trigger, changes: currentPlan.changes }];
     }
     return [];
-  }, [planHistory, currentPlan]);
+  }, [report, planHistory, currentPlan]);
 
-  const [, setRefreshKey] = useState(0);
   const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
   return (
@@ -163,7 +240,7 @@ export function AfterActionPage() {
           </div>
           <div className="flex items-center gap-2 text-[11px] font-mono text-slate-600 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 self-start md:self-auto font-medium">
             <Clock className="w-3.5 h-3.5 text-blue-600" />
-            <span>Session Events: <strong className="text-slate-900">{opLog.length}</strong></span>
+            <span>Session Events: <strong className="text-slate-900">{unifiedTimeline.length}</strong></span>
           </div>
         </div>
 
@@ -209,7 +286,7 @@ export function AfterActionPage() {
         {/* Tab Navigation */}
         <div className="flex border-b border-slate-200 gap-2">
           {[
-            { id: 'timeline', label: `Operations Audit Log (${opLog.length})` },
+            { id: 'timeline', label: `Operations Audit Log (${unifiedTimeline.length})` },
             { id: 'baseline', label: 'Benchmark vs Baseline' },
             { id: 'plans', label: 'Plan Evolutionary Steps' },
             { id: 'unresolved', label: `Unresolved Incidents (${unresolvedList.length})` },
@@ -238,7 +315,7 @@ export function AfterActionPage() {
               </p>
             </div>
 
-            {opLog.length === 0 ? (
+            {unifiedTimeline.length === 0 ? (
               <div className="text-center py-16 flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50/50">
                 <FileText className="w-6 h-6 text-slate-400" />
                 <p className="text-xs font-semibold text-slate-800">No operational actions logged in this session yet</p>
@@ -248,7 +325,7 @@ export function AfterActionPage() {
               </div>
             ) : (
               <div className="relative pl-5 border-l border-slate-200 space-y-3">
-                {opLog.map((entry) => {
+                {unifiedTimeline.map((entry) => {
                   const cfg = CATEGORY_CONFIG[entry.category] || CATEGORY_CONFIG.system;
                   const Icon = cfg.icon;
                   return (
