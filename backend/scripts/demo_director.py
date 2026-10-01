@@ -169,22 +169,22 @@ def main():
         print("=======================================================")
 
         if not args.auto:
-            input("Press [ENTER] to RESET scenario and start recording...")
+            input("Press [ENTER] to RESET scenario. Start on http://localhost:8000/login...")
             reset_scenario(client, headers)
 
-            input("\n[0:00 - 0:20] Start recording problem statement. Press [ENTER] when ready for Incidents (0:20)...")
+            input("\n[0:00 - 0:05] Kickoff on Login Screen. Click 'Sign in as Duty Operator'.\n[0:05 - 0:25] Explain Problem Statement on Command Center.\nPress [ENTER] when ready for Incidents (0:25)...")
             step_1_incidents(client, headers)
 
-            input("\n[0:20 - 0:50] Explaining Intake & Assessment. Press [ENTER] to show PLAN-001 (0:50)...")
+            input("\n[0:25 - 0:55] Explaining Intake & Assessment. Press [ENTER] to show PLAN-001 (0:55)...")
             step_2_plan1(client, headers)
 
-            input("\n[0:50 - 1:20] Explaining initial plan. Press [ENTER] to trigger Rain Surge & APR-001 (1:20)...")
+            input("\n[0:55 - 1:25] Explaining initial plan. Press [ENTER] to trigger Rain Surge & APR-001 (1:25)...")
             step_3_rain_surge_and_approval(client, headers)
 
-            input("\n[1:20 - 2:00] Explaining PLAN-002 diff. Press [ENTER] to trigger Zone-B Outage (2:00)...")
+            input("\n[1:25 - 2:05] Explaining PLAN-002 diff. Press [ENTER] to trigger Zone-B Outage (2:05)...")
             step_4_zone_b_outage(client, headers)
 
-            input("\n[2:00 - 2:30] Explaining SMS fallback. Press [ENTER] to Close Incidents & View Report (2:30)...")
+            input("\n[2:05 - 2:35] Explaining SMS fallback. Press [ENTER] to Close Incidents & View Report (2:35)...")
             step_5_close_and_report(client, headers)
 
             print("\n>>> DEMO COMPLETE! Stop your recording.")
