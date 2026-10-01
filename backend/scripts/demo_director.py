@@ -94,11 +94,23 @@ def step_3_rain_surge_and_approval(client: httpx.Client, headers: dict) -> None:
     
     if apr1:
         print(f"  [+] APR-001 generated: {apr1.get('summary')}")
-        print(">>> Switch to Approvals Inbox in UI to show APR-001.")
-        time.sleep(1.0)
-        print(">>> Approving APR-001 (reassigning RES-01 to INC-02)...")
-        dec = client.post(f"{BASE}/approvals/APR-001/decision", json={"decision": "approve", "optionId": "OPT-A"}, headers=headers).json()
-        print(f"  [+] APR-001 Approved: status = {dec.get('status')}")
+        print(">>> [ACTION] Click 'Review Decisions →' in UI and click 'Approve' on APR-001!")
+        
+        # Give the operator up to 15 seconds to click Approve in the UI
+        approved = False
+        for _ in range(15):
+            time.sleep(1.0)
+            apprs = client.get(f"{BASE}/approvals", headers=headers).json()
+            curr = next((a for a in apprs if a.get("approvalId") == "APR-001"), None)
+            if curr and curr.get("status") == "approved":
+                print("  [+] Operator clicked Approve on APR-001 in UI!")
+                approved = True
+                break
+
+        if not approved:
+            print("  [i] Auto-approving APR-001 fallback...")
+            dec = client.post(f"{BASE}/approvals/APR-001/decision", json={"decision": "approve", "optionId": "OPT-A"}, headers=headers).json()
+            print(f"  [+] APR-001 Approved: status = {dec.get('status')}")
     
     # Wait for PLAN-002
     p2 = None
