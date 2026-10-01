@@ -148,13 +148,23 @@ $env:ENGINE_MODE="real"; $env:LLM_MODE="scripted"; $env:DEV_MODE="true"; .venv\S
 export ENGINE_MODE="real" LLM_MODE="scripted" DEV_MODE="true" && uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-### 3. Open in Browser
-- **Command Center Dashboard**: [http://localhost:8000/command](http://localhost:8000/command)  
+### 3. Live Access & Portals
+
+#### 🌐 Live Evaluator Deployment (Public HTTPS / WSS):
+**Public Deployment URL**: [https://sophisticated-debate-nurse-searching.trycloudflare.com](https://sophisticated-debate-nurse-searching.trycloudflare.com)
+
+* **Command Center Dashboard**: [Open Command Center](https://sophisticated-debate-nurse-searching.trycloudflare.com/command)  
   *Credentials*: Username `operator` | Password `demo1234`
-- **Citizen Emergency SOS Portal**: [http://localhost:8000/sos](http://localhost:8000/sos) (multilingual en/kn/hi)
-- **Field Crew Portal**: [http://localhost:8000/crew](http://localhost:8000/crew) (Unit code: `AMB-01`, PIN: `1111`)
-- **After-Action Analytics**: [http://localhost:8000/after-action](http://localhost:8000/after-action)
-- **Interactive OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Citizen Emergency SOS Portal**: [Open Citizen SOS](https://sophisticated-debate-nurse-searching.trycloudflare.com/sos) *(Bilingual en/kn/hi, optimized for mobile browsers & 2G connections)*
+* **Field Crew Interface**: [Open Crew Interface](https://sophisticated-debate-nurse-searching.trycloudflare.com/crew) *(Unit code: `AMB-01`, PIN: `1111`)*
+* **After-Action Audit Analytics**: [Open After-Action Report](https://sophisticated-debate-nurse-searching.trycloudflare.com/after-action)
+* **Interactive API Documentation**: [Open OpenAPI Swagger Docs](https://sophisticated-debate-nurse-searching.trycloudflare.com/docs)
+
+#### 💻 Local Development (When running locally):
+* **Command Center**: `http://localhost:8000/command`
+* **Citizen SOS**: `http://localhost:8000/sos`
+* **Crew Portal**: `http://localhost:8000/crew`
+* **Local API Docs**: `http://localhost:8000/docs`
 
 ---
 
