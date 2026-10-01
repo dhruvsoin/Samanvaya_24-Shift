@@ -43,6 +43,7 @@ export function TopBar({ wsStatus }: Props) {
   const location = useLocation();
 
   function handleLogout() {
+    useAppStore.getState().reset();
     logout();
     navigate('/login');
   }

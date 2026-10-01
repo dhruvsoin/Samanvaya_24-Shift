@@ -60,15 +60,21 @@ async function refetchState() {
     ]);
     if (units.length) useAppStore.getState().setUnits(units);
     if (zones.length) useAppStore.getState().setZones(zones);
+    const incMap: Record<string, any> = {};
     for (const inc of incidents) {
-      useAppStore.getState().setIncident(inc);
+      incMap[inc.incidentId] = inc;
     }
+    const appMap: Record<string, any> = {};
     for (const appr of approvals) {
-      useAppStore.getState().setApproval(appr);
+      appMap[appr.approvalId] = appr;
     }
+    useAppStore.setState({
+      incidentsById: incMap,
+      approvalsById: appMap,
+    });
     if (status) useAppStore.getState().setSystemStatus(status);
     const plan = await api.plan.current().catch(() => null);
-    if (plan) useAppStore.getState().publishPlan(plan);
+    useAppStore.setState({ currentPlan: plan });
   } catch {
     // Best effort — don't crash on refetch failure
   }
